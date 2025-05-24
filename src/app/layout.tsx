@@ -13,13 +13,24 @@ const Opensans = Open_Sans({
 	variable: "--font_os"
 });
 export const metadata: Metadata = {
-	title: "LocalImage - Fast, Private Image Conversion Right in Your Browser",
-	description: "LocalImage: Convert your images instantly without uploads! Your photos stay private, processed directly in your browser. Supports JPG, PNG, WEBP, and more. Lightning-fast, secure, and privacy-focused image conversion.",
-	keywords: "image converter, local image conversion, no upload, privacy-first, fast image processing, JPG to PNG, PNG to JPG, WEBP converter, image format converter, online image converter, offline image processing, private photo converter, free image converter, browser-based image tool",
+	title: "LocalImage - Fast & Private Browser-Based Image Converter",
+	description: "Convert images privately in your browser - no uploads needed. Fast, secure processing for JPG, PNG, and WebP formats. Privacy-focused image conversion with zero server storage.",
+	keywords: "image converter, no upload, privacy, JPG, PNG, WEBP, browser-based, free, offline, fast conversion",
 	authors: [{ name: "limgx.com" }],
+	robots: {
+		index: true,
+		follow: true,
+		googleBot: {
+			index: true,
+			follow: true,
+			'max-video-preview': -1,
+			'max-image-preview': 'large',
+			'max-snippet': -1,
+		},
+	},
 	openGraph: {
-		title: "LocalImage - Fast, Private Image Conversion Right in Your Browser",
-		description: "LocalImage: Convert your images instantly without uploads! Your photos stay private, processed directly in your browser. Supports JPG, PNG, WEBP, and more. Lightning-fast, secure, and privacy-focused image conversion.",
+		title: "LocalImage - Fast & Private Browser-Based Image Converter",
+		description: "Convert images privately in your browser - no uploads needed. Fast, secure processing for JPG, PNG, and WebP formats. Privacy-focused image conversion with zero server storage.",
 		type: "website",
 		url: "https://www.limgx.com",
 		images: ["https://www.limgx.com/images/social-share-preview.jpg"],
@@ -27,8 +38,8 @@ export const metadata: Metadata = {
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "LocalImage - Fast, Private Image Conversion Right in Your Browser",
-		description: "LocalImage: Convert your images instantly without uploads! Your photos stay private, processed directly in your browser. Supports JPG, PNG, WEBP, and more. Lightning-fast, secure, and privacy-focused image conversion.",
+		title: "LocalImage - Fast & Private Browser-Based Image Converter",
+		description: "Convert images privately in your browser - no uploads needed. Fast, secure processing for JPG, PNG, and WebP formats. Privacy-focused image conversion with zero server storage.",
 		images: ["https://www.limgx.com/images/social-share-preview.jpg"],
 		creator: "@limgx_official",
 	},
