@@ -28,7 +28,7 @@ class FFMPEG {
 					"text/javascript",
 				),
 				wasmURL: await toBlobURL(
-					"/js/ffmpeg-core.wasm",
+					"https://pub-0640b16e634149728ed7a92f9480486e.r2.dev/ffmpeg-core.wasm",
 					"application/wasm",
 				),
 			});
@@ -38,19 +38,25 @@ class FFMPEG {
 	}
 
 	/**
-	 * 图片格式转换和压缩
+	 * 图片格式转换和压缩，支持分辨率调整和avif格式
 	 * @param input 图片的URL、Uint8Array或ArrayBuffer
-	 * @param outputName 输出文件名（如 output.jpg、output.webp）
-	 * @param quality 压缩质量（0-100，默认75，webp/jpg有效）
+	 * @param outputName 输出文件名（如 output.jpg、output.webp、output.avif）
+	 * @param quality 压缩质量（0-100，默认75，webp/jpg/avif有效）
+	 * @param width 可选，输出宽度
+	 * @param height 可选，输出高度
 	 */
 	async convertImage({
 		input,
 		outputName,
 		quality = 75,
+		width,
+		height,
 	}: {
 		input: string | Uint8Array | ArrayBuffer;
 		outputName: string;
 		quality?: number;
+		width?: number;
+		height?: number;
 	}): Promise<Uint8Array> {
 		await this.load();
 		// 自动判断输入格式
@@ -61,7 +67,8 @@ class FFMPEG {
 			(input.endsWith(".png") ||
 				input.endsWith(".jpg") ||
 				input.endsWith(".jpeg") ||
-				input.endsWith(".webp"))
+				input.endsWith(".webp") ||
+				input.endsWith(".avif"))
 		) {
 			inputFileName = `input_image.${input.split(".").pop()}`;
 		} else if (typeof input === "string") {
@@ -85,10 +92,19 @@ class FFMPEG {
 
 		// 构建参数
 		const args = ["-i", inputFileName];
+		// 分辨率缩放
+		if (width || height) {
+			let scaleArg = "scale=";
+			scaleArg += width ? `${width}:` : "-1:";
+			scaleArg += height ? `${height}` : "-1";
+			args.push("-vf", scaleArg);
+		}
 		if (ext === "jpg" || ext === "jpeg") {
 			args.push("-q:v", String(Math.round((100 - quality) / 2.5))); // 0(高质量)-31(低质量)
 		} else if (ext === "webp") {
 			args.push("-qscale", String(quality)); // 0-100
+		} else if (ext === "avif") {
+			args.push("-qscale", String(quality)); // avif同样支持qscale
 		}
 		args.push(outputName);
 

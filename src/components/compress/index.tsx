@@ -42,13 +42,15 @@ function ImageTrans() {
 					input: arrayBuffer,
 					outputName,
 					quality: advanced.quality,
-					// width 和 height 不属于 convertImage 的已知参数，移除以修复类型错误
+					width: advanced.width ? Number(advanced.width) : undefined,
+					height: advanced.height ? Number(advanced.height) : undefined,
 				});
 				const mimeMap: Record<string, string> = {
 					webp: "image/webp",
 					png: "image/png",
 					jpg: "image/jpeg",
 					jpeg: "image/jpeg",
+					avif: "image/avif",
 				};
 				const blob = new Blob([compressed], { type: mimeMap[format] || "application/octet-stream" });
 				const url = URL.createObjectURL(blob);
@@ -74,6 +76,7 @@ function ImageTrans() {
 						<SelectItem value="webp">.webp</SelectItem>
 						<SelectItem value="png">.png</SelectItem>
 						<SelectItem value="jpg">.jpg</SelectItem>
+						<SelectItem value="jpg">.avif</SelectItem>
 					</SelectContent>
 				</Select>
 				<Advanced onChange={setAdvanced} />
