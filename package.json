@@ -1,8 +1,8 @@
 {
-  "name": "next-starter-template",
+  "name": "localpress",
   "description": "a image compress web tool",
   "cloudflare": {
-    "label": "LocalPress",
+    "label": "localpress",
     "products": [
       "Workers"
     ],
