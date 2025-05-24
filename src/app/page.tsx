@@ -17,7 +17,7 @@ function Page() {
 		<div className="w-full h-full flex flex-col items-center min-h-[100vh]">
 			<div className="min-h-[40vh] flex items-center justify-center flex-col">
 				<div className="text-[40px] uppercase">{t("name")}</div>
-				<div className="font-OS text-[12px] opacity-60">{t("desc")}</div>
+				<div className="font-OS text-[12px] opacity-60 text-center">{t("desc")}</div>
 			</div>
 			{isLoading ? (
 				<div className="flex justify-center items-center w-[300px] h-[300px]">
