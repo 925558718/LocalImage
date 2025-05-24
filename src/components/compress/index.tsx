@@ -76,7 +76,7 @@ function ImageTrans() {
 						<SelectItem value="webp">.webp</SelectItem>
 						<SelectItem value="png">.png</SelectItem>
 						<SelectItem value="jpg">.jpg</SelectItem>
-						<SelectItem value="jpg">.avif</SelectItem>
+						<SelectItem value="avif">.avif</SelectItem>
 					</SelectContent>
 				</Select>
 				<Advanced onChange={setAdvanced} />
