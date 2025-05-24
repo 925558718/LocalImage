@@ -1,30 +1,34 @@
 import { Button } from "@/components/shadcn";
 import JSZip from "jszip";
 
-function DownloadAll({ urls }: { urls: string[] }) {
+interface DownloadItem {
+	url: string;
+	name: string;
+}
+
+function DownloadAll({ items }: { items: DownloadItem[] }) {
 	async function handleDownloadAll() {
 		const zip = new JSZip();
 		// 并发下载所有图片并添加到 zip
 		await Promise.all(
-			urls.map(async (url, idx) => {
-				const res = await fetch(url);
+			items.map(async (item, idx) => {
+				const res = await fetch(item.url);
 				const blob = await res.blob();
-				// 取文件名或用序号
-				const name = url.split("/").pop() || `image${idx + 1}.jpg`;
-				zip.file(name, blob);
+				// 使用传入的文件名，确保扩展名正确
+				zip.file(item.name, blob);
 			}),
 		);
 		// 生成 zip 文件并下载
 		const content = await zip.generateAsync({ type: "blob" });
 		const a = document.createElement("a");
 		a.href = URL.createObjectURL(content);
-		a.download = "images.zip";
+		a.download = "compressed_images.zip";
 		a.click();
 		URL.revokeObjectURL(a.href);
 	}
 
 	return (
-		<Button onClick={handleDownloadAll} disabled={urls.length === 0}>
+		<Button onClick={handleDownloadAll} disabled={items.length === 0}>
 			Download All
 		</Button>
 	);

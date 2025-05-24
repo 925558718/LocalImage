@@ -104,7 +104,11 @@ class FFMPEG {
 		} else if (ext === "webp") {
 			args.push("-qscale", String(quality)); // 0-100
 		} else if (ext === "avif") {
-			args.push("-qscale", String(quality)); // avif同样支持qscale
+			// AVIF 需要使用特定编码器和参数
+			args.push("-c:v", "libaom-av1");
+			args.push("-strict", "experimental");
+			args.push("-crf", String(Math.round((100 - quality) * 0.63))); // 将quality转换为crf值(0-63)
+			args.push("-b:v", "0"); // 使用CRF而非比特率
 		}
 		args.push(outputName);
 

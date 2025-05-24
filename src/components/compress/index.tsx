@@ -1,5 +1,5 @@
 import ffm_ins from "@/lib/ffmpeg";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import CompressItem from "./components/CompressItem";
 import {
@@ -15,19 +15,19 @@ import Advanced from "./components/Advanced";
 import DownloadAll from "./components/DownloadAll";
 
 function ImageTrans() {
-	const fileRef = useRef<HTMLInputElement>(null);
 	const [loading, setLoading] = useState(false);
 	const { t } = useI18n();
 	const [downloadList, setDownloadList] = useState<
 		{ url: string; name: string }[]
 	>([]);
+	// 追踪文件的选择状态
+	const [files, setFiles] = useState<FileList | null>(null);
 
 	// 新增：格式和高级配置
 	const [format, setFormat] = useState("webp");
 	const [advanced, setAdvanced] = useState({ width: "", height: "", quality: 85 });
 
 	async function handleCompress() {
-		const files = fileRef.current?.files;
 		if (!files || files.length === 0) return;
 		setLoading(true);
 		setDownloadList([]);
@@ -37,24 +37,54 @@ function ImageTrans() {
 				const file = files[i];
 				const arrayBuffer = await file.arrayBuffer();
 				const baseName = file.name.replace(/\.[^.]+$/, "");
-				const outputName = `${baseName}_compressed.${format}`;
-				const compressed = await ffm_ins.convertImage({
-					input: arrayBuffer,
-					outputName,
-					quality: advanced.quality,
-					width: advanced.width ? Number(advanced.width) : undefined,
-					height: advanced.height ? Number(advanced.height) : undefined,
-				});
-				const mimeMap: Record<string, string> = {
-					webp: "image/webp",
-					png: "image/png",
-					jpg: "image/jpeg",
-					jpeg: "image/jpeg",
-					avif: "image/avif",
-				};
-				const blob = new Blob([compressed], { type: mimeMap[format] || "application/octet-stream" });
-				const url = URL.createObjectURL(blob);
-				results.push({ url, name: outputName });
+				
+				// 当选择 avif 时使用 webp 作为备选格式
+				let actualFormat = format;
+				let outputName = `${baseName}_compressed.${format}`;
+				
+				try {
+					const compressed = await ffm_ins.convertImage({
+						input: arrayBuffer,
+						outputName,
+						quality: advanced.quality,
+						width: advanced.width ? Number(advanced.width) : undefined,
+						height: advanced.height ? Number(advanced.height) : undefined,
+					});
+					
+					const mimeMap: Record<string, string> = {
+						webp: "image/webp",
+						png: "image/png",
+						jpg: "image/jpeg",
+						jpeg: "image/jpeg",
+						avif: "image/avif",
+					};
+					
+					const blob = new Blob([compressed], { type: mimeMap[actualFormat] || "application/octet-stream" });
+					const url = URL.createObjectURL(blob);
+					results.push({ url, name: outputName });
+				} catch (error) {
+					if (format === "avif") {
+						// AVIF 转换失败，尝试使用 WebP 替代
+						console.warn("AVIF 转换失败，使用 WebP 替代", error);
+						actualFormat = "webp";
+						outputName = `${baseName}_compressed.webp`;
+						
+						const compressed = await ffm_ins.convertImage({
+							input: arrayBuffer,
+							outputName,
+							quality: advanced.quality,
+							width: advanced.width ? Number(advanced.width) : undefined,
+							height: advanced.height ? Number(advanced.height) : undefined,
+						});
+						
+						const blob = new Blob([compressed], { type: "image/webp" });
+						const url = URL.createObjectURL(blob);
+						results.push({ url, name: outputName });
+					} else {
+						// 其他格式转换失败，继续抛出异常
+						throw error;
+					}
+				}
 			}
 			setDownloadList(results);
 		} catch (e) {
@@ -67,7 +97,7 @@ function ImageTrans() {
 	return (
 		<div>
 			<div className="flex gap-4 flex-wrap">
-				<Input type="file" ref={fileRef} accept="image/*" multiple className="w-fit"/>
+				<Input type="file" accept="image/*" multiple className="w-fit" onChange={(e) => setFiles(e.target.files)}/>
 				<Select value={format} onValueChange={setFormat}>
 					<SelectTrigger className="w-[180px]">
 						<SelectValue placeholder="Format" />
@@ -76,14 +106,13 @@ function ImageTrans() {
 						<SelectItem value="webp">.webp</SelectItem>
 						<SelectItem value="png">.png</SelectItem>
 						<SelectItem value="jpg">.jpg</SelectItem>
-						<SelectItem value="avif">.avif</SelectItem>
 					</SelectContent>
 				</Select>
 				<Advanced onChange={setAdvanced} />
-				<Button onClick={handleCompress} disabled={loading}>
+				<Button onClick={handleCompress} disabled={loading || !files || files.length === 0}>
 					{loading ? t("compressing_btn") : t("compress_btn")}
 				</Button>
-				<DownloadAll urls={downloadList.map((item) => item.url)} />
+				<DownloadAll items={downloadList} />
 			</div>
 			{downloadList.length > 0 && (
 				<div className="mt-4 space-y-2">

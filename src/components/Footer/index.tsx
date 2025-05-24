@@ -1,9 +1,23 @@
+"use client"
+import { useI18n } from "@/hooks/useI18n";
+
 function Footer() {
-  return (
-    <div className="w-full bg-gray-900 text-white text-center py-4">
-      <p>&copy; 2023 Your Company Name</p>
-    </div>
-  );
+	const { t } = useI18n();
+	return (
+		<div className="fixed bottom-0 left-0 w-full text-center py-4 ">
+			<p>
+				{t("suggestion")}
+				<a
+					href="mailto:yugwhite@outlook.com"
+					target="_blank"
+					rel="noreferrer"
+					className="underline mx-1"
+				>
+					yugwhite@outlook.com
+				</a>
+			</p>
+		</div>
+	);
 }
 
 export default Footer;
