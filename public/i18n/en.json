@@ -1,3 +1,14 @@
 {
-	"hello": "Hello123"
+	"load_ffmpeg": "Please wait for seconds, it's loading ffmpeg core code",
+	"compress_btn": "Compress",
+	"compressing_btn": "Compressing",
+	"name": "localpress",
+	"desc": "We respect your privacy, all functions are completed locally on your computer and will not be uploaded to the server",
+	"download": "download",
+	"advance": "Advanced Options",
+	"advanceoption": {
+		"width": "Width",
+		"height": "Height",
+		"quality": "Quality"
+	}
 }

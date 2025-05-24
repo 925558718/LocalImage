@@ -20,7 +20,8 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true
-		}
+		},
+		"ignore": ["public/*"]
 	},
 	"javascript": {
 		"formatter": {

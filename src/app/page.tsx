@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import ffmpeg from "@/lib/ffmpeg";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import ImageTrans from "@/components/ImageTrans";
+import Compress from "@/components/compress";
 import { useI18n } from "@/hooks/useI18n";
 function Page() {
 	const { t } = useI18n();
@@ -14,7 +14,11 @@ function Page() {
 		});
 	}, []);
 	return (
-		<div className="w-full h-full flex justify-center items-center min-h-[100vh]">
+		<div className="w-full h-full flex flex-col items-center min-h-[100vh]">
+			<div className="min-h-[40vh] flex items-center justify-center flex-col">
+				<div className="text-[40px] uppercase">{t("name")}</div>
+				<div className="font-OS text-[12px] opacity-60">{t("desc")}</div>
+			</div>
 			{isLoading ? (
 				<div className="flex justify-center items-center w-[300px] h-[300px]">
 					<DotLottieReact
@@ -24,10 +28,10 @@ function Page() {
 						width={50}
 						height={50}
 					/>
-					{t("hello")}
+					{t("load_ffmpeg")}
 				</div>
 			) : (
-				<ImageTrans />
+				<Compress />
 			)}
 		</div>
 	);

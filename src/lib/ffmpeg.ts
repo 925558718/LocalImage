@@ -1,7 +1,6 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
 import { isBrowser } from "./utils";
-const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd";
 
 class FFMPEG {
 	private ffmpeg: FFmpeg | null = null;
@@ -12,7 +11,6 @@ class FFMPEG {
 		if (!isBrowser()) {
 			return;
 		}
-		console.log("test")
 		this.ffmpeg = new FFmpeg();
 		this.ffmpeg.on("log", ({ message }: { message: string }) => {
 			console.log("[ffmpeg]", message);
@@ -22,15 +20,15 @@ class FFMPEG {
 	async load() {
 		if (this.isLoaded) return;
 		if (this.loadingPromise) return this.loadingPromise as Promise<void>;
-		if (!this.ffmpeg) throw new Error("ffmpeg 未初始化");
+		if (!this.ffmpeg) throw new Error("ffmpeg dones't exist");
 		this.loadingPromise = (async () => {
 			await (this.ffmpeg as FFmpeg).load({
 				coreURL: await toBlobURL(
-					`${baseURL}/ffmpeg-core.js`,
+					"/js/ffmpeg-core.js",
 					"text/javascript",
 				),
 				wasmURL: await toBlobURL(
-					`${baseURL}/ffmpeg-core.wasm`,
+					"/js/ffmpeg-core.wasm",
 					"application/wasm",
 				),
 			});
