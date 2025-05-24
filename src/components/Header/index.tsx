@@ -14,11 +14,10 @@ function Header() {
 
 	return (
 		<div className="absolute top-0 px-6 py-2 flex justify-between w-full">
-			<div>Logo</div>
-			<div>NAV</div>
 			{mounted ? (
 				<Button
 					variant="outline"
+					className="ml-auto"
 					size="icon"
 					onClick={() => setTheme(theme === "light" ? "dark" : "light")}
 				>

@@ -66,8 +66,8 @@ function ImageTrans() {
 
 	return (
 		<div>
-			<div className="flex gap-4">
-				<Input type="file" ref={fileRef} accept="image/*" multiple />
+			<div className="flex gap-4 flex-wrap">
+				<Input type="file" ref={fileRef} accept="image/*" multiple className="w-fit"/>
 				<Select value={format} onValueChange={setFormat}>
 					<SelectTrigger className="w-[180px]">
 						<SelectValue placeholder="Format" />
