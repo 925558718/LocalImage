@@ -28,7 +28,7 @@ class FFMPEG {
 					"text/javascript",
 				),
 				wasmURL: await toBlobURL(
-					"https://pub-0640b16e634149728ed7a92f9480486e.r2.dev/ffmpeg-core.wasm",
+					"https://static.limgx.com/ffmpeg-core.wasm",
 					"application/wasm",
 				),
 			});
