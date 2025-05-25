@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useI18n } from "@/hooks/useI18n";
 
 interface AdSenseProps {
@@ -24,6 +24,8 @@ export default function AdSense({
   const [isLoaded, setIsLoaded] = useState(false);
   const [adLabel, setAdLabel] = useState<string>("");
   const isDev = process.env.NODE_ENV === 'development';
+  const adRef = useRef<HTMLDivElement>(null);
+  const isInitialized = useRef(false); // 跟踪广告是否已初始化
 
   useEffect(() => {
     // 尝试获取广告标签的翻译，如果不存在则使用默认值
@@ -33,21 +35,37 @@ export default function AdSense({
       setAdLabel("Advertisement");
     }
 
-    // 在生产环境中加载广告
-    if (!isDev) {
+    // 只在生产环境中加载广告，并确保只初始化一次
+    if (!isDev && !isInitialized.current) {
       const loadAd = setTimeout(() => {
         try {
-          // @ts-ignore
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-          setIsLoaded(true);
+          if (adRef.current && !isInitialized.current) {
+            // 确保adsbygoogle已定义
+            if (typeof window !== 'undefined' && window.adsbygoogle) {
+              // 使用数组方法push
+              (window.adsbygoogle = window.adsbygoogle || []).push({});
+              setIsLoaded(true);
+              isInitialized.current = true; // 标记为已初始化
+              console.log("AdSense ad loaded for slot:", slot);
+            }
+          }
         } catch (err) {
           console.error("AdSense error:", err);
         }
       }, 100);
 
-      return () => clearTimeout(loadAd);
+      return () => {
+        clearTimeout(loadAd);
+      };
     }
-  }, [t, isDev]);
+  }, [t, isDev, slot]);
+
+  // 防止组件卸载后仍然尝试加载广告
+  useEffect(() => {
+    return () => {
+      isInitialized.current = false;
+    };
+  }, []);
 
   return (
     <div className={`relative overflow-hidden my-4 mx-auto rounded-lg border bg-card text-card-foreground transition-all hover:shadow-md ${className}`}>
@@ -72,7 +90,7 @@ export default function AdSense({
         </div>
       ) : (
         // 生产环境中显示实际广告
-        <>
+        <div ref={adRef}>
           {!isLoaded && (
             <div className="absolute inset-0 flex items-center justify-center bg-muted/20">
               <div className="animate-pulse flex flex-col items-center">
@@ -90,7 +108,7 @@ export default function AdSense({
             data-ad-format={format}
             data-full-width-responsive={responsive ? "true" : "false"}
           />
-        </>
+        </div>
       )}
     </div>
   );

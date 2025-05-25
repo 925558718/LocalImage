@@ -1,18 +1,18 @@
 {
-	"load_ffmpeg": "Por favor espere, cargando el núcleo de FFMPEG...",
+	"load_ffmpeg": "Por favor espera, cargando el núcleo FFMPEG...",
 	"compress_btn": "Iniciar Compresión",
 	"compressing_btn": "Comprimiendo...",
-	"name": "Procesador de Imágenes Local",
-	"desc": "Todo el procesamiento ocurre en su dispositivo - nada se sube a internet",
+	"name": "Local Image",
+	"desc": "Todo el procesamiento ocurre en tu dispositivo - nada se sube a internet",
 	"download": "Descargar",
 	"advance": "Configuración Avanzada",
 	"advanceoption": {
 		"width": "Ancho",
-		"height": "Altura",
+		"height": "Alto",
 		"quality": "Calidad"
 	},
-	"suggestion": "¿Tiene comentarios o solicitudes de funciones? ¡Háganoslo saber!",
-	"drag_drop_or_click": "Suelte archivos aquí o haga clic para buscar",
+	"suggestion": "¿Tienes comentarios o solicitudes de funciones? ¡Háznoslo saber!",
+	"drag_drop_or_click": "Suelta archivos aquí o haz clic para navegar",
 	"file_selected": "archivo",
 	"files_selected": "archivos",
 	"clear_files": "Borrar Archivos",
@@ -33,5 +33,6 @@
 	"milliseconds": "ms",
 	"seconds": "seg",
 	"minutes": "min",
-	"arrow_symbol": "→"
+	"arrow_symbol": "→",
+	"ad_label": "Publicidad"
 }

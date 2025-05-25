@@ -33,5 +33,6 @@
 	"milliseconds": "ms",
 	"seconds": "Sek",
 	"minutes": "Min",
-	"arrow_symbol": "→"
+	"arrow_symbol": "→",
+	"ad_label": "Werbung"
 }
