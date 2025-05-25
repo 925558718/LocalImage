@@ -3,29 +3,24 @@
 import { useEffect, useState, useRef } from "react";
 import { useI18n } from "@/hooks/useI18n";
 
-interface AdSenseProps {
+interface EzoicAdProps {
   className?: string;
-  slot: string;
-  format?: "auto" | "fluid" | "rectangle" | "horizontal" | "vertical";
+  slotId: number;
   style?: React.CSSProperties;
-  responsive?: boolean;
   showLabel?: boolean;
 }
 
-export default function AdSense({
+export default function EzoicAd({
   className = "",
-  slot,
-  format = "auto",
+  slotId,
   style,
-  responsive = true,
   showLabel = true,
-}: AdSenseProps) {
+}: EzoicAdProps) {
   const { t } = useI18n();
   const [isLoaded, setIsLoaded] = useState(false);
   const [adLabel, setAdLabel] = useState<string>("");
   const isDev = process.env.NODE_ENV === 'development';
   const adRef = useRef<HTMLDivElement>(null);
-  const isInitialized = useRef(false); // 跟踪广告是否已初始化
 
   useEffect(() => {
     // 尝试获取广告标签的翻译，如果不存在则使用默认值
@@ -35,37 +30,24 @@ export default function AdSense({
       setAdLabel("Advertisement");
     }
 
-    // 只在生产环境中加载广告，并确保只初始化一次
-    if (!isDev && !isInitialized.current) {
-      const loadAd = setTimeout(() => {
-        try {
-          if (adRef.current && !isInitialized.current) {
-            // 确保adsbygoogle已定义
-            if (typeof window !== 'undefined' && window.adsbygoogle) {
-              // 使用数组方法push
-              (window.adsbygoogle = window.adsbygoogle || []).push({});
+    // 在生产环境中处理 Ezoic 广告
+    if (!isDev && typeof window !== 'undefined') {
+      // 使用 Ezoic 的 ezstandalone 来显示广告
+      if (window.ezstandalone && window.ezstandalone.cmd) {
+        window.ezstandalone.cmd.push(function() {
+          try {
+            if (window.ezstandalone) {
+              window.ezstandalone.display(slotId);
               setIsLoaded(true);
-              isInitialized.current = true; // 标记为已初始化
-              console.log("AdSense ad loaded for slot:", slot);
+              console.log("Ezoic ad loaded for slot ID:", slotId);
             }
+          } catch (err) {
+            console.error("Ezoic ad error:", err);
           }
-        } catch (err) {
-          console.error("AdSense error:", err);
-        }
-      }, 100);
-
-      return () => {
-        clearTimeout(loadAd);
-      };
+        });
+      }
     }
-  }, [t, isDev, slot]);
-
-  // 防止组件卸载后仍然尝试加载广告
-  useEffect(() => {
-    return () => {
-      isInitialized.current = false;
-    };
-  }, []);
+  }, [t, isDev, slotId]);
 
   return (
     <div className={`relative overflow-hidden my-4 mx-auto rounded-lg border bg-card text-card-foreground transition-all hover:shadow-md ${className}`}>
@@ -82,15 +64,15 @@ export default function AdSense({
           className="flex items-center justify-center bg-muted/10 border-dashed border-2 border-muted"
         >
           <div className="text-muted-foreground text-sm">
-            AdSense {slot} - {format}
+            Ezoic Ad Slot ID: {slotId}
             <p className="text-xs opacity-70">
               (广告仅在生产环境显示)
             </p>
           </div>
         </div>
       ) : (
-        // 生产环境中显示实际广告
-        <div ref={adRef}>
+        // 生产环境中显示 Ezoic 广告
+        <div ref={adRef} style={style || { display: "block", minHeight: "280px" }}>
           {!isLoaded && (
             <div className="absolute inset-0 flex items-center justify-center bg-muted/20">
               <div className="animate-pulse flex flex-col items-center">
@@ -100,16 +82,20 @@ export default function AdSense({
             </div>
           )}
           
-          <ins
-            className="adsbygoogle"
-            style={style || { display: "block", textAlign: "center", minHeight: "280px" }}
-            data-ad-client="ca-pub-3559955380533996"
-            data-ad-slot={slot}
-            data-ad-format={format}
-            data-full-width-responsive={responsive ? "true" : "false"}
-          />
+          {/* Ezoic 广告位放置点 */}
+          <div id={`ezoic-pub-ad-placeholder-${slotId}`}></div>
         </div>
       )}
     </div>
   );
+}
+
+// 为了保持向后兼容性，声明一个全局 ezstandalone 类型
+declare global {
+  interface Window {
+    ezstandalone?: {
+      cmd: any[];
+      display: (slotId: number) => void;
+    };
+  }
 }

@@ -13,7 +13,7 @@ import {
 import Advanced from "./components/Advanced";
 import DownloadAll from "./components/DownloadAll";
 import { DropzoneWithPreview } from "./components/DropzoneWithPreview";
-import AdSense from "@/components/AdSense";
+import EzoicAd from "@/components/AdSense";
 
 function ImageTrans() {
 	const [loading, setLoading] = useState(false);
@@ -237,11 +237,10 @@ function ImageTrans() {
 						{/* 在总体统计和单个文件列表之间添加广告 */}
 						{downloadList.length > 0 && (
 							<div className="mb-4">
-								<AdSense 
-									slot="5432109876" 
-									format="rectangle"
-									responsive={true}
+								<EzoicAd 
+									slotId={2} 
 									style={{ display: "block", minHeight: "250px" }}
+									showLabel={true}
 								/>
 							</div>
 						)}

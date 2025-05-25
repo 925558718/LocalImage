@@ -81,6 +81,17 @@ export default async function RootLayout({
 	const dictionary = await dictionaries[locale as keyof typeof dictionaries]();
 	return (
 		<html lang={locale} suppressHydrationWarning>
+			<head>
+				<script src="https://cmp.gatekeeperconsent.com/min.js" data-cfasync="false"></script>
+				<script src="https://the.gatekeeperconsent.com/cmp.min.js" data-cfasync="false"></script>
+				<script async src="//www.ezojs.com/ezoic/sa.min.js"></script>
+				<script dangerouslySetInnerHTML={{ 
+					__html: `
+						window.ezstandalone = window.ezstandalone || { };
+						ezstandalone.cmd = ezstandalone.cmd || [];
+					`
+				}} />
+			</head>
 			<body
 				className={clsx("bg-background text-foreground", Opensans.variable)}
 			>
@@ -96,8 +107,6 @@ export default async function RootLayout({
 					</TranslationProvider>
 				</ThemeProvider>
 				<GoogleAnalytics gaId="G-89618T8EX2" />
-				<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3559955380533996"
-					crossOrigin="anonymous"></script>
 			</body>
 		</html>
 	);
