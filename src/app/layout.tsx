@@ -69,14 +69,14 @@ export default async function RootLayout({
 	// 检查是否支持该语言，如果不支持则使用英语
 	const supportedLocales = Object.keys(dictionaries);
 	let locale = "en";
-	
+
 	if (supportedLocales.includes(preferredLocale)) {
 		locale = preferredLocale;
 	} else if (preferredLocale.startsWith("zh")) {
 		// 对于中文的各种变体，都使用zh-CN
 		locale = "zh-CN";
 	}
-	
+
 	console.log("User locale:", preferredLocale, "Using:", locale);
 	const dictionary = await dictionaries[locale as keyof typeof dictionaries]();
 	return (
@@ -96,6 +96,8 @@ export default async function RootLayout({
 					</TranslationProvider>
 				</ThemeProvider>
 				<GoogleAnalytics gaId="G-89618T8EX2" />
+				<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3559955380533996"
+					crossOrigin="anonymous"></script>
 			</body>
 		</html>
 	);

@@ -5,6 +5,8 @@ import ffmpeg from "@/lib/ffmpeg";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import Compress from "@/components/compress";
 import { useI18n } from "@/hooks/useI18n";
+import AdSense from "@/components/AdSense";
+
 function Page() {
 	const { t } = useI18n();
 	const [isLoading, setIsloading] = useState(true);
@@ -31,7 +33,18 @@ function Page() {
 					{t("load_ffmpeg")}
 				</div>
 			) : (
-				<Compress />
+				<>
+					<Compress />
+					{/* 在主要内容下方添加广告 */}
+					<div className="w-full max-w-[900px] mt-8">
+						<AdSense 
+							slot="1234567890" 
+							format="auto"
+							responsive={true}
+							className="w-full"
+						/>
+					</div>
+				</>
 			)}
 		</div>
 	);

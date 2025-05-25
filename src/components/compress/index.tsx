@@ -13,7 +13,7 @@ import {
 import Advanced from "./components/Advanced";
 import DownloadAll from "./components/DownloadAll";
 import { DropzoneWithPreview } from "./components/DropzoneWithPreview";
-
+import AdSense from "@/components/AdSense";
 
 function ImageTrans() {
 	const [loading, setLoading] = useState(false);
@@ -205,13 +205,14 @@ function ImageTrans() {
 				{downloadList.length > 0 && (
 					<div className="mt-4 space-y-4 min-w-[700px]">
 						<div className="flex justify-between items-center mb-2">
-							<h3 className="text-sm font-medium">{t('compressed_files')} ({downloadList.length})</h3>
-							<button 
-								className="text-xs text-destructive hover:underline" 
+							<h3 className="text-base font-medium">{t('compressed_files')} ({downloadList.length})</h3>
+							<Button 
+								variant="destructive"
+								size="sm"
 								onClick={handleClearDownloadList}
 							>
 								{t('clear_all')}
-							</button>
+							</Button>
 						</div>
 						
 						{/* 总体压缩统计信息 - 对于任何数量的文件都显示 */}
@@ -229,6 +230,18 @@ function ImageTrans() {
 									format={downloadList.length > 0 ? downloadList[downloadList.length - 1].format : format}
 									quality={advanced.quality}
 									key="overall-stats"
+								/>
+							</div>
+						)}
+						
+						{/* 在总体统计和单个文件列表之间添加广告 */}
+						{downloadList.length > 0 && (
+							<div className="mb-4">
+								<AdSense 
+									slot="5432109876" 
+									format="rectangle"
+									responsive={true}
+									style={{ display: "block", minHeight: "250px" }}
 								/>
 							</div>
 						)}
