@@ -15,7 +15,7 @@ function Page() {
 	}, []);
 	return (
 		<div className="w-full h-full flex flex-col items-center min-h-[100vh] pb-[56px]">
-			<div className="min-h-[40vh] flex items-center justify-center flex-col">
+			<div className="min-h-[30vh] flex items-center justify-center flex-col">
 				<div className="text-[40px] uppercase">{t("name")}</div>
 				<div className="font-OS text-[12px] opacity-60 text-center">{t("desc")}</div>
 			</div>

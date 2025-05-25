@@ -50,6 +50,12 @@ export const metadata: Metadata = {
 
 const dictionaries = {
 	en: () => import("public/i18n/en.json").then((module) => module.default),
+	"zh-CN": () => import("public/i18n/zh-CN.json").then((module) => module.default),
+	zh: () => import("public/i18n/zh-CN.json").then((module) => module.default),
+	es: () => import("public/i18n/es.json").then((module) => module.default),
+	fr: () => import("public/i18n/fr.json").then((module) => module.default),
+	de: () => import("public/i18n/de.json").then((module) => module.default),
+	ja: () => import("public/i18n/ja.json").then((module) => module.default)
 };
 
 export default async function RootLayout({
@@ -59,9 +65,19 @@ export default async function RootLayout({
 }>) {
 	const headersList = await headers();
 	const acceptLanguage = headersList.get("accept-language");
-	// const locale = acceptLanguage?.split(",")[0] || "en";
-	const locale = "en";
-	console.log(locale);
+	const preferredLocale = acceptLanguage?.split(",")[0] || "en";
+	// 检查是否支持该语言，如果不支持则使用英语
+	const supportedLocales = Object.keys(dictionaries);
+	let locale = "en";
+	
+	if (supportedLocales.includes(preferredLocale)) {
+		locale = preferredLocale;
+	} else if (preferredLocale.startsWith("zh")) {
+		// 对于中文的各种变体，都使用zh-CN
+		locale = "zh-CN";
+	}
+	
+	console.log("User locale:", preferredLocale, "Using:", locale);
 	const dictionary = await dictionaries[locale as keyof typeof dictionaries]();
 	return (
 		<html lang={locale} suppressHydrationWarning>
