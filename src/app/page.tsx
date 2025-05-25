@@ -35,14 +35,6 @@ function Page() {
 			) : (
 				<>
 					<Compress />
-					{/* 在主要内容下方添加广告 */}
-					<div className="w-full max-w-[900px] mt-8">
-						<EzoicAd 
-							slotId={1} 
-							className="w-full"
-							showLabel={true}
-						/>
-					</div>
 				</>
 			)}
 		</div>

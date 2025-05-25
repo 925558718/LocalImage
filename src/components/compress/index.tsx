@@ -234,16 +234,6 @@ function ImageTrans() {
 							</div>
 						)}
 						
-						{/* 在总体统计和单个文件列表之间添加广告 */}
-						{downloadList.length > 0 && (
-							<div className="mb-4">
-								<EzoicAd 
-									slotId={2} 
-									style={{ display: "block", minHeight: "250px" }}
-									showLabel={true}
-								/>
-							</div>
-						)}
 						
 						{/* 单个文件压缩项 */}
 						<div className="space-y-2">
