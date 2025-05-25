@@ -8,6 +8,8 @@ import { headers } from "next/headers";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { Open_Sans } from "next/font/google";
 import clsx from "clsx";
+import Script from "next/script";
+
 const Opensans = Open_Sans({
 	subsets: ["latin"],
 	variable: "--font_os"
@@ -81,17 +83,17 @@ export default async function RootLayout({
 	const dictionary = await dictionaries[locale as keyof typeof dictionaries]();
 	return (
 		<html lang={locale} suppressHydrationWarning>
-			<head>
-				<script src="https://cmp.gatekeeperconsent.com/min.js" data-cfasync="false"></script>
-				<script src="https://the.gatekeeperconsent.com/cmp.min.js" data-cfasync="false"></script>
-				<script async src="//www.ezojs.com/ezoic/sa.min.js"></script>
-				<script dangerouslySetInnerHTML={{ 
-					__html: `
-						window.ezstandalone = window.ezstandalone || { };
-						ezstandalone.cmd = ezstandalone.cmd || [];
-					`
-				}} />
-			</head>
+			{/* 使用 Next.js Script 组件加载 Ezoic 脚本 */}
+			<Script src="https://cmp.gatekeeperconsent.com/min.js" strategy="afterInteractive" data-cfasync="false" />
+			<Script src="https://the.gatekeeperconsent.com/cmp.min.js" strategy="afterInteractive" data-cfasync="false" />
+			<Script src="//www.ezojs.com/ezoic/sa.min.js" strategy="afterInteractive" />
+			<Script id="ezoic-init" strategy="afterInteractive">
+				{`
+				window.ezstandalone = window.ezstandalone || { };
+				ezstandalone.cmd = ezstandalone.cmd || [];
+				`}
+			</Script>
+
 			<body
 				className={clsx("bg-background text-foreground", Opensans.variable)}
 			>
