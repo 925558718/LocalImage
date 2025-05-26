@@ -65,8 +65,6 @@ function ImageTrans() {
 		if (files.length === 0) return;
 		setLoading(true);
 		setDownloadList([]);
-		// 记录压缩开始时间
-		const compressStartTime = performance.now();
 		try {
 			const results: { 
 				url: string; 
@@ -78,6 +76,8 @@ function ImageTrans() {
 				quality?: number;
 			}[] = [];
 			for (let i = 0; i < files.length; i++) {
+				// 记录每个文件处理的开始时间
+				const fileStartTime = performance.now();
 				const file = files[i];
 				const arrayBuffer = await file.arrayBuffer();
 				const baseName = file.name.replace(/\.[^.]+$/, "");
@@ -107,12 +107,12 @@ function ImageTrans() {
 						avif: "image/avif",
 					};
 
-						const blob = new Blob([compressed], { type: mimeMap[actualFormat] || "application/octet-stream" });
+					const blob = new Blob([compressed], { type: mimeMap[actualFormat] || "application/octet-stream" });
 					// 记录压缩后的文件大小
 					compressedSize = blob.size;
 					const url = URL.createObjectURL(blob);
 					// 计算当前文件的处理时间(毫秒)
-					const fileProcessingTime = performance.now() - compressStartTime;
+					const fileProcessingTime = performance.now() - fileStartTime;
 					results.push({ 
 						url, 
 						name: outputName, 
@@ -142,7 +142,7 @@ function ImageTrans() {
 						compressedSize = blob.size;
 						const url = URL.createObjectURL(blob);
 						// 计算当前文件的处理时间(毫秒)
-						const fileProcessingTime = performance.now() - compressStartTime;
+						const fileProcessingTime = performance.now() - fileStartTime;
 						results.push({ 
 							url, 
 							name: outputName, 
@@ -228,7 +228,8 @@ function ImageTrans() {
 									// 计算所有文件的总处理时间
 									processingTime={downloadList.reduce((sum, item) => sum + (item.processingTime || 0), 0)}
 									format={downloadList.length > 0 ? downloadList[downloadList.length - 1].format : format}
-									quality={advanced.quality}
+									// 使用已压缩文件的实际质量值，而不是当前滑动条的值
+									quality={downloadList.length > 0 ? downloadList[0].quality : undefined}
 									key="overall-stats"
 								/>
 							</div>
