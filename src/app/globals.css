@@ -5,6 +5,7 @@
 
 @theme inline {
   --font-OS: "Open Sans", "sans-serif";
+  --font-inter: "Inter", "system-ui", "sans-serif";
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -117,5 +118,39 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  .font-inter {
+    font-family: var(--font-inter);
+  }
+}
+
+/* Logo动画效果 */
+@layer utilities {
+  .animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradient-x 3s ease infinite;
+  }
+  
+  @keyframes gradient-x {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  
+  /* 脉冲光晕效果 */
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  
+  @keyframes glow {
+    from {
+      box-shadow: 0 0 10px -2px var(--primary);
+    }
+    to {
+      box-shadow: 0 0 20px -2px var(--primary), 0 0 30px -10px var(--primary);
+    }
   }
 }

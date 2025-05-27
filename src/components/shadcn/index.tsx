@@ -19,3 +19,4 @@ export {
 	PopoverAnchor,
 } from "./popover";
 export { Slider } from "./slider";
+export { Skeleton } from "./skeleton";

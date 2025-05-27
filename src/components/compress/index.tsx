@@ -9,6 +9,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 	Button,
+	Progress,
 } from "@/components/shadcn";
 import Advanced from "./components/Advanced";
 import DownloadAll from "./components/DownloadAll";
@@ -17,6 +18,8 @@ import EzoicAd from "@/components/AdSense";
 
 function ImageTrans() {
 	const [loading, setLoading] = useState(false);
+	const [progress, setProgress] = useState(0);
+	const [currentFileName, setCurrentFileName] = useState("");
 	const { t } = useI18n();
 	const [downloadList, setDownloadList] = useState<
 		{ 
@@ -64,6 +67,8 @@ function ImageTrans() {
 	async function handleCompress() {
 		if (files.length === 0) return;
 		setLoading(true);
+		setProgress(0);
+		setCurrentFileName("");
 		setDownloadList([]);
 		try {
 			const results: { 
@@ -76,6 +81,11 @@ function ImageTrans() {
 				quality?: number;
 			}[] = [];
 			for (let i = 0; i < files.length; i++) {
+				// 更新进度和当前处理的文件名
+				const progressPercent = Math.round((i / files.length) * 100);
+				setProgress(progressPercent);
+				setCurrentFileName(files[i].name);
+				
 				// 记录每个文件处理的开始时间
 				const fileStartTime = performance.now();
 				const file = files[i];
@@ -158,11 +168,16 @@ function ImageTrans() {
 					}
 				}
 			}
+			// 完成所有文件处理
+			setProgress(100);
+			setCurrentFileName("");
 			setDownloadList(results);
 		} catch (e) {
 			console.error("压缩失败", e);
 		} finally {
 			setLoading(false);
+			setProgress(0);
+			setCurrentFileName("");
 		}
 	}
 
@@ -187,6 +202,32 @@ function ImageTrans() {
 					</Button>
 					<DownloadAll items={downloadList} />
 				</div>
+
+				{/* 进度条 */}
+				{loading && (
+					<div className="w-full max-w-lg mx-auto space-y-3 p-4 bg-muted/30 rounded-lg border">
+						<div className="flex justify-between items-center text-sm font-medium">
+							<span>{t("processing_progress")}</span>
+							<span className="text-primary">{progress}%</span>
+						</div>
+						<Progress value={progress} className="w-full h-2" />
+						{currentFileName && (
+							<div className="text-sm text-muted-foreground text-center">
+								<span className="font-medium">{t("current_file")}:</span>
+								<div className="truncate mt-1 text-xs bg-background px-2 py-1 rounded">
+									{currentFileName}
+								</div>
+							</div>
+						)}
+						<div className="text-xs text-muted-foreground text-center">
+							{files.length > 1 && (
+								<span>
+									{Math.floor(progress / 100 * files.length)} / {files.length} {t("files_selected")}
+								</span>
+							)}
+						</div>
+					</div>
+				)}
 
 				{/* 左侧上传区域 */}
 				<div className="space-y-4 min-w-[300px]">

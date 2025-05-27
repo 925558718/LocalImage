@@ -1,36 +1,31 @@
 "use client";
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
-import { Button } from "../shadcn";
-import { useEffect, useState } from "react";
+
+import Logo from "./Logo";
+import Navigation from "./Navigation";
+import ThemeToggle from "./ThemeToggle";
 
 function Header() {
-	const { setTheme, theme } = useTheme();
-	const [mounted, setMounted] = useState(false);
-
-	useEffect(() => {
-		setMounted(true);
-	}, []);
-
 	return (
-		<div className="absolute top-0 px-6 py-2 flex justify-between w-full">
-			{mounted ? (
-				<Button
-					variant="outline"
-					className="ml-auto"
-					size="icon"
-					onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-				>
-					{theme === "light" ? (
-						<Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-					) : (
-						<Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-					)}
-				</Button>
-			) : (
-				<div style={{ width: 32, height: 32 }} />
-			)}
-		</div>
+		<header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+			<div className="container mx-auto px-4 sm:px-6 lg:px-8">
+				<div className="flex h-16 items-center justify-between">
+					{/* 左侧：Logo */}
+					<div className="flex items-center">
+						<Logo />
+					</div>
+
+					{/* 中间：导航 */}
+					<div className="flex-1 flex justify-center">
+						<Navigation />
+					</div>
+
+					{/* 右侧：主题切换 */}
+					<div className="flex items-center">
+						<ThemeToggle />
+					</div>
+				</div>
+			</div>
+		</header>
 	);
 }
 

@@ -6,13 +6,19 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { TranslationProvider } from "@/hooks/useI18n";
 import { headers } from "next/headers";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { Open_Sans } from "next/font/google";
+import { Open_Sans, Inter } from "next/font/google";
 import clsx from "clsx";
 import Script from "next/script";
 
 const Opensans = Open_Sans({
 	subsets: ["latin"],
 	variable: "--font_os"
+});
+
+const inter = Inter({
+	subsets: ["latin"],
+	variable: "--font-inter",
+	weight: ["400", "500", "600", "700", "800", "900"]
 });
 export const metadata: Metadata = {
 	title: "LocalImage - Fast & Private Browser-Based Image Converter",
@@ -95,7 +101,7 @@ export default async function RootLayout({
 			</Script>
 
 			<body
-				className={clsx("bg-background text-foreground", Opensans.variable)}
+				className={clsx("bg-background text-foreground", Opensans.variable, inter.variable)}
 			>
 				<ThemeProvider
 					attribute="class"
