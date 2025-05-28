@@ -56,16 +56,26 @@ export function DropzoneWithPreview({
     
     if (e.type === 'dragover' || e.type === 'dragenter') {
       setIsDragging(true);
-    } else if (e.type === 'dragleave' || e.type === 'drop') {
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = 'copy';
+      }
+    } else if (e.type === 'dragleave') {
       setIsDragging(false);
-    }
-    
-    // 如果是放下文件的事件，处理文件上传
-    if (e.type === 'drop' && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      // 只处理图片文件
-      const imageFiles = Array.from(e.dataTransfer.files).filter(file => 
-        file.type.startsWith('image/'));
-      onFilesSelected(imageFiles);
+    } else if (e.type === 'drop') {
+      setIsDragging(false);
+      
+      // 处理拖拽文件
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        const allFiles = Array.from(e.dataTransfer.files);
+        const imageFiles = allFiles.filter(file => 
+          file.type.startsWith('image/') || 
+          /\.(jpg|jpeg|png|gif|webp|avif|bmp|tiff)$/i.test(file.name)
+        );
+        
+        if (imageFiles.length > 0) {
+          onFilesSelected(imageFiles);
+        }
+      }
     }
   };
   

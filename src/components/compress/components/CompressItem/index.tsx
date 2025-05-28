@@ -1,6 +1,8 @@
 import { Button } from "@/components/shadcn/button";
 import { useI18n } from "@/hooks/useI18n";
 import { Download } from "lucide-react";
+import { Progress } from "@/components/shadcn";
+import JSZip from "jszip";
 
 interface CompressItemProps {
   url: string;
@@ -11,9 +13,26 @@ interface CompressItemProps {
   processingTime?: number;  // 压缩处理时间(毫秒)
   format?: string;          // 压缩格式
   quality?: number;         // 压缩质量
+  downloadItems?: { url: string; name: string; blob?: Blob }[]; // 总体统计时的下载列表
+  isProcessing?: boolean;   // 是否正在处理
+  progress?: number;        // 处理进度(0-100)
+  blob?: Blob;              // 添加blob数据支持
 }
 
-function CompressItem({ url, name, originalSize, compressedSize, isOverallStats = false, processingTime, format, quality }: CompressItemProps) {
+function CompressItem({ 
+	url, 
+	name, 
+	originalSize, 
+	compressedSize, 
+	isOverallStats = false, 
+	processingTime, 
+	format, 
+	quality,
+	downloadItems = [],
+	isProcessing = false,
+	progress = 0,
+	blob
+}: CompressItemProps) {
 	const { t } = useI18n();
 	
 	// 格式化文件大小
@@ -35,6 +54,119 @@ function CompressItem({ url, name, originalSize, compressedSize, isOverallStats 
 	};
 	
 	const ratioColor = getRatioColor(parseFloat(compressionRatio));
+	
+	// 批量下载功能
+	const handleDownloadAll = async () => {
+		try {
+			const zip = new JSZip();
+			
+			// 验证是否有有效的项目
+			if (downloadItems.length === 0) {
+				console.warn(t('no_valid_files_download'));
+				return;
+			}
+			
+			console.log(`${t('batch_download_started')}: ${downloadItems.length}`);
+			
+			// 串行处理每个文件以避免并发导致的问题
+			let successCount = 0;
+			for (let i = 0; i < downloadItems.length; i++) {
+				const item = downloadItems[i];
+				try {
+					// 验证项目数据
+					if (!item.name) {
+						console.warn(`${t('skipping_invalid_item')}: 缺少文件名`);
+						continue;
+					}
+					
+					let blob: Blob;
+					
+					// 优先使用存储的blob数据
+					if (item.blob) {
+						blob = item.blob;
+						console.log(`${t('using_cached_blob')}: ${item.name} (${blob.size} bytes)`);
+					} else if (item.url && item.url.startsWith('blob:')) {
+						// 如果没有缓存的blob，尝试从URL获取
+						console.log(`${t('fetching_blob_from_url')}: ${item.name}`);
+						
+						const response = await fetch(item.url, {
+							method: 'GET',
+							headers: {
+								'Cache-Control': 'no-cache'
+							}
+						});
+						
+						if (!response.ok) {
+							throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+						}
+						
+						blob = await response.blob();
+					} else {
+						console.warn(`${t('skipping_invalid_url')}: ${item.name} - ${item.url || 'undefined'}`);
+						continue;
+					}
+					
+					// 验证blob
+					if (!blob || blob.size === 0) {
+						console.warn(`${t('file_empty_skip')}: ${item.name}`);
+						continue;
+					}
+					
+					// 清理文件名中的非法字符
+					const cleanName = item.name.replace(/[<>:"/\\|?*]/g, '_');
+					zip.file(cleanName, blob);
+					successCount++;
+					console.log(`${t('file_added_to_zip')}: ${cleanName} (${blob.size} bytes)`);
+					
+				} catch (error) {
+					console.error(`${t('process_file_failed')} ${item.name}:`, error);
+					// 继续处理下一个文件而不是整体失败
+					continue;
+				}
+			}
+			
+			// 检查是否有文件被成功添加到zip
+			if (successCount === 0) {
+				console.error(t('no_valid_files_download'));
+				alert(t('no_valid_files_download_alert'));
+				return;
+			}
+			
+			console.log(`${t('generating_zip')}: ${successCount}`);
+			
+			// 生成 zip 文件并下载
+			const content = await zip.generateAsync({ 
+				type: "blob",
+				compression: "DEFLATE",
+				compressionOptions: {
+					level: 6
+				}
+			});
+			
+			// 创建下载链接
+			const downloadUrl = URL.createObjectURL(content);
+			const a = document.createElement("a");
+			a.href = downloadUrl;
+			a.download = `compressed_images_${new Date().getTime()}.zip`;
+			
+			// 添加到DOM，触发下载，然后清理
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			
+			// 延迟清理URL以确保下载完成
+			setTimeout(() => {
+				URL.revokeObjectURL(downloadUrl);
+			}, 1000);
+			
+			console.log(`${t('batch_download_completed')} - ${successCount}/${downloadItems.length} ${t('files_downloaded')}`);
+			
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			console.error(`${t('batch_download_failed')}:`, error);
+			alert(`${t('batch_download_failed')}: ${errorMessage}`);
+		}
+	};
 	
 	// 格式化处理时间
 	const formatProcessingTime = (ms?: number): string => {
@@ -67,10 +199,22 @@ function CompressItem({ url, name, originalSize, compressedSize, isOverallStats 
 		return (
 			<div className="flex flex-col space-y-2">
 				<div className="flex items-center justify-between bg-background p-3 rounded-md border">
-					<span className="font-medium">{name}</span>
-					<span className={`text-sm font-medium ${ratioColor}`}>
-						{compressionRatio}% {parseFloat(compressionRatio) >= 0 ? t('saved') : t('increased')}
-					</span>
+					<div className="flex items-center gap-3">
+						<span className="font-medium">{name}</span>
+						<span className={`text-sm font-medium ${ratioColor}`}>
+							{compressionRatio}% {parseFloat(compressionRatio) >= 0 ? t('saved') : t('increased')}
+						</span>
+					</div>
+					{/* 批量下载按钮 */}
+					<Button 
+						onClick={handleDownloadAll} 
+						disabled={downloadItems.length === 0}
+						size="sm"
+						className="gap-2"
+					>
+						<Download size={16} />
+						{t('download_all')} ({downloadItems.length})
+					</Button>
 				</div>
 				
 				{/* 总体文件大小和压缩率 */}
@@ -106,14 +250,73 @@ function CompressItem({ url, name, originalSize, compressedSize, isOverallStats 
 	// 单个文件项的显示 - 添加时间、格式和质量信息
 	const formattedProcessingTime = formatProcessingTime(processingTime);
 	
+	// 处理下载
+	const handleDownload = () => {
+		try {
+			let downloadUrl: string;
+			
+			// 优先使用存储的blob数据
+			if (blob) {
+				downloadUrl = URL.createObjectURL(blob);
+				console.log(`使用缓存的blob创建下载链接: ${name}`);
+			} else if (url && url !== '') {
+				downloadUrl = url;
+				console.log(`使用现有URL下载: ${name}`);
+			} else {
+				console.error(`下载失败：${name} - 没有可用的下载数据`);
+				return;
+			}
+			
+			// 创建临时链接进行下载
+			const link = document.createElement('a');
+			link.href = downloadUrl;
+			link.download = name;
+			
+			// 添加到DOM并触发点击
+			document.body.appendChild(link);
+			link.click();
+			
+			// 清理
+			document.body.removeChild(link);
+			
+			// 如果是从blob创建的URL，需要清理
+			if (blob && downloadUrl !== url) {
+				setTimeout(() => {
+					URL.revokeObjectURL(downloadUrl);
+				}, 1000);
+			}
+			
+			console.log(`开始下载: ${name}`);
+		} catch (error) {
+			console.error('下载失败:', error);
+		}
+	};
+	
 	return (
 		<div className="flex flex-col space-y-1">
-			<a href={url} download={name} key={name} className="block">
-				<Button variant="secondary" className="w-full justify-between">
-					<span className="truncate mr-2">{name}</span>
+			<Button 
+				variant="secondary" 
+				className="w-full justify-between"
+				onClick={handleDownload}
+				disabled={isProcessing}
+			>
+				<span className="truncate mr-2">{name}</span>
+				{isProcessing ? (
+					<div className="flex items-center gap-2">
+						<span className="text-xs">{progress}%</span>
+						<div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+					</div>
+				) : (
 					<Download />
-				</Button>
-			</a>
+				)}
+			</Button>
+			
+			{/* 进度条 - 仅在处理时显示 */}
+			{isProcessing && (
+				<div className="px-2">
+					<Progress value={progress} className="h-1" />
+				</div>
+			)}
 			
 			{/* 文件大小和压缩率 */}
 			<div className="flex justify-between text-xs px-2">

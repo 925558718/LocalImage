@@ -153,4 +153,89 @@
       box-shadow: 0 0 20px -2px var(--primary), 0 0 30px -10px var(--primary);
     }
   }
+
+  /* X字母Transform动画效果 */
+  .animate-spin-slow {
+    animation: spin-slow 4s linear infinite;
+  }
+  
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Transform变换动画 */
+  .animate-transform {
+    animation: transform-effect 2s ease-in-out infinite;
+  }
+  
+  @keyframes transform-effect {
+    0%, 100% {
+      transform: scale(1) rotate(0deg);
+    }
+    25% {
+      transform: scale(1.1) rotate(5deg);
+    }
+    50% {
+      transform: scale(0.9) rotate(-5deg);
+    }
+    75% {
+      transform: scale(1.05) rotate(3deg);
+    }
+  }
+
+  /* X字母的subtle常驻动画 */
+  .animate-x-subtle {
+    animation: x-subtle 3s ease-in-out infinite;
+  }
+  
+  @keyframes x-subtle {
+    0%, 100% {
+      transform: scale(1) rotate(0deg);
+      opacity: 0.8;
+    }
+    50% {
+      transform: scale(1.02) rotate(1deg);
+      opacity: 1;
+    }
+  }
+
+  /* 粒子散射效果 */
+  .animate-scatter {
+    animation: scatter 1.5s ease-out infinite;
+  }
+  
+  @keyframes scatter {
+    0% {
+      transform: translate(0, 0) scale(0);
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      transform: translate(var(--scatter-x, 0), var(--scatter-y, 0)) scale(1);
+      opacity: 0;
+    }
+  }
+
+  /* 波纹扩散效果 */
+  .animate-ripple {
+    animation: ripple 1s ease-out infinite;
+  }
+  
+  @keyframes ripple {
+    0% {
+      transform: scale(0);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
 }

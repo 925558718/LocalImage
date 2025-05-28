@@ -1,5 +1,5 @@
 import ffm_ins from "@/lib/ffmpeg";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import CompressItem from "./components/CompressItem";
 import {
@@ -12,9 +12,11 @@ import {
 	Progress,
 } from "@/components/shadcn";
 import Advanced from "./components/Advanced";
-import DownloadAll from "./components/DownloadAll";
 import { DropzoneWithPreview } from "./components/DropzoneWithPreview";
 import EzoicAd from "@/components/AdSense";
+
+// 导入FFMPEG类用于静态方法调用
+import { FFMPEG } from "@/lib/ffmpeg";
 
 function ImageTrans() {
 	const [loading, setLoading] = useState(false);
@@ -35,9 +37,19 @@ function ImageTrans() {
 	// Track file selection state
 	const [files, setFiles] = useState<File[]>([]);
 	
+	// 单个文件进度状态
+	const [fileProgress, setFileProgress] = useState<{[key: string]: {isProcessing: boolean, progress: number}}>({});
+	
 	// 处理新文件添加
 	const handleFilesSelected = (newFiles: File[]) => {
-		setFiles(prevFiles => [...prevFiles, ...newFiles]);
+		console.log(`[文件选择] 接收到 ${newFiles.length} 个新文件:`, newFiles.map(f => f.name));
+		console.log('[文件选择] 当前已有文件数量:', files.length);
+		
+		setFiles(prevFiles => {
+			const updatedFiles = [...prevFiles, ...newFiles];
+			console.log(`[文件选择] 更新后总文件数量: ${updatedFiles.length}`);
+			return updatedFiles;
+		});
 	};
 	
 	// 处理删除单个文件
@@ -53,14 +65,41 @@ function ImageTrans() {
 	// 格式和高级配置
 	const [format, setFormat] = useState("webp");
 	const [advanced, setAdvanced] = useState({ width: "", height: "", quality: 85 });
+	const [processingMode, setProcessingMode] = useState<"parallel" | "serial" | "">("");
+	
+	// 组件卸载时清理内存
+	useEffect(() => {
+		return () => {
+			// 清理blob URLs
+			downloadList.forEach(item => {
+				URL.revokeObjectURL(item.url);
+			});
+			
+			// 清理FFmpeg内存和实例池
+			ffm_ins.cleanupMemory().catch(error => {
+				console.warn('组件卸载时清理FFmpeg内存失败:', error);
+			});
+			FFMPEG.clearInstancePool().catch(error => {
+				console.warn('组件卸载时清理实例池失败:', error);
+			});
+		};
+	}, [downloadList]);
 	
 	// 清空已压缩的文件列表
-	const handleClearDownloadList = () => {
+	const handleClearDownloadList = async () => {
 		// 释放所有已创建的blob URL以防止内存泄漏
 		downloadList.forEach(item => {
 			URL.revokeObjectURL(item.url);
 		});
 		setDownloadList([]);
+		
+		// 清理FFmpeg内存和实例池
+		try {
+			await ffm_ins.cleanupMemory();
+			await FFMPEG.clearInstancePool();
+		} catch (error) {
+			console.warn('清理FFmpeg内存失败:', error);
+		}
 	};
 
 	// 处理压缩
@@ -70,114 +109,119 @@ function ImageTrans() {
 		setProgress(0);
 		setCurrentFileName("");
 		setDownloadList([]);
+		setFileProgress({}); // 重置文件进度
+		setProcessingMode("serial"); // 现在默认使用串行模式
+		
+		// 开始处理前先清理内存，确保从干净状态开始
 		try {
-			const results: { 
-				url: string; 
-				name: string; 
-				originalSize: number; 
-				compressedSize: number;
-				processingTime?: number; // 压缩所用时间(毫秒)
-				format?: string;
-				quality?: number;
-			}[] = [];
-			for (let i = 0; i < files.length; i++) {
-				// 更新进度和当前处理的文件名
-				const progressPercent = Math.round((i / files.length) * 100);
-				setProgress(progressPercent);
-				setCurrentFileName(files[i].name);
-				
-				// 记录每个文件处理的开始时间
-				const fileStartTime = performance.now();
-				const file = files[i];
+			await ffm_ins.cleanupMemory();
+		} catch (error) {
+			console.warn('开始压缩前清理FFmpeg内存失败:', error);
+		}
+		
+		try {
+			// 准备文件数据
+			const fileData: { data: ArrayBuffer; name: string; originalSize: number }[] = [];
+			for (const file of files) {
 				const arrayBuffer = await file.arrayBuffer();
-				const baseName = file.name.replace(/\.[^.]+$/, "");
+				fileData.push({
+					data: arrayBuffer,
+					name: file.name,
+					originalSize: file.size
+				});
 				
-				// 记录原始文件大小
-				const originalSize = file.size;
-
-				// 当选择 avif 时使用 webp 作为备选格式
-				let actualFormat = format;
-				let outputName = `${baseName}_compressed.${format}`;
-				let compressedSize = 0;
-
-				try {
-					const compressed = await ffm_ins.convertImage({
-						input: arrayBuffer,
-						outputName,
-						quality: advanced.quality,
-						width: advanced.width ? Number(advanced.width) : undefined,
-						height: advanced.height ? Number(advanced.height) : undefined,
-					});
-
-					const mimeMap: Record<string, string> = {
-						webp: "image/webp",
-						png: "image/png",
-						jpg: "image/jpeg",
-						jpeg: "image/jpeg",
-						avif: "image/avif",
-					};
-
-					const blob = new Blob([compressed], { type: mimeMap[actualFormat] || "application/octet-stream" });
-					// 记录压缩后的文件大小
-					compressedSize = blob.size;
-					const url = URL.createObjectURL(blob);
-					// 计算当前文件的处理时间(毫秒)
-					const fileProcessingTime = performance.now() - fileStartTime;
-					results.push({ 
-						url, 
-						name: outputName, 
-						originalSize, 
-						compressedSize,
-						processingTime: fileProcessingTime,
-						format: actualFormat,
-						quality: advanced.quality
-					});
-				} catch (error) {
-					if (format === "avif") {
-						// AVIF 转换失败，尝试使用 WebP 替代
-						console.warn("AVIF 转换失败，使用 WebP 替代", error);
-						actualFormat = "webp";
-						outputName = `${baseName}_compressed.webp`;
-
-						const compressed = await ffm_ins.convertImage({
-							input: arrayBuffer,
-							outputName,
-							quality: advanced.quality,
-							width: advanced.width ? Number(advanced.width) : undefined,
-							height: advanced.height ? Number(advanced.height) : undefined,
-						});
-
-						const blob = new Blob([compressed], { type: "image/webp" });
-						// 记录压缩后的文件大小
-						compressedSize = blob.size;
-						const url = URL.createObjectURL(blob);
-						// 计算当前文件的处理时间(毫秒)
-						const fileProcessingTime = performance.now() - fileStartTime;
-						results.push({ 
-							url, 
-							name: outputName, 
-							originalSize, 
-							compressedSize,
-							processingTime: fileProcessingTime,
-							format: "webp", // 注意这里使用webp格式
-							quality: advanced.quality
-						});
-					} else {
-						// 其他格式转换失败，继续抛出异常
-						throw error;
-					}
-				}
+				// 初始化文件进度状态
+				setFileProgress(prev => ({
+					...prev,
+					[file.name]: { isProcessing: true, progress: 0 }
+				}));
 			}
+
+			const results: {
+				url: string;
+				name: string;
+				originalSize: number;
+				compressedSize: number;
+				processingTime: number;
+				format: string;
+				quality: number;
+			}[] = [];
+
+			// 使用并行压缩（内部会自动切换到串行模式）
+			const parallelResults = await FFMPEG.convertImagesParallel({
+				files: fileData,
+				format,
+				quality: advanced.quality,
+				width: advanced.width ? Number(advanced.width) : undefined,
+				height: advanced.height ? Number(advanced.height) : undefined,
+				onProgress: (completed: number, total: number) => {
+					const progressPercent = Math.round((completed / total) * 100);
+					setProgress(progressPercent);
+					
+					// 更新当前处理的文件进度
+					if (completed < total) {
+						const currentFileIndex = completed;
+						const currentFileName = fileData[currentFileIndex]?.name;
+						if (currentFileName) {
+							setFileProgress(prev => ({
+								...prev,
+								[currentFileName]: { isProcessing: true, progress: 50 }
+							}));
+						}
+					}
+				},
+				onFileComplete: (result: {
+					url: string;
+					name: string;
+					originalSize: number;
+					compressedSize: number;
+					processingTime: number;
+					format: string;
+					quality: number;
+				}) => {
+					setCurrentFileName(result.name);
+					
+					// 更新文件完成状态
+					setFileProgress(prev => ({
+						...prev,
+						[result.name]: { isProcessing: false, progress: 100 }
+					}));
+					
+					// 实时更新结果列表
+					setDownloadList(prev => {
+						const newList = [...prev, result];
+						return newList;
+					});
+				}
+			});
+
+			// 确保所有结果都已添加到downloadList
+			// parallelResults 包含所有处理完成的文件
+
 			// 完成所有文件处理
 			setProgress(100);
 			setCurrentFileName("");
-			setDownloadList(results);
+			
 		} catch (e) {
 			console.error("压缩失败", e);
+			// 压缩失败时清除进度状态
+			setFileProgress({});
+			// 压缩失败时也清理FFmpeg内存和实例池
+			try {
+				await ffm_ins.cleanupMemory();
+				await FFMPEG.clearInstancePool();
+			} catch (cleanupError) {
+				console.warn('清理FFmpeg内存失败:', cleanupError);
+			}
 		} finally {
 			setLoading(false);
 			setProgress(0);
 			setCurrentFileName("");
+			setProcessingMode(""); // 清除处理模式状态
+			// 一段时间后清除文件进度状态
+			setTimeout(() => {
+				setFileProgress({});
+			}, 3000);
 		}
 	}
 
@@ -200,7 +244,6 @@ function ImageTrans() {
 					<Button onClick={handleCompress} disabled={loading || files.length === 0}>
 						{loading ? t("compressing_btn") : t("compress_btn")}
 					</Button>
-					<DownloadAll items={downloadList} />
 				</div>
 
 				{/* 进度条 */}
@@ -217,6 +260,11 @@ function ImageTrans() {
 								<div className="truncate mt-1 text-xs bg-background px-2 py-1 rounded">
 									{currentFileName}
 								</div>
+								{processingMode && (
+									<div className="text-xs text-blue-600 mt-1">
+										{processingMode === "serial" ? "🔄 串行模式 (内存优化)" : "⚡ 并行模式"}
+									</div>
+								)}
 							</div>
 						)}
 						<div className="text-xs text-muted-foreground text-center">
@@ -226,6 +274,14 @@ function ImageTrans() {
 								</span>
 							)}
 						</div>
+						{files.length > 3 && (
+							<div className="text-xs text-amber-600 text-center mt-2 p-2 bg-amber-50 rounded">
+								💡 处理多个大图片可能需要更多内存。如遇到内存不足错误，建议：
+								<br />• 分批处理，每次选择3-5个文件
+								<br />• 先压缩大文件，再处理小文件
+								<br />• 关闭其他占用内存的浏览器标签页
+							</div>
+						)}
 					</div>
 				)}
 
@@ -271,6 +327,8 @@ function ImageTrans() {
 									format={downloadList.length > 0 ? downloadList[downloadList.length - 1].format : format}
 									// 使用已压缩文件的实际质量值，而不是当前滑动条的值
 									quality={downloadList.length > 0 ? downloadList[0].quality : undefined}
+									// 传递下载列表
+									downloadItems={downloadList.map(item => ({ url: item.url, name: item.name }))}
 									key="overall-stats"
 								/>
 							</div>
@@ -279,18 +337,23 @@ function ImageTrans() {
 						
 						{/* 单个文件压缩项 */}
 						<div className="space-y-2">
-							{downloadList.map((item) => (
-								<CompressItem
-									name={item.name}
-									url={item.url}
-									originalSize={item.originalSize}
-									compressedSize={item.compressedSize}
-									processingTime={item.processingTime}
-									format={item.format}
-									quality={item.quality}
-									key={item.name + item.url}
-								/>
-							))}
+							{downloadList.map((item) => {
+								const currentProgress = fileProgress[item.name];
+								return (
+									<CompressItem
+										name={item.name}
+										url={item.url}
+										originalSize={item.originalSize}
+										compressedSize={item.compressedSize}
+										processingTime={item.processingTime}
+										format={item.format}
+										quality={item.quality}
+										isProcessing={currentProgress?.isProcessing || false}
+										progress={currentProgress?.progress || 0}
+										key={item.name + item.url}
+									/>
+								);
+							})}
 						</div>
 					</div>
 				)}

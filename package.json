@@ -19,6 +19,7 @@
     "@lottiefiles/dotlottie-react": "^0.13.5",
     "@next/third-parties": "^15.1.8",
     "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-navigation-menu": "^1.2.13",
     "@radix-ui/react-popover": "^1.1.14",
     "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-select": "^2.2.5",

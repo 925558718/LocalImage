@@ -52,7 +52,7 @@ function Logo() {
 			
 			{/* 商标名称 */}
 			<div className="flex flex-col">
-				{/* Limgx - 主商标名 */}
+				{/* LimgX - 主商标名 */}
 				<div className="relative overflow-hidden">
 					<span 
 						className="font-black text-2xl leading-none tracking-tight bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent animate-gradient-x font-inter"
@@ -61,7 +61,44 @@ function Logo() {
 							letterSpacing: '-0.02em'
 						}}
 					>
-						Limgx
+						Limg
+						{/* X字母 - Transform动画效果 */}
+						<span className="relative inline-block">
+							{/* 主X字母 - 常驻transform效果 */}
+							<span className="relative z-20 animate-x-subtle text-primary drop-shadow-lg">
+								X
+							</span>
+							
+							{/* Transform变换效果层 - 常驻显示 */}
+							<span className="absolute inset-0 opacity-60">
+								{/* 慢速旋转的X - 表示持续变换 */}
+								<span className="absolute inset-0 animate-spin-slow text-primary/20 scale-125">X</span>
+								{/* 脉冲缩放的X - 表示动态变化 */}
+								<span className="absolute inset-0 animate-pulse text-primary/30 scale-150">X</span>
+								{/* 快速闪烁的X - 表示瞬间转换 */}
+								<span className="absolute inset-0 animate-ping text-primary/25">X</span>
+								{/* 波纹扩散效果 - 表示影响扩散 */}
+								<span className="absolute inset-0 animate-ripple text-primary/15 scale-200">X</span>
+							</span>
+							
+							{/* 变换粒子效果 - 常驻显示 */}
+							<div className="absolute -inset-3 opacity-60">
+								{/* 左上角粒子 */}
+								<div className="absolute -top-1 -left-1 w-1.5 h-1.5 bg-gradient-to-br from-primary to-primary/50 rounded-full animate-bounce delay-100"></div>
+								{/* 右上角粒子 */}
+								<div className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-gradient-to-bl from-primary to-primary/50 rounded-full animate-bounce delay-200"></div>
+								{/* 左下角粒子 */}
+								<div className="absolute -bottom-1 -left-1 w-1.5 h-1.5 bg-gradient-to-tr from-primary to-primary/50 rounded-full animate-bounce delay-300"></div>
+								{/* 右下角粒子 */}
+								<div className="absolute -bottom-1 -right-1 w-1.5 h-1.5 bg-gradient-to-tl from-primary to-primary/50 rounded-full animate-bounce delay-500"></div>
+							</div>
+							
+							{/* 中心能量环 - 常驻显示 */}
+							<div className="absolute inset-0 opacity-40">
+								<div className="absolute inset-0 border border-primary/40 rounded-full animate-ping"></div>
+								<div className="absolute inset-0 border border-primary/20 rounded-full animate-pulse scale-150"></div>
+							</div>
+						</span>
 					</span>
 					{/* 下划线动画 */}
 					<div className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-primary via-primary/80 to-primary/50 w-0 group-hover:w-full transition-all duration-700 ease-out rounded-full"></div>
