@@ -66,7 +66,6 @@ function ImageTrans() {
 	// 格式和高级配置
 	const [format, setFormat] = useState("webp");
 	const [advanced, setAdvanced] = useState({ width: "", height: "", quality: 85 });
-	const [processingMode, setProcessingMode] = useState<"parallel" | "serial" | "">("");
 	
 	// 组件卸载时清理内存
 	useEffect(() => {
@@ -111,7 +110,6 @@ function ImageTrans() {
 		setCurrentFileName("");
 		setDownloadList([]);
 		setFileProgress({}); // 重置文件进度
-		setProcessingMode("serial"); // 现在默认使用串行模式
 		
 		// 开始处理前先清理内存，确保从干净状态开始
 		try {
@@ -138,18 +136,8 @@ function ImageTrans() {
 				}));
 			}
 
-			const results: {
-				url: string;
-				name: string;
-				originalSize: number;
-				compressedSize: number;
-				processingTime: number;
-				format: string;
-				quality: number;
-			}[] = [];
-
-			// 使用并行压缩（内部会自动切换到串行模式）
-			const parallelResults = await FFMPEG.convertImagesParallel({
+			// 使用串行压缩模式 - 稳定且内存高效
+			const results = await FFMPEG.convertImagesSerial({
 				files: fileData,
 				format,
 				quality: advanced.quality,
@@ -222,9 +210,6 @@ function ImageTrans() {
 				}
 			});
 
-			// 确保所有结果都已添加到downloadList
-			// parallelResults 包含所有处理完成的文件
-
 			// 完成所有文件处理
 			setProgress(100);
 			setCurrentFileName("");
@@ -244,7 +229,6 @@ function ImageTrans() {
 			setLoading(false);
 			setProgress(0);
 			setCurrentFileName("");
-			setProcessingMode(""); // 清除处理模式状态
 			// 一段时间后清除文件进度状态
 			setTimeout(() => {
 				setFileProgress({});
@@ -287,11 +271,6 @@ function ImageTrans() {
 								<div className="truncate mt-1 text-xs bg-background px-2 py-1 rounded">
 									{currentFileName}
 								</div>
-								{processingMode && (
-									<div className="text-xs text-blue-600 mt-1">
-										{processingMode === "serial" ? "🔄 串行模式 (内存优化)" : "⚡ 并行模式"}
-									</div>
-								)}
 							</div>
 						)}
 						<div className="text-xs text-muted-foreground text-center">

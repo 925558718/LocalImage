@@ -128,11 +128,6 @@ class FFMPEG {
 	private ffmpeg: FFmpeg | null = null;
 	private isLoaded = false;
 	private loadingPromise: Promise<void> | null = null;
-	// 并行处理的FFmpeg实例池
-	private static instancePool: FFMPEG[] = [];
-	private static readonly MAX_CONCURRENT = 2; // 减少最大并发数以节省内存
-	private static creatingInstances = 0; // 正在创建的实例数
-	private static currentConcurrent = 1; // 当前实际并发数，动态调整
 
 	constructor() {
 		if (!isBrowser()) {
@@ -142,112 +137,6 @@ class FFMPEG {
 		this.ffmpeg.on("log", ({ message }: { message: string }) => {
 			console.log("[ffmpeg]", message);
 		});
-	}
-
-	/**
-	 * 动态调整并发数
-	 */
-	private static adjustConcurrency(success: boolean): void {
-		if (success && this.currentConcurrent < this.MAX_CONCURRENT) {
-			this.currentConcurrent = Math.min(this.currentConcurrent + 1, this.MAX_CONCURRENT);
-			console.log(`[ffmpeg] 提升并发数到: ${this.currentConcurrent}`);
-		} else if (!success && this.currentConcurrent > 1) {
-			this.currentConcurrent = Math.max(this.currentConcurrent - 1, 1);
-			console.log(`[ffmpeg] 降低并发数到: ${this.currentConcurrent}`);
-		}
-	}
-
-	/**
-	 * 获取一个可用的FFmpeg实例
-	 */
-	static async getAvailableInstance(): Promise<FFMPEG> {
-		// 强制垃圾回收以释放内存
-		if (window.gc) {
-			window.gc();
-		}
-		
-		// 如果池中有可用实例，直接返回
-		if (this.instancePool.length > 0) {
-			const instance = this.instancePool.pop()!;
-			// 清理实例内存后再返回
-			await instance.cleanupMemory();
-			return instance;
-		}
-		
-		// 限制同时创建的实例数量（使用动态并发数）
-		if (this.creatingInstances >= this.currentConcurrent) {
-			// 等待其他实例创建完成
-			await new Promise(resolve => setTimeout(resolve, 500)); // 增加等待时间
-			return this.getAvailableInstance();
-		}
-		
-		// 创建新实例
-		this.creatingInstances++;
-		try {
-			// 清理所有现有实例以释放内存
-			await this.clearInstancePool();
-			
-			// 再次强制垃圾回收
-			if (window.gc) {
-				window.gc();
-			}
-			
-			// 等待一段时间让内存释放
-			await new Promise(resolve => setTimeout(resolve, 1000));
-			
-			const instance = new FFMPEG();
-			await instance.load();
-			this.adjustConcurrency(true); // 成功创建实例
-			return instance;
-		} catch (error) {
-			console.error('创建FFmpeg实例失败:', error);
-			this.adjustConcurrency(false); // 创建失败，降低并发数
-			
-			// 如果是内存相关错误，强制使用单实例模式
-			if (error instanceof Error && (
-				error.message.includes('memory') || 
-				error.message.includes('Memory') ||
-				error.message.includes('WebAssembly')
-			)) {
-				this.currentConcurrent = 1;
-				console.warn('[ffmpeg] 检测到内存不足，强制切换到单实例模式');
-				
-				// 尝试清理并重试一次
-				await this.clearInstancePool();
-				if (window.gc) {
-					window.gc();
-				}
-				await new Promise(resolve => setTimeout(resolve, 2000));
-			}
-			
-			throw new Error(`FFmpeg实例创建失败: ${error}`);
-		} finally {
-			this.creatingInstances--;
-		}
-	}
-
-	/**
-	 * 将实例返回到池中
-	 */
-	static returnInstance(instance: FFMPEG): void {
-		if (this.instancePool.length < this.MAX_CONCURRENT) {
-			// 清理实例内存后返回池中
-			instance.cleanupMemory().catch(console.warn);
-			this.instancePool.push(instance);
-		}
-	}
-
-	/**
-	 * 清理实例池
-	 */
-	static async clearInstancePool(): Promise<void> {
-		const instances = [...this.instancePool];
-		this.instancePool = [];
-		
-		// 清理所有实例
-		await Promise.all(instances.map(instance => 
-			instance.cleanupMemory().catch(console.warn)
-		));
 	}
 
 	async load() {
@@ -818,7 +707,7 @@ class FFMPEG {
 	}
 
 	/**
-	 * 纯串行压缩多个图片 - 避免内存问题的安全模式
+	 * 串行压缩多个图片 - 稳定且内存高效
 	 */
 	static async convertImagesSerial({
 		files,
@@ -863,25 +752,22 @@ class FFMPEG {
 			quality: number;
 		}[] = [];
 		
-		// 使用单一实例进行串行处理
-		let instance: FFMPEG | null = null;
-		
 		try {
 			console.log('[ffmpeg] 开始串行处理模式 - 稳定且内存高效');
 			
-			// 清理实例池和强制垃圾回收
+			// 清理内存和强制垃圾回收
 			await this.clearInstancePool();
 			if (window.gc) {
 				window.gc();
 			}
-			// 减少延迟，从1000ms改为200ms
 			await new Promise(resolve => setTimeout(resolve, 200));
 			
-			// 创建单一实例
-			instance = new FFMPEG();
+			// 使用主实例进行处理
+			const instance = ffm_ins;
+			if (!instance) {
+				throw new Error('FFmpeg实例未初始化，请确保在浏览器环境中运行');
+			}
 			await instance.load();
-			
-			console.log('[ffmpeg] 开始串行处理模式');
 			
 			for (let i = 0; i < files.length; i++) {
 				const file = files[i];
@@ -975,12 +861,11 @@ class FFMPEG {
 					const completed = i + 1;
 					onProgress?.(completed, files.length);
 					
-					// 优化内存清理策略：只在处理大量文件时才清理，且减少频率
+					// 优化内存清理策略：只在处理大量文件时才清理
 					if (files.length > 5 && (i + 1) % 5 === 0) {
 						await instance.cleanupMemory();
 						if (window.gc) {
 							window.gc();
-							// 减少垃圾回收后的等待时间
 							await new Promise(resolve => setTimeout(resolve, 100));
 						}
 					}
@@ -994,11 +879,6 @@ class FFMPEG {
 			return results;
 			
 		} finally {
-			// 清理实例
-			if (instance) {
-				await instance.cleanupMemory();
-			}
-			
 			// 最终垃圾回收
 			if (window.gc) {
 				window.gc();
@@ -1007,71 +887,19 @@ class FFMPEG {
 	}
 
 	/**
-	 * 并行压缩多个图片 - 智能切换到串行模式
+	 * 简化的实例池清理方法
 	 */
-	static async convertImagesParallel({
-		files,
-		format,
-		quality = 75,
-		width,
-		height,
-		onProgress,
-		onFileComplete
-	}: {
-		files: { data: ArrayBuffer; name: string; originalSize: number }[];
-		format: string;
-		quality?: number;
-		width?: number;
-		height?: number;
-		onProgress?: (completed: number, total: number) => void;
-		onFileComplete?: (result: {
-			url: string;
-			name: string;
-			originalSize: number;
-			compressedSize: number;
-			processingTime: number;
-			format: string;
-			quality: number;
-		}) => void;
-	}): Promise<{
-		url: string;
-		name: string;
-		originalSize: number;
-		compressedSize: number;
-		processingTime: number;
-		format: string;
-		quality: number;
-	}[]> {
-		try {
-			// 先尝试并行处理（仅在内存足够时）
-			console.log('[ffmpeg] 尝试并行处理模式');
-			return await this.convertImagesSerial({ // 直接使用串行模式以避免内存问题
-				files,
-				format,
-				quality,
-				width,
-				height,
-				onProgress,
-				onFileComplete
-			});
-		} catch (error) {
-			console.warn('[ffmpeg] 并行处理失败，切换到串行处理:', error);
-			
-			// 切换到纯串行处理
-			return await this.convertImagesSerial({
-				files,
-				format,
-				quality,
-				width,
-				height,
-				onProgress,
-				onFileComplete
-			});
+	static async clearInstancePool(): Promise<void> {
+		// 简化版本 - 只进行垃圾回收
+		if (window.gc) {
+			window.gc();
 		}
+		console.log('[ffmpeg] 内存清理完成');
 	}
 }
 
-const ffm_ins = new FFMPEG();
+// 只在浏览器环境中创建实例，避免在Node.js测试环境中报错
+const ffm_ins = (isBrowser() && !process.env.VITEST) ? new FFMPEG() : null;
 
 export default ffm_ins;
 export { FFMPEG };
