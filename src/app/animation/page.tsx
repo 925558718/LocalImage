@@ -11,9 +11,17 @@ function AnimationPage() {
 	const [isLoading, setIsLoading] = useState(true);
 	
 	useEffect(() => {
-		ffmpeg.load().then(() => {
+		if (ffmpeg) {
+			ffmpeg.load().then(() => {
+				setIsLoading(false);
+			}).catch((error) => {
+				console.error('FFmpeg加载失败:', error);
+				setIsLoading(false); // 即使失败也停止loading状态
+			});
+		} else {
+			// 如果ffmpeg实例不存在（比如在服务端），直接停止loading
 			setIsLoading(false);
-		});
+		}
 	}, []);
 	
 	return (
