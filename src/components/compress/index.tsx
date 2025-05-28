@@ -49,6 +49,15 @@ function ImageTrans() {
 		setFiles(prevFiles => {
 			const updatedFiles = [...prevFiles, ...newFiles];
 			console.log(`[文件选择] 更新后总文件数量: ${updatedFiles.length}`);
+			
+			// 文件选择后预热FFmpeg实例
+			if (updatedFiles.length > 0 && ffm_ins) {
+				console.log('[性能优化] 开始预热FFmpeg实例...');
+				ffm_ins.load().catch(error => {
+					console.warn('[性能优化] FFmpeg预热失败:', error);
+				});
+			}
+			
 			return updatedFiles;
 		});
 	};
@@ -69,12 +78,15 @@ function ImageTrans() {
 	
 	// 组件卸载时清理内存
 	useEffect(() => {
-		return () => {
-			// 清理blob URLs
-			downloadList.forEach(item => {
-				URL.revokeObjectURL(item.url);
+		// 组件挂载时预热FFmpeg实例
+		if (ffm_ins) {
+			console.log('[性能优化] 组件挂载时预热FFmpeg实例...');
+			ffm_ins.load().catch(error => {
+				console.warn('[性能优化] 组件挂载时FFmpeg预热失败:', error);
 			});
-			
+		}
+		
+		return () => {
 			// 清理FFmpeg内存和实例池
 			if (ffm_ins) {
 				ffm_ins.cleanupMemory().catch(error => {
@@ -83,6 +95,18 @@ function ImageTrans() {
 			}
 			FFMPEG.clearInstancePool().catch(error => {
 				console.warn('组件卸载时清理实例池失败:', error);
+			});
+		};
+	}, []); // 空依赖数组，只在挂载和卸载时执行
+	
+	// 单独处理downloadList变化时的清理 - 确保URL被及时释放
+	useEffect(() => {
+		return () => {
+			// 当downloadList即将发生变化时，清理旧的URL
+			downloadList.forEach(item => {
+				if (item.url) {
+					URL.revokeObjectURL(item.url);
+				}
 			});
 		};
 	}, [downloadList]);
@@ -125,21 +149,40 @@ function ImageTrans() {
 		}
 		
 		try {
-			// 准备文件数据
-			const fileData: { data: ArrayBuffer; name: string; originalSize: number }[] = [];
-			for (const file of files) {
-				const arrayBuffer = await file.arrayBuffer();
-				fileData.push({
-					data: arrayBuffer,
-					name: file.name,
-					originalSize: file.size
-				});
-				
-				// 初始化文件进度状态
-				setFileProgress(prev => ({
-					...prev,
-					[file.name]: { isProcessing: true, progress: 0 }
-				}));
+			// 提前显示准备状态
+			setCurrentFileName("正在准备文件...");
+			setProgress(5);
+			
+			// 并行读取所有文件 - 大幅提升性能
+			console.log('[性能优化] 开始并行读取文件...');
+			const startTime = performance.now();
+			
+			const fileData: { data: ArrayBuffer; name: string; originalSize: number }[] = await Promise.all(
+				files.map(async (file) => {
+					// 初始化文件进度状态
+					setFileProgress(prev => ({
+						...prev,
+						[file.name]: { isProcessing: true, progress: 0 }
+					}));
+					
+					const arrayBuffer = await file.arrayBuffer();
+					return {
+						data: arrayBuffer,
+						name: file.name,
+						originalSize: file.size
+					};
+				})
+			);
+			
+			const readTime = performance.now() - startTime;
+			console.log(`[性能优化] 文件读取完成，耗时: ${readTime.toFixed(1)}ms`);
+			
+			setCurrentFileName("开始压缩文件...");
+			setProgress(15);
+			
+			// 确保FFmpeg已加载
+			if (ffm_ins) {
+				await ffm_ins.load();
 			}
 
 			// 使用串行压缩模式 - 稳定且内存高效
@@ -150,8 +193,10 @@ function ImageTrans() {
 				width: advanced.width ? Number(advanced.width) : undefined,
 				height: advanced.height ? Number(advanced.height) : undefined,
 				onProgress: (completed: number, total: number) => {
-					const progressPercent = Math.round((completed / total) * 100);
-					setProgress(progressPercent);
+					// 将压缩进度映射到15%-95%的范围
+					const compressionProgress = (completed / total) * 80; // 80% for compression
+					const totalProgress = 15 + compressionProgress; // Start from 15%
+					setProgress(Math.round(totalProgress));
 					
 					// 更新当前处理的文件进度
 					if (completed < total) {

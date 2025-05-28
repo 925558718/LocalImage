@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 添加重定向配置
+  // 添加重定向
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
   async redirects() {
     return [
       {
