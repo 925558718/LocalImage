@@ -76,9 +76,11 @@ function ImageTrans() {
 			});
 			
 			// 清理FFmpeg内存和实例池
-			ffm_ins.cleanupMemory().catch(error => {
-				console.warn('组件卸载时清理FFmpeg内存失败:', error);
-			});
+			if (ffm_ins) {
+				ffm_ins.cleanupMemory().catch(error => {
+					console.warn('组件卸载时清理FFmpeg内存失败:', error);
+				});
+			}
 			FFMPEG.clearInstancePool().catch(error => {
 				console.warn('组件卸载时清理实例池失败:', error);
 			});
@@ -95,7 +97,9 @@ function ImageTrans() {
 		
 		// 清理FFmpeg内存和实例池
 		try {
-			await ffm_ins.cleanupMemory();
+			if (ffm_ins) {
+				await ffm_ins.cleanupMemory();
+			}
 			await FFMPEG.clearInstancePool();
 		} catch (error) {
 			console.warn('清理FFmpeg内存失败:', error);
@@ -113,7 +117,9 @@ function ImageTrans() {
 		
 		// 开始处理前先清理内存，确保从干净状态开始
 		try {
-			await ffm_ins.cleanupMemory();
+			if (ffm_ins) {
+				await ffm_ins.cleanupMemory();
+			}
 		} catch (error) {
 			console.warn('开始压缩前清理FFmpeg内存失败:', error);
 		}
@@ -220,7 +226,9 @@ function ImageTrans() {
 			setFileProgress({});
 			// 压缩失败时也清理FFmpeg内存和实例池
 			try {
-				await ffm_ins.cleanupMemory();
+				if (ffm_ins) {
+					await ffm_ins.cleanupMemory();
+				}
 				await FFMPEG.clearInstancePool();
 			} catch (cleanupError) {
 				console.warn('清理FFmpeg内存失败:', cleanupError);

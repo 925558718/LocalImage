@@ -122,6 +122,10 @@ function AnimationComposer() {
 		stopPreview();
 		
 		try {
+			if (!ffm_ins) {
+				throw new Error('FFmpeg实例未初始化，请刷新页面重试');
+			}
+
 			const outputName = `animation_${Date.now()}.${format}`;
 			
 			// 模拟进度更新

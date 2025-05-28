@@ -11,9 +11,16 @@ function Page() {
 	const { t } = useI18n();
 	const [isLoading, setIsloading] = useState(true);
 	useEffect(() => {
-		ffmpeg.load().then((res) => {
+		if (ffmpeg) {
+			ffmpeg.load().then((res) => {
+				setIsloading(false);
+			}).catch((error) => {
+				console.error('FFmpeg加载失败:', error);
+				setIsloading(false);
+			});
+		} else {
 			setIsloading(false);
-		});
+		}
 	}, []);
 	return (
 		<main className="w-full h-full flex flex-col items-center min-h-[calc(100vh-4rem)] pb-[56px] pt-8">
