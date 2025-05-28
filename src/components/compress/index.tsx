@@ -32,6 +32,7 @@ function ImageTrans() {
 			processingTime?: number; // 压缩所用时间(毫秒)
 			format?: string;
 			quality?: number;
+			blob?: Blob; // 添加 blob 数据存储
 		}[]
 	>([]);
 	// Track file selection state
@@ -190,6 +191,32 @@ function ImageTrans() {
 					// 实时更新结果列表
 					setDownloadList(prev => {
 						const newList = [...prev, result];
+						
+						// 异步获取并缓存 blob 数据以优化下载性能
+						setTimeout(async () => {
+							try {
+								if (result.url && result.url.startsWith('blob:')) {
+									const response = await fetch(result.url);
+									if (response.ok) {
+										const blob = await response.blob();
+										if (blob && blob.size > 0) {
+											// 更新列表中对应项目的 blob 数据
+											setDownloadList(currentList => 
+												currentList.map(item => 
+													item.url === result.url && item.name === result.name
+														? { ...item, blob }
+														: item
+												)
+											);
+											console.log(`[blob缓存] 成功缓存: ${result.name} (${blob.size} bytes)`);
+										}
+									}
+								}
+							} catch (error) {
+								console.warn(`[blob缓存] 缓存失败: ${result.name}`, error);
+							}
+						}, 0); // 使用 setTimeout 避免阻塞 UI 更新
+						
 						return newList;
 					});
 				}
@@ -328,7 +355,11 @@ function ImageTrans() {
 									// 使用已压缩文件的实际质量值，而不是当前滑动条的值
 									quality={downloadList.length > 0 ? downloadList[0].quality : undefined}
 									// 传递下载列表
-									downloadItems={downloadList.map(item => ({ url: item.url, name: item.name }))}
+									downloadItems={downloadList.map(item => ({ 
+										url: item.url, 
+										name: item.name, 
+										blob: item.blob 
+									}))}
 									key="overall-stats"
 								/>
 							</div>
@@ -350,6 +381,7 @@ function ImageTrans() {
 										quality={item.quality}
 										isProcessing={currentProgress?.isProcessing || false}
 										progress={currentProgress?.progress || 0}
+										blob={item.blob}
 										key={item.name + item.url}
 									/>
 								);
