@@ -97,5 +97,7 @@
 	"using_cached_blob": "Using cached blob data",
 	"fetching_blob_from_url": "Fetching blob data from URL",
 	"nav_gradient_generator": "Gradient Generator",
-	"gradient_generator_desc": "Create beautiful CSS gradients with Tailwind support"
+	"gradient_generator_desc": "Create beautiful CSS gradients with Tailwind output",
+	"nav_codec_tools": "Codec Tools",
+	"codec_tools_desc": "Encoding and decoding utilities for developers"
 }

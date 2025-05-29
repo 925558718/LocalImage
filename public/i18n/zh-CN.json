@@ -104,5 +104,7 @@
 	"using_cached_blob": "使用缓存的二进制数据",
 	"fetching_blob_from_url": "从URL获取二进制数据",
 	"nav_gradient_generator": "渐变生成器",
-	"gradient_generator_desc": "创建漂亮的CSS渐变，支持Tailwind输出"
+	"gradient_generator_desc": "创建漂亮的CSS渐变，支持Tailwind输出",
+	"nav_codec_tools": "编解码工具",
+	"codec_tools_desc": "开发者专用的编码解码实用工具"
 }

@@ -74,6 +74,18 @@ function Navigation() {
 		},
 	];
 
+	// 编解码工具 - 独立tab
+	const codecTool: NavigationItem = {
+		href: "/codec",
+		labelKey: "nav_codec_tools",
+		description: "codec_tools_desc",
+		icon: (
+			<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z" />
+			</svg>
+		),
+	};
+
 	// 前端开发工具组
 	const devTools: NavigationItem[] = [
 		{
@@ -137,52 +149,8 @@ function Navigation() {
 
 	// 检查当前路径是否在开发工具组内
 	const isDevToolActive = devTools.some(item => item.href === pathname);
-
-	// Web3工具组 - 暂时注释掉
-	/*
-	const web3Tools: NavigationItem[] = [
-		{
-			href: "/web3/wallet",
-			labelKey: "nav_wallet_tools",
-			description: "wallet_tools_desc",
-			icon: (
-				<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-				</svg>
-			),
-		},
-		{
-			href: "/web3/token",
-			labelKey: "nav_token_tools",
-			description: "token_tools_desc",
-			icon: (
-				<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-				</svg>
-			),
-		},
-		{
-			href: "/web3/nft",
-			labelKey: "nav_nft_tools",
-			description: "nft_tools_desc",
-			icon: (
-				<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-				</svg>
-			),
-		},
-		{
-			href: "/web3/defi",
-			labelKey: "nav_defi_tools",
-			description: "defi_tools_desc",
-			icon: (
-				<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-				</svg>
-			),
-		},
-	];
-	*/
+	// 检查当前路径是否在编解码工具内
+	const isCodecActive = pathname.startsWith('/codec');
 
 	return (
 		<nav className="flex items-center space-x-1">
@@ -204,6 +172,22 @@ function Navigation() {
 					<span className="transition-all duration-300 ease-in-out">{t(item.labelKey)}</span>
 				</Link>
 			))}
+
+			{/* 编解码工具 - 独立tab */}
+			<Link
+				href={codecTool.href}
+				className={cn(
+					"flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ease-in-out hover:bg-accent hover:text-accent-foreground hover:scale-105 active:scale-95",
+					isCodecActive
+						? "bg-accent text-accent-foreground shadow-sm" 
+						: "text-muted-foreground hover:text-foreground"
+				)}
+			>
+				<span className="transition-transform duration-300 ease-in-out group-hover:scale-110">
+					{codecTool.icon}
+				</span>
+				<span className="transition-all duration-300 ease-in-out">{t(codecTool.labelKey)}</span>
+			</Link>
 
 			{/* 前端开发工具 - 折叠菜单 */}
 			<div className="relative" ref={dropdownRef}>
