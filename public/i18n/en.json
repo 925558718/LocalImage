@@ -95,5 +95,7 @@
 	"generating_zip": "Generating zip with files",
 	"skipping_invalid_item": "Skipping invalid item",
 	"using_cached_blob": "Using cached blob data",
-	"fetching_blob_from_url": "Fetching blob data from URL"
+	"fetching_blob_from_url": "Fetching blob data from URL",
+	"nav_gradient_generator": "Gradient Generator",
+	"gradient_generator_desc": "Create beautiful CSS gradients with Tailwind support"
 }

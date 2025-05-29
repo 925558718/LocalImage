@@ -86,6 +86,23 @@ function Navigation() {
 				</svg>
 			),
 		},
+		{
+			href: "/dev/gradient",
+			labelKey: "nav_gradient_generator",
+			description: "gradient_generator_desc",
+			icon: (
+				<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<defs>
+						<linearGradient id="gradientIcon" x1="0%" y1="0%" x2="100%" y2="100%">
+							<stop offset="0%" stopColor="currentColor" stopOpacity="1" />
+							<stop offset="100%" stopColor="currentColor" stopOpacity="0.5" />
+						</linearGradient>
+					</defs>
+					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} fill="url(#gradientIcon)" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM7 3v18" />
+					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 8l4-4 4 4-4 4-4-4z" />
+				</svg>
+			),
+		},
 		// {
 		// 	href: "/dev/url-encoder",
 		// 	labelKey: "nav_url_encoder",

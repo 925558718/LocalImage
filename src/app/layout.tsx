@@ -9,6 +9,7 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import { Open_Sans, Inter } from "next/font/google";
 import clsx from "clsx";
 import Script from "next/script";
+import { Toaster } from "@/components/shadcn/sonner";
 
 const Opensans = Open_Sans({
 	subsets: ["latin"],
@@ -107,11 +108,13 @@ export default async function RootLayout({
 					attribute="class"
 					defaultTheme="dark"
 					disableTransitionOnChange
+					enableSystem={false}
 				>
 					<TranslationProvider value={dictionary}>
 						<Header />
 						{children}
 						<Footer />
+						<Toaster />
 					</TranslationProvider>
 				</ThemeProvider>
 				<GoogleAnalytics gaId="G-89618T8EX2" />

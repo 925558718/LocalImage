@@ -101,6 +101,8 @@
 	"skipping_non_blob_url": "跳过非blob URL",
 	"generating_zip": "生成压缩包，包含文件数",
 	"skipping_invalid_item": "跳过无效项目",
-	"using_cached_blob": "使用缓存的blob数据",
-	"fetching_blob_from_url": "从URL获取blob数据"
+	"using_cached_blob": "使用缓存的二进制数据",
+	"fetching_blob_from_url": "从URL获取二进制数据",
+	"nav_gradient_generator": "渐变生成器",
+	"gradient_generator_desc": "创建漂亮的CSS渐变，支持Tailwind输出"
 }
