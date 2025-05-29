@@ -7,6 +7,7 @@ import { Textarea } from "@/components/shadcn/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/shadcn/card";
 import { Copy, RefreshCw, ArrowRightLeft } from "lucide-react";
 import { toast } from "sonner";
+import { useI18n } from "@/hooks/useI18n";
 
 const urlUtils = {
   encode: (text: string): string => {
@@ -22,6 +23,7 @@ const urlUtils = {
 };
 
 const UrlCodecPage = () => {
+  const { t } = useI18n();
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
 
@@ -29,9 +31,9 @@ const UrlCodecPage = () => {
     try {
       const result = urlUtils.encode(inputText);
       setOutputText(result);
-      toast.success('URL编码成功！');
+      toast.success(t('codec_encode_success'));
     } catch (error) {
-      toast.error(`编码失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      toast.error(`${t('codec_encode_failed')}: ${error instanceof Error ? error.message : t('codec_unknown_error')}`);
     }
   };
 
@@ -39,9 +41,9 @@ const UrlCodecPage = () => {
     try {
       const result = urlUtils.decode(inputText);
       setOutputText(result);
-      toast.success('URL解码成功！');
+      toast.success(t('codec_decode_success'));
     } catch (error) {
-      toast.error(`解码失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      toast.error(`${t('codec_decode_failed')}: ${error instanceof Error ? error.message : t('codec_unknown_error')}`);
     }
   };
 
@@ -58,17 +60,17 @@ const UrlCodecPage = () => {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success('已复制到剪贴板！');
+    toast.success(t('codec_copied'));
   };
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl">
       <div className="mb-6 text-center">
         <h1 className="text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-          URL 编解码
+          {t('codec_url_title')}
         </h1>
         <p className="text-muted-foreground">
-          URL编码和解码工具，处理URL中的特殊字符，确保URL的正确传输
+          {t('codec_url_desc')}
         </p>
       </div>
 
@@ -76,15 +78,15 @@ const UrlCodecPage = () => {
         <CardHeader>
           <CardTitle>URL Encoding & Decoding</CardTitle>
           <CardDescription>
-            对URL中的特殊字符进行编码，或将编码后的URL还原
+            {t('codec_page_description_url')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>输入文本</Label>
+              <Label>{t('codec_input_text')}</Label>
               <Textarea
-                placeholder="输入要编码或解码的URL文本..."
+                placeholder={t('codec_input_placeholder')}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 className="min-h-[300px] font-mono"
@@ -92,10 +94,10 @@ const UrlCodecPage = () => {
             </div>
 
             <div className="space-y-2">
-              <Label>输出结果</Label>
+              <Label>{t('codec_output_result')}</Label>
               <div className="relative">
                 <Textarea
-                  placeholder="结果将显示在这里..."
+                  placeholder={t('codec_output_placeholder')}
                   value={outputText}
                   readOnly
                   className="min-h-[300px] font-mono bg-muted"
@@ -115,10 +117,10 @@ const UrlCodecPage = () => {
 
           <div className="flex gap-2 flex-wrap">
             <Button onClick={encode} className="flex-1">
-              URL编码
+              {t('codec_url_encode')}
             </Button>
             <Button onClick={decode} variant="outline" className="flex-1">
-              URL解码
+              {t('codec_url_decode')}
             </Button>
             <Button onClick={swap} variant="outline" size="icon">
               <ArrowRightLeft className="w-4 h-4" />
@@ -129,20 +131,20 @@ const UrlCodecPage = () => {
           </div>
 
           <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-            <h4 className="font-medium mb-2">URL编码说明</h4>
+            <h4 className="font-medium mb-2">{t('codec_url_explanation')}</h4>
             <div className="text-sm text-muted-foreground space-y-2">
-              <p>• URL编码（百分号编码）将URL中的特殊字符转换为安全格式</p>
-              <p>• 空格变成%20，&变成%26，中文字符被编码为UTF-8字节序列</p>
-              <p>• 用于确保URL在不同系统间正确传输和解析</p>
-              <p>• 常用于表单提交、API请求参数等场景</p>
+              <p>{t('codec_url_explanation_1')}</p>
+              <p>{t('codec_url_explanation_2')}</p>
+              <p>{t('codec_url_explanation_3')}</p>
+              <p>{t('codec_url_explanation_4')}</p>
               
               <div className="mt-3 p-3 bg-background rounded border">
-                <h5 className="font-medium text-foreground mb-2">常见转换示例：</h5>
+                <h5 className="font-medium text-foreground mb-2">{t('codec_url_common_conversions')}</h5>
                 <div className="space-y-1 text-xs">
-                  <div><span className="text-green-600">空格：</span> " " → "%20"</div>
-                  <div><span className="text-green-600">中文：</span> "你好" → "%E4%BD%A0%E5%A5%BD"</div>
-                  <div><span className="text-green-600">符号：</span> "&" → "%26", "?" → "%3F"</div>
-                  <div><span className="text-green-600">邮箱：</span> "test@example.com" → "test%40example.com"</div>
+                  <div><span className="text-green-600">{t('codec_url_space')}</span> &quot; &quot; → &quot;%20&quot;</div>
+                  <div><span className="text-green-600">{t('codec_url_chinese')}</span> &quot;你好&quot; → &quot;%E4%BD%A0%E5%A5%BD&quot;</div>
+                  <div><span className="text-green-600">{t('codec_url_symbols')}</span> &quot;&amp;&quot; → &quot;%26&quot;, &quot;?&quot; → &quot;%3F&quot;</div>
+                  <div><span className="text-green-600">{t('codec_url_email')}</span> &quot;test@example.com&quot; → &quot;test%40example.com&quot;</div>
                 </div>
               </div>
             </div>

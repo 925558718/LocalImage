@@ -7,6 +7,7 @@ import { Textarea } from "@/components/shadcn/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/shadcn/card";
 import { Copy, RefreshCw, ArrowRightLeft } from "lucide-react";
 import { toast } from "sonner";
+import { useI18n } from "@/hooks/useI18n";
 
 const hexUtils = {
   encode: (text: string): string => {
@@ -25,6 +26,7 @@ const hexUtils = {
 };
 
 const HexCodecPage = () => {
+  const { t } = useI18n();
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
 
@@ -32,9 +34,9 @@ const HexCodecPage = () => {
     try {
       const result = hexUtils.encode(inputText);
       setOutputText(result);
-      toast.success('十六进制编码成功！');
+      toast.success(t('codec_encode_success'));
     } catch (error) {
-      toast.error(`编码失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      toast.error(`${t('codec_encode_failed')}: ${error instanceof Error ? error.message : t('codec_unknown_error')}`);
     }
   };
 
@@ -42,9 +44,9 @@ const HexCodecPage = () => {
     try {
       const result = hexUtils.decode(inputText);
       setOutputText(result);
-      toast.success('十六进制解码成功！');
+      toast.success(t('codec_decode_success'));
     } catch (error) {
-      toast.error(`解码失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      toast.error(`${t('codec_decode_failed')}: ${error instanceof Error ? error.message : t('codec_unknown_error')}`);
     }
   };
 
@@ -61,33 +63,33 @@ const HexCodecPage = () => {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success('已复制到剪贴板！');
+    toast.success(t('codec_copied'));
   };
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl">
       <div className="mb-6 text-center">
         <h1 className="text-3xl font-bold mb-3 bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
-          十六进制编解码
+          {t('codec_hex_title')}
         </h1>
         <p className="text-muted-foreground">
-          十六进制编码和解码工具，查看文本的字节级表示
+          {t('codec_hex_desc')}
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Hexadecimal Encoding &amp; Decoding</CardTitle>
+          <CardTitle>Hexadecimal Encoding & Decoding</CardTitle>
           <CardDescription>
-            将文本转换为十六进制表示或将十六进制数据还原为文本
+            {t('codec_page_description_hex')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>输入文本</Label>
+              <Label>{t('codec_input_text')}</Label>
               <Textarea
-                placeholder="输入要编码或解码的文本..."
+                placeholder={t('codec_input_placeholder')}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 className="min-h-[300px] font-mono"
@@ -95,10 +97,10 @@ const HexCodecPage = () => {
             </div>
 
             <div className="space-y-2">
-              <Label>输出结果</Label>
+              <Label>{t('codec_output_result')}</Label>
               <div className="relative">
                 <Textarea
-                  placeholder="结果将显示在这里..."
+                  placeholder={t('codec_output_placeholder')}
                   value={outputText}
                   readOnly
                   className="min-h-[300px] font-mono bg-muted"
@@ -118,10 +120,10 @@ const HexCodecPage = () => {
 
           <div className="flex gap-2 flex-wrap">
             <Button onClick={encode} className="flex-1">
-              十六进制编码
+              {t('codec_hex_encode')}
             </Button>
             <Button onClick={decode} variant="outline" className="flex-1">
-              十六进制解码
+              {t('codec_hex_decode')}
             </Button>
             <Button onClick={swap} variant="outline" size="icon">
               <ArrowRightLeft className="w-4 h-4" />
@@ -132,15 +134,15 @@ const HexCodecPage = () => {
           </div>
 
           <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-            <h4 className="font-medium mb-2">十六进制编码说明</h4>
+            <h4 className="font-medium mb-2">{t('codec_hex_explanation')}</h4>
             <div className="text-sm text-muted-foreground space-y-2">
-              <p>• 十六进制（Hex）使用0-9和A-F字符表示数据的字节值</p>
-              <p>• 每个字节用两个十六进制字符表示（00-FF）</p>
-              <p>• 常用于程序调试、数据分析和底层编程</p>
-              <p>• 可以直观地看到文本的UTF-8字节编码</p>
+              <p>{t('codec_hex_explanation_1')}</p>
+              <p>{t('codec_hex_explanation_2')}</p>
+              <p>{t('codec_hex_explanation_3')}</p>
+              <p>{t('codec_hex_explanation_4')}</p>
               
               <div className="mt-3 p-3 bg-background rounded border">
-                <h5 className="font-medium text-foreground mb-2">编码示例：</h5>
+                <h5 className="font-medium text-foreground mb-2">{t('codec_unicode_example')}</h5>
                 <div className="space-y-1 text-xs">
                   <div><span className="text-yellow-600">ASCII：</span> &quot;Hello&quot; → &quot;48656c6c6f&quot;</div>
                   <div><span className="text-yellow-600">数字：</span> &quot;123&quot; → &quot;313233&quot;</div>
