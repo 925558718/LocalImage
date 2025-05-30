@@ -910,7 +910,7 @@ const GradientGenerator = () => {
                       <div className="p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded">
                         <p className="text-sm text-yellow-800 dark:text-yellow-200">
                           <strong>Complex Gradient:</strong> Using arbitrary value because:
-                          <br />• Colors not in Tailwind's standard palette, or
+                          <br />• Colors not in Tailwind&apos;s standard palette, or
                           <br />• More than 3 color stops (Tailwind supports max 3: from/via/to)
                           <br /><br />
                           <strong>Note:</strong> Tailwind CSS supports position syntax like:
