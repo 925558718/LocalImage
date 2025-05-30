@@ -36,6 +36,7 @@ const GradientGenerator = () => {
   });
 
   const [outputFormat, setOutputFormat] = useState<"css" | "tailwind">("css");
+  const [tailwindVersion, setTailwindVersion] = useState<"v3" | "v4">("v4");
   const [dragging, setDragging] = useState<{ id: string; startX: number; startPosition: number } | null>(null);
   const [selectedStop, setSelectedStop] = useState<string | null>(null);
   const [isDragEnd, setIsDragEnd] = useState(false);
@@ -70,18 +71,36 @@ const GradientGenerator = () => {
     "#ef4444": "red-500", "#dc2626": "red-600", "#b91c1c": "red-700", "#991b1b": "red-800",
     // Blues  
     "#eff6ff": "blue-50", "#dbeafe": "blue-100", "#bfdbfe": "blue-200", "#93c5fd": "blue-300",
-    "#3b82f6": "blue-500", "#2563eb": "blue-600", "#1d4ed8": "blue-700", "#1e40af": "blue-800",
+    "#60a5fa": "blue-400", "#3b82f6": "blue-500", "#2563eb": "blue-600", "#1d4ed8": "blue-700", "#1e40af": "blue-800",
     // Greens
     "#f0fdf4": "green-50", "#dcfce7": "green-100", "#bbf7d0": "green-200", "#86efac": "green-300",
-    "#22c55e": "green-500", "#16a34a": "green-600", "#15803d": "green-700", "#166534": "green-800",
-    // Purples
+    "#4ade80": "green-400", "#22c55e": "green-500", "#16a34a": "green-600", "#15803d": "green-700", "#166534": "green-800",
+    // Purples & Violets
     "#faf5ff": "purple-50", "#f3e8ff": "purple-100", "#e9d5ff": "purple-200", "#c4b5fd": "purple-300",
-    "#8b5cf6": "purple-500", "#7c3aed": "purple-600", "#6d28d9": "purple-700", "#5b21b6": "purple-800",
-    // Yellows
-    "#fefce8": "yellow-50", "#fef3c7": "yellow-100", "#fde68a": "yellow-200", "#facc15": "yellow-400",
-    "#eab308": "yellow-500", "#ca8a04": "yellow-600", "#a16207": "yellow-700", "#854d0e": "yellow-800",
+    "#a78bfa": "purple-400", "#8b5cf6": "purple-500", "#7c3aed": "purple-600", "#6d28d9": "purple-700", "#5b21b6": "purple-800",
+    "#5f27cd": "purple-600", // Custom mapping for your gradient color
+    // Yellows & Ambers
+    "#fefce8": "yellow-50", "#fef3c7": "yellow-100", "#fde68a": "yellow-200", "#fcd34d": "yellow-300",
+    "#facc15": "yellow-400", "#eab308": "yellow-500", "#ca8a04": "yellow-600", "#a16207": "yellow-700", "#854d0e": "yellow-800",
+    "#eddd53": "yellow-400", // Custom mapping for your gradient color
+    // Teals & Cyans
+    "#f0fdfa": "teal-50", "#ccfbf1": "teal-100", "#99f6e4": "teal-200", "#5eead4": "teal-300",
+    "#2dd4bf": "teal-400", "#14b8a6": "teal-500", "#0d9488": "teal-600", "#0f766e": "teal-700",
+    "#57c785": "emerald-400", // Custom mapping for your gradient color
+    // Custom colors from your example
+    "#2a7b9b": "sky-600", // Custom mapping for your gradient color
+    // Grays
+    "#f9fafb": "gray-50", "#f3f4f6": "gray-100", "#e5e7eb": "gray-200", "#d1d5db": "gray-300",
+    "#9ca3af": "gray-400", "#6b7280": "gray-500", "#4b5563": "gray-600", "#374151": "gray-700",
+    "#1f2937": "gray-800", "#111827": "gray-900",
+    // Indigos
+    "#eef2ff": "indigo-50", "#e0e7ff": "indigo-100", "#c7d2fe": "indigo-200", "#a5b4fc": "indigo-300",
+    "#818cf8": "indigo-400", "#6366f1": "indigo-500", "#4f46e5": "indigo-600", "#4338ca": "indigo-700",
+    // Sky colors
+    "#f0f9ff": "sky-50", "#e0f2fe": "sky-100", "#bae6fd": "sky-200", "#7dd3fc": "sky-300",
+    "#38bdf8": "sky-400", "#0ea5e9": "sky-500", "#0284c7": "sky-600", "#0369a1": "sky-700",
     // Others
-    "#000000": "black", "#ffffff": "white", "#6b7280": "gray-500", "#374151": "gray-700"
+    "#000000": "black", "#ffffff": "white"
   };
 
   // Generate CSS gradient string
@@ -98,57 +117,137 @@ const GradientGenerator = () => {
     }
   };
 
-  // Generate Tailwind CSS classes (improved)
+  // Generate Tailwind CSS classes (supports both v3 and v4)
   const generateTailwind = () => {
     const sortedStops = [...config.stops].sort((a, b) => a.position - b.position);
     
-    if (sortedStops.length === 2 && sortedStops[0].position === 0 && sortedStops[1].position === 100) {
+    // Get direction string based on version
+    const getDirection = () => {
+      if (config.type === "linear") {
+        const v4Directions: { [key: string]: string } = {
+          "0deg": "bg-linear-to-t",
+          "45deg": "bg-linear-to-tr", 
+          "90deg": "bg-linear-to-r",
+          "135deg": "bg-linear-to-br",
+          "180deg": "bg-linear-to-b",
+          "225deg": "bg-linear-to-bl",
+          "270deg": "bg-linear-to-l",
+          "315deg": "bg-linear-to-tl"
+        };
+        
+        const v3Directions: { [key: string]: string } = {
+          "0deg": "bg-gradient-to-t",
+          "45deg": "bg-gradient-to-tr",
+          "90deg": "bg-gradient-to-r", 
+          "135deg": "bg-gradient-to-br",
+          "180deg": "bg-gradient-to-b",
+          "225deg": "bg-gradient-to-bl",
+          "270deg": "bg-gradient-to-l",
+          "315deg": "bg-gradient-to-tl"
+        };
+        
+        const directions = tailwindVersion === "v4" ? v4Directions : v3Directions;
+        return directions[config.direction] || (tailwindVersion === "v4" ? "bg-linear-to-r" : "bg-gradient-to-r");
+      } else {
+        return tailwindVersion === "v4" ? "bg-radial" : "bg-gradient-radial";
+      }
+    };
+
+    // Try to generate Tailwind classes with position support
+    const classes = [getDirection()];
+    
+    // Handle different numbers of stops
+    if (sortedStops.length === 2) {
       const fromColor = hexToTailwindColor(sortedStops[0].color);
       const toColor = hexToTailwindColor(sortedStops[1].color);
       
-      let direction = "";
-      if (config.type === "linear") {
-        switch (config.direction) {
-          case "0deg": direction = "bg-gradient-to-t"; break;
-          case "45deg": direction = "bg-gradient-to-tr"; break;
-          case "90deg": direction = "bg-gradient-to-r"; break;
-          case "135deg": direction = "bg-gradient-to-br"; break;
-          case "180deg": direction = "bg-gradient-to-b"; break;
-          case "225deg": direction = "bg-gradient-to-bl"; break;
-          case "270deg": direction = "bg-gradient-to-l"; break;
-          case "315deg": direction = "bg-gradient-to-tl"; break;
-          default: direction = "bg-gradient-to-r";
-        }
-      } else {
-        direction = "bg-gradient-radial";
+      // Add from color and position
+      classes.push(`from-${fromColor}`);
+      if (sortedStops[0].position !== 0) {
+        classes.push(`from-${sortedStops[0].position}%`);
       }
       
-      return `${direction} from-${fromColor} to-${toColor}`;
-    } else if (sortedStops.length === 3 && sortedStops[0].position === 0 && sortedStops[2].position === 100) {
-      // Three color gradient
+      // Add to color and position
+      classes.push(`to-${toColor}`);
+      if (sortedStops[1].position !== 100) {
+        classes.push(`to-${sortedStops[1].position}%`);
+      }
+      
+      // Only use standard classes if colors are in Tailwind palette
+      if (!fromColor.includes('[') && !toColor.includes('[')) {
+        return classes.join(' ');
+      }
+    } 
+    else if (sortedStops.length === 3) {
       const fromColor = hexToTailwindColor(sortedStops[0].color);
       const viaColor = hexToTailwindColor(sortedStops[1].color);
       const toColor = hexToTailwindColor(sortedStops[2].color);
       
-      let direction = "bg-gradient-to-r";
-      if (config.type === "linear") {
-        switch (config.direction) {
-          case "0deg": direction = "bg-gradient-to-t"; break;
-          case "45deg": direction = "bg-gradient-to-tr"; break;
-          case "90deg": direction = "bg-gradient-to-r"; break;
-          case "135deg": direction = "bg-gradient-to-br"; break;
-          case "180deg": direction = "bg-gradient-to-b"; break;
-          case "225deg": direction = "bg-gradient-to-bl"; break;
-          case "270deg": direction = "bg-gradient-to-l"; break;
-          case "315deg": direction = "bg-gradient-to-tl"; break;
-        }
+      // Add from color and position
+      classes.push(`from-${fromColor}`);
+      if (sortedStops[0].position !== 0) {
+        classes.push(`from-${sortedStops[0].position}%`);
       }
       
-      return `${direction} from-${fromColor} via-${viaColor} to-${toColor}`;
-    } else {
-      // For complex gradients, use arbitrary value
-      return `[background:${generateCSS()}]`;
+      // Add via color and position
+      classes.push(`via-${viaColor}`);
+      if (sortedStops[1].position !== 50) {
+        classes.push(`via-${sortedStops[1].position}%`);
+      }
+      
+      // Add to color and position
+      classes.push(`to-${toColor}`);
+      if (sortedStops[2].position !== 100) {
+        classes.push(`to-${sortedStops[2].position}%`);
+      }
+      
+      // Only use standard classes if colors are in Tailwind palette
+      if (!fromColor.includes('[') && !viaColor.includes('[') && !toColor.includes('[')) {
+        return classes.join(' ');
+      }
     }
+    else if (sortedStops.length > 3) {
+      // For more than 3 colors, we can still try to use Tailwind syntax with arbitrary values
+      // Use first color as from, last as to, and try to fit middle colors as via
+      const fromColor = hexToTailwindColor(sortedStops[0].color);
+      const toColor = hexToTailwindColor(sortedStops[sortedStops.length - 1].color);
+      
+      classes.push(`from-${fromColor}`);
+      if (sortedStops[0].position !== 0) {
+        classes.push(`from-${sortedStops[0].position}%`);
+      }
+      
+      // Add middle colors as via with arbitrary values if needed
+      const middleStops = sortedStops.slice(1, -1);
+      if (middleStops.length === 1) {
+        const viaColor = hexToTailwindColor(middleStops[0].color);
+        classes.push(`via-${viaColor}`);
+        if (middleStops[0].position !== 50) {
+          classes.push(`via-${middleStops[0].position}%`);
+        }
+      } else if (middleStops.length > 1) {
+        // For multiple middle colors, use arbitrary value for via
+        const viaColors = middleStops.map(stop => `${stop.color} ${stop.position}%`).join(', ');
+        classes.push(`via-[${viaColors}]`);
+      }
+      
+      classes.push(`to-${toColor}`);
+      if (sortedStops[sortedStops.length - 1].position !== 100) {
+        classes.push(`to-${sortedStops[sortedStops.length - 1].position}%`);
+      }
+      
+      // Check if we can use standard classes
+      if (!fromColor.includes('[') && !toColor.includes('[') && middleStops.length <= 1) {
+        const viaColor = middleStops.length > 0 ? hexToTailwindColor(middleStops[0].color) : '';
+        if (middleStops.length === 0 || !viaColor.includes('[')) {
+          return classes.join(' ');
+        }
+      }
+    }
+    
+    // Fallback to arbitrary value for complex gradients
+    const fallbackCSS = generateCSS().replace(/\s+/g, '_');
+    return `bg-[${fallbackCSS}]`;
   };
 
   // Convert hex to closest Tailwind color or return arbitrary value
@@ -166,13 +265,18 @@ const GradientGenerator = () => {
     
     for (const [colorHex, tailwindClass] of Object.entries(tailwindColorMap)) {
       const distance = colorDistance(hex, colorHex);
-      if (distance < minDistance && distance < 50) { // Threshold for "close enough"
+      if (distance < minDistance && distance < 80) { // Increased threshold for better matching
         minDistance = distance;
         closestColor = tailwindClass;
       }
     }
     
-    return closestColor;
+    // If we found a reasonably close match, use it
+    if (minDistance < 80) {
+      return closestColor;
+    }
+    
+    return `[${hex}]`;
   };
 
   // Calculate color distance (simplified RGB distance)
@@ -385,6 +489,41 @@ const GradientGenerator = () => {
         { id: "3", color: "#EDDD53", position: 100 }
       ]
     });
+  };
+
+  // Simplify gradient to 3 colors for better Tailwind compatibility
+  const simplifyGradient = () => {
+    const sortedStops = [...config.stops].sort((a, b) => a.position - b.position);
+    
+    if (sortedStops.length <= 3) {
+      // Already simple, just adjust positions
+      const newStops = sortedStops.map((stop, index) => ({
+        ...stop,
+        position: index === 0 ? 0 : index === sortedStops.length - 1 ? 100 : 50
+      }));
+      setConfig(prev => ({ ...prev, stops: newStops }));
+      toast.success("Gradient positions adjusted to 0%, 50%, 100%!");
+    } else {
+      // Reduce to 3 colors: first, middle, last
+      const firstStop = sortedStops[0];
+      const lastStop = sortedStops[sortedStops.length - 1];
+      const middleIndex = Math.floor(sortedStops.length / 2);
+      const middleStop = sortedStops[middleIndex];
+      
+      const newStops = [
+        { ...firstStop, position: 0 },
+        { ...middleStop, position: 50 },
+        { ...lastStop, position: 100 }
+      ];
+      
+      setConfig(prev => ({
+        ...prev,
+        stops: newStops
+      }));
+      
+      // Show what colors were selected
+      toast.success(`Simplified to 3 colors: ${firstStop.color}, ${middleStop.color}, ${lastStop.color}`);
+    }
   };
 
   const cssGradient = generateCSS();
@@ -635,15 +774,25 @@ const GradientGenerator = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <Button onClick={generateRandomGradient} variant="outline" className="flex-1">
-                    <Shuffle className="w-4 h-4 mr-2" />
-                    Random
-                  </Button>
-                  <Button onClick={resetGradient} variant="outline" className="flex-1">
-                    <RotateCcw className="w-4 h-4 mr-2" />
-                    Reset
-                  </Button>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Button onClick={generateRandomGradient} variant="outline" className="flex-1">
+                      <Shuffle className="w-4 h-4 mr-2" />
+                      Random
+                    </Button>
+                    <Button onClick={resetGradient} variant="outline" className="flex-1">
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Reset
+                    </Button>
+                  </div>
+                  {config.stops.length > 3 && (
+                    <Button onClick={simplifyGradient} variant="outline" className="w-full">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      Simplify for Tailwind
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -698,8 +847,19 @@ const GradientGenerator = () => {
                   </TabsContent>
                   
                   <TabsContent value="tailwind" className="space-y-4">
+                    {/* Version Selector */}
                     <div className="space-y-2">
-                      <Label>Tailwind Classes</Label>
+                      <Label>Tailwind CSS Version</Label>
+                      <Tabs value={tailwindVersion} onValueChange={(value: string) => setTailwindVersion(value as "v3" | "v4")}>
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="v3">v3 (Current)</TabsTrigger>
+                          <TabsTrigger value="v4">v4 (Latest)</TabsTrigger>
+                        </TabsList>
+                      </Tabs>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Tailwind CSS {tailwindVersion.toUpperCase()} Classes</Label>
                       <div className="relative">
                         <pre className="p-3 bg-muted rounded text-sm overflow-x-auto border">
                           <code>{tailwindGradient}</code>
@@ -730,11 +890,35 @@ const GradientGenerator = () => {
                       </div>
                     </div>
                     
-                    {tailwindGradient.includes("[background:") && (
+                    {tailwindVersion === "v4" ? (
+                      <div className="p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded">
+                        <p className="text-sm text-blue-800 dark:text-blue-200">
+                          <strong>Tailwind CSS v4:</strong> Uses new gradient syntax (bg-linear-*, bg-radial-*). 
+                          This is the latest version with improved gradient utilities.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded">
+                        <p className="text-sm text-green-800 dark:text-green-200">
+                          <strong>Tailwind CSS v3:</strong> Uses traditional gradient syntax (bg-gradient-*). 
+                          This is the stable version currently in wide use.
+                        </p>
+                      </div>
+                    )}
+                    
+                    {tailwindGradient.includes("bg-[") && (
                       <div className="p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded">
                         <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                          <strong>Note:</strong> Complex gradients use arbitrary values. 
-                          For cleaner Tailwind code, use 2-3 color gradients with standard positions.
+                          <strong>Complex Gradient:</strong> Using arbitrary value because:
+                          <br />• Colors not in Tailwind's standard palette, or
+                          <br />• More than 3 color stops (Tailwind supports max 3: from/via/to)
+                          <br /><br />
+                          <strong>Note:</strong> Tailwind CSS supports position syntax like:
+                          <br />• <code>from-blue-500 from-10%</code>
+                          <br />• <code>via-red-500 via-30%</code> 
+                          <br />• <code>to-green-500 to-90%</code>
+                          <br /><br />
+                          <strong>Arbitrary Value Format:</strong> <code>bg-[linear-gradient(...)]</code>
                         </p>
                       </div>
                     )}
