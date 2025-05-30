@@ -91,7 +91,7 @@ export default async function RootLayout({
 	return (
 		<html lang={locale} suppressHydrationWarning>
 			{/* 使用 Next.js Script 组件加载 Ezoic 脚本 */}
-			<Script src="https://cmp.gatekeeperconsent.com/min.js" strategy="afterInteractive" data-cfasync="false" />
+			{/* <Script src="https://cmp.gatekeeperconsent.com/min.js" strategy="afterInteractive" data-cfasync="false" />
 			<Script src="https://the.gatekeeperconsent.com/cmp.min.js" strategy="afterInteractive" data-cfasync="false" />
 			<Script src="//www.ezojs.com/ezoic/sa.min.js" strategy="afterInteractive" />
 			<Script id="ezoic-init" strategy="afterInteractive">
@@ -99,7 +99,7 @@ export default async function RootLayout({
 				window.ezstandalone = window.ezstandalone || { };
 				ezstandalone.cmd = ezstandalone.cmd || [];
 				`}
-			</Script>
+			</Script> */}
 
 			<body
 				className={clsx("bg-background text-foreground", Opensans.variable, inter.variable)}
