@@ -150,7 +150,7 @@ class FFMPEG {
 					"text/javascript",
 				),
 				wasmURL: await toBlobURL(
-					"https://static.limgx.com/ffmpeg-core.wasm",
+					"https://static.limgx.com/ffmpeg-core-12.10.wasm",
 					"application/wasm",
 				),
 			});
@@ -192,20 +192,26 @@ class FFMPEG {
 			if (filesToDelete.length > 0) {
 				console.log(`[ffmpeg] 清理 ${filesToDelete.length} 个临时文件...`);
 				
-				await Promise.all(
-					filesToDelete.map(async (file) => {
-						try {
-							await this.ffmpeg!.deleteFile(file.name);
-						} catch (error) {
-							// 静默忽略删除失败的文件，避免过多警告信息
-						}
-					})
-				);
+				// 串行删除文件，避免并发删除导致的FS错误
+				for (const file of filesToDelete) {
+					try {
+						await this.ffmpeg.deleteFile(file.name);
+					} catch (error) {
+						// 静默忽略删除失败的文件，避免过多警告信息
+						console.debug(`[ffmpeg] 删除文件 ${file.name} 失败:`, error);
+					}
+				}
 				
 				console.log('[ffmpeg] 内存清理完成');
 			}
 		} catch (error) {
 			console.warn('[ffmpeg] 内存清理失败:', error);
+			// 如果清理失败，尝试重置实例
+			if (error instanceof Error && error.message.includes('FS error')) {
+				console.warn('[ffmpeg] 检测到FS错误，将在下次使用时重置实例');
+				this.isLoaded = false;
+				this.loadingPromise = null;
+			}
 		}
 	}
 
@@ -414,13 +420,16 @@ class FFMPEG {
 		await this.load();
 		if (!this.ffmpeg) throw new Error("ffmpeg 未初始化");
 
+		// 使用专门的WebP动画编解码器
 		const args = [
 			'-framerate', frameRate.toString(),
 			'-i', framePattern,
-			'-c:v', 'libwebp',
+			'-c:v', 'libwebp_anim', // 使用专门的WebP动画编解码器
 			'-quality', quality.toString(),
 			'-lossless', '0',
 			'-loop', loop.toString(),
+			'-preset', 'default',
+			'-method', '6',
 			outputName
 		];
 
@@ -461,6 +470,13 @@ class FFMPEG {
 		if (!this.ffmpeg) throw new Error("ffmpeg 未初始化");
 		if (images.length === 0) throw new Error("至少需要一张图片");
 		
+		// 先清理文件系统，确保干净的环境
+		try {
+			await this.cleanupMemory();
+		} catch (error) {
+			console.warn('[动画合成] 预清理失败，继续执行:', error);
+		}
+		
 		// 按文件名排序 - 提取文件名中的数字进行自然排序
 		const sortedImages = [...images].sort((a, b) => {
 			// 提取文件名中的数字部分
@@ -489,31 +505,65 @@ class FFMPEG {
 		
 		// 定义变量用于清理
 		const fileExtensions: string[] = [];
-		let inputPattern: string = ""; // 声明在这里确保finally块能访问
+		const createdFiles: string[] = []; // 跟踪创建的文件
+		let inputPattern: string = "";
 		
 		try {
 			// 写入所有图片文件（使用排序后的顺序，保持原始格式）
 			for (let i = 0; i < sortedImages.length; i++) {
 				const file = sortedImages[i];
-				const arrayBuffer = await file.arrayBuffer();
-				const fileData = new Uint8Array(arrayBuffer);
 				
-				// 获取原始文件扩展名
-				const originalExt = file.name.split('.').pop()?.toLowerCase() || 'png';
-				const fileName = `frame_${String(i).padStart(3, '0')}.${originalExt}`;
-				fileExtensions.push(originalExt);
-				
-				await this.ffmpeg.writeFile(fileName, fileData);
-				console.log(`[动画合成] 写入帧文件: ${fileName} (${file.name}), 格式: ${originalExt}, 大小: ${fileData.length} bytes`);
+				try {
+					const arrayBuffer = await file.arrayBuffer();
+					const fileData = new Uint8Array(arrayBuffer);
+					
+					// 验证文件数据
+					if (!fileData || fileData.length === 0) {
+						throw new Error(`文件 ${file.name} 数据为空`);
+					}
+					
+					// 获取原始文件扩展名
+					const originalExt = file.name.split('.').pop()?.toLowerCase() || 'png';
+					const fileName = `frame_${String(i).padStart(3, '0')}.${originalExt}`;
+					fileExtensions.push(originalExt);
+					
+					// 检查文件是否已存在，如果存在则先删除
+					try {
+						const existingFiles = await this.ffmpeg.listDir('/');
+						const fileExists = existingFiles.some(f => f.name === fileName);
+						if (fileExists) {
+							await this.ffmpeg.deleteFile(fileName);
+							console.log(`[动画合成] 删除已存在的文件: ${fileName}`);
+						}
+					} catch (error) {
+						// 忽略检查/删除失败
+					}
+					
+					await this.ffmpeg.writeFile(fileName, fileData);
+					createdFiles.push(fileName);
+					console.log(`[动画合成] 写入帧文件: ${fileName} (${file.name}), 格式: ${originalExt}, 大小: ${fileData.length} bytes`);
+					
+				} catch (error) {
+					console.error(`[动画合成] 处理文件 ${file.name} 失败:`, error);
+					throw new Error(`文件 ${file.name} 处理失败: ${error instanceof Error ? error.message : '未知错误'}`);
+				}
 			}
 			
 			console.log(`[动画合成] 所有帧文件写入完成，共 ${sortedImages.length} 帧`);
 			console.log(`[动画合成] 文件格式分布:`, fileExtensions);
 			
 			// 验证写入的文件
-			const writtenFiles = await this.ffmpeg.listDir('/');
-			const frameFiles = writtenFiles.filter(f => f.name.startsWith('frame_')).sort();
-			console.log(`[动画合成] 已写入的帧文件:`, frameFiles.map(f => f.name));
+			try {
+				const writtenFiles = await this.ffmpeg.listDir('/');
+				const frameFiles = writtenFiles.filter(f => f.name.startsWith('frame_')).sort();
+				console.log(`[动画合成] 已写入的帧文件:`, frameFiles.map(f => f.name));
+				
+				if (frameFiles.length !== sortedImages.length) {
+					throw new Error(`文件写入不完整：期望 ${sortedImages.length} 个文件，实际 ${frameFiles.length} 个`);
+				}
+			} catch (error) {
+				console.warn('[动画合成] 文件验证失败:', error);
+			}
 			
 			// 获取输出格式
 			const ext = outputName.split(".").pop()?.toLowerCase() || "webp";
@@ -538,14 +588,21 @@ class FFMPEG {
 						try {
 							await this.ffmpeg.exec([
 								'-i', originalFileName,
+								'-y', // 覆盖输出文件
 								pngFileName
 							]);
 							
 							// 删除原始文件
 							await this.ffmpeg.deleteFile(originalFileName);
+							// 更新创建文件列表
+							const index = createdFiles.indexOf(originalFileName);
+							if (index > -1) {
+								createdFiles[index] = pngFileName;
+							}
 							console.log(`[动画合成] 转换 ${originalFileName} -> ${pngFileName}`);
 						} catch (error) {
 							console.warn(`[动画合成] 转换文件 ${originalFileName} 失败:`, error);
+							throw new Error(`格式转换失败: ${error instanceof Error ? error.message : '未知错误'}`);
 						}
 					}
 				}
@@ -561,48 +618,86 @@ class FFMPEG {
 			
 			console.log(`[动画合成] 使用输入模式: ${inputPattern}`);
 			
+			// 确保输出文件不存在
+			try {
+				const existingFiles = await this.ffmpeg.listDir('/');
+				const outputExists = existingFiles.some(f => f.name === outputName);
+				if (outputExists) {
+					await this.ffmpeg.deleteFile(outputName);
+					console.log(`[动画合成] 删除已存在的输出文件: ${outputName}`);
+				}
+			} catch (error) {
+				// 忽略检查/删除失败
+			}
+			
 			if (ext === "webp") {
-				// WebP 动画 - 使用传统序列模式（FFmpeg.wasm不支持glob）
+				// WebP 动画 - 使用专门的WebP动画编解码器
 				const args = [
 					"-framerate", String(frameRate),
-					"-i", inputPattern.includes('*') ? "frame_%03d.png" : inputPattern,
-					"-c:v", "libwebp",
+					"-i", inputPattern,
+					"-c:v", "libwebp_anim", // 使用专门的WebP动画编解码器
 					"-quality", String(quality),
 					"-lossless", "0",
 					"-loop", "0",
-					"-fps_mode", "cfr", // 替代已弃用的-vsync
-					"-r", String(frameRate), // 明确指定输出帧率
-					"-an", // 移除音频流
+					"-preset", "default",
+					"-method", "6",
+					"-y", // 覆盖输出文件
 					outputName
 				];
 				
-				console.log(`[动画合成] WebP命令: ffmpeg ${args.join(' ')}`);
+				console.log(`[动画合成] WebP动画命令: ffmpeg ${args.join(' ')}`);
 				
 				try {
 					await this.ffmpeg.exec(args);
-				} catch (error) {
-					console.warn(`[动画合成] 序列模式失败，尝试简化方法:`, error);
 					
-					// 备用方法：最简化的WebP动画
-					const simpleArgs = [
+					// 立即检查文件是否生成
+					const checkFiles = await this.ffmpeg.listDir('/');
+					const outputExists = checkFiles.some(f => f.name === outputName);
+					console.log(`[动画合成] WebP动画执行后文件检查: ${outputExists ? '成功' : '失败'}`);
+					
+					if (!outputExists) {
+						throw new Error('WebP动画方法执行后文件未生成');
+					}
+				} catch (error) {
+					console.warn(`[动画合成] WebP动画方法失败:`, error);
+					
+					// 备用方法：使用libwebp编解码器
+					const fallbackArgs = [
 						"-framerate", String(frameRate),
-						"-i", "frame_%03d.*", // 使用通配符匹配任何扩展名
-						"-c:v", "libwebp",
+						"-i", inputPattern,
+						"-c:v", "libwebp", // 备用编解码器
 						"-quality", String(quality),
 						"-lossless", "0",
 						"-loop", "0",
+						"-y", // 覆盖输出文件
 						outputName
 					];
 					
-					console.log(`[动画合成] WebP简化命令: ffmpeg ${simpleArgs.join(' ')}`);
-					await this.ffmpeg.exec(simpleArgs);
+					console.log(`[动画合成] WebP备用命令: ffmpeg ${fallbackArgs.join(' ')}`);
+					
+					try {
+						await this.ffmpeg.exec(fallbackArgs);
+						
+						// 再次检查文件是否生成
+						const checkFiles2 = await this.ffmpeg.listDir('/');
+						const outputExists2 = checkFiles2.some(f => f.name === outputName);
+						console.log(`[动画合成] WebP备用执行后文件检查: ${outputExists2 ? '成功' : '失败'}`);
+						
+						if (!outputExists2) {
+							throw new Error('WebP备用方法执行后文件仍未生成');
+						}
+					} catch (fallbackError) {
+						console.error(`[动画合成] WebP备用方法也失败:`, fallbackError);
+						throw new Error(`WebP动画生成失败: ${fallbackError instanceof Error ? fallbackError.message : '未知错误'}`);
+					}
 				}
 			} else if (ext === "gif") {
-				// 先生成调色板 - 使用传统序列模式
+				// 先生成调色板
 				const paletteArgs = [
 					"-framerate", String(frameRate),
-					"-i", inputPattern.includes('*') ? "frame_%03d.png" : inputPattern,
+					"-i", inputPattern,
 					"-vf", "palettegen",
+					"-y", // 覆盖输出文件
 					"palette.png"
 				];
 				
@@ -610,29 +705,29 @@ class FFMPEG {
 				
 				try {
 					await this.ffmpeg.exec(paletteArgs);
+					createdFiles.push("palette.png");
+					
+					// 检查调色板是否生成
+					const paletteFiles = await this.ffmpeg.listDir('/');
+					const paletteExists = paletteFiles.some(f => f.name === "palette.png");
+					console.log(`[动画合成] 调色板生成检查: ${paletteExists ? '成功' : '失败'}`);
+					
+					if (!paletteExists) {
+						throw new Error('调色板文件未生成');
+					}
 				} catch (error) {
-					console.warn(`[动画合成] GIF调色板失败，尝试通配符模式:`, error);
-					
-					// 备用调色板生成
-					const fallbackPaletteArgs = [
-						"-framerate", String(frameRate),
-						"-i", "frame_%03d.*",
-						"-vf", "palettegen",
-						"palette.png"
-					];
-					
-					console.log(`[动画合成] GIF调色板备用命令: ffmpeg ${fallbackPaletteArgs.join(' ')}`);
-					await this.ffmpeg.exec(fallbackPaletteArgs);
+					console.warn(`[动画合成] GIF调色板失败:`, error);
+					throw new Error(`GIF调色板生成失败: ${error instanceof Error ? error.message : '未知错误'}`);
 				}
 				
-				// 生成 GIF - 使用基础滤镜
+				// 生成 GIF
 				const gifArgs = [
 					"-framerate", String(frameRate),
-					"-i", inputPattern.includes('*') ? "frame_%03d.png" : inputPattern,
+					"-i", inputPattern,
 					"-i", "palette.png",
 					"-lavfi", "paletteuse",
-					"-r", String(frameRate), // 明确指定输出帧率
 					"-loop", "0",
+					"-y", // 覆盖输出文件
 					outputName
 				];
 				
@@ -640,41 +735,85 @@ class FFMPEG {
 				
 				try {
 					await this.ffmpeg.exec(gifArgs);
+					
+					// 检查GIF是否生成
+					const gifFiles = await this.ffmpeg.listDir('/');
+					const gifExists = gifFiles.some(f => f.name === outputName);
+					console.log(`[动画合成] GIF生成检查: ${gifExists ? '成功' : '失败'}`);
+					
+					if (!gifExists) {
+						throw new Error('GIF标准方法执行后文件未生成');
+					}
 				} catch (error) {
-					console.warn(`[动画合成] GIF标准方法失败，尝试最简化方法:`, error);
+					console.warn(`[动画合成] GIF标准方法失败:`, error);
 					
 					// 最简化的GIF生成方法
 					const simpleGifArgs = [
 						"-framerate", String(frameRate),
-						"-i", "frame_%03d.*",
+						"-i", inputPattern,
 						"-vf", `fps=${frameRate}`,
-						"-loop", "0",
+						"-y", // 覆盖输出文件
 						outputName
 					];
 					
 					console.log(`[动画合成] GIF最简化命令: ffmpeg ${simpleGifArgs.join(' ')}`);
-					await this.ffmpeg.exec(simpleGifArgs);
+					
+					try {
+						await this.ffmpeg.exec(simpleGifArgs);
+						
+						// 最后检查GIF是否生成
+						const gifFiles2 = await this.ffmpeg.listDir('/');
+						const gifExists2 = gifFiles2.some(f => f.name === outputName);
+						console.log(`[动画合成] GIF简化生成检查: ${gifExists2 ? '成功' : '失败'}`);
+						
+						if (!gifExists2) {
+							throw new Error('GIF简化方法执行后文件仍未生成');
+						}
+					} catch (simpleError) {
+						console.error(`[动画合成] GIF简化方法也失败:`, simpleError);
+						throw new Error(`GIF动画生成失败: ${simpleError instanceof Error ? simpleError.message : '未知错误'}`);
+					}
 				}
 			} else {
 				throw new Error("仅支持WebP和GIF格式");
 			}
 			
-			return (await this.ffmpeg.readFile(outputName)) as Uint8Array;
+			// 验证输出文件是否生成（最终检查）
+			try {
+				const outputFiles = await this.ffmpeg.listDir('/');
+				const outputExists = outputFiles.some(f => f.name === outputName);
+				console.log(`[动画合成] 最终文件检查: ${outputExists ? '成功' : '失败'}`);
+				
+				if (!outputExists) {
+					// 列出当前所有文件用于调试
+					console.error('[动画合成] 当前文件系统内容:', outputFiles.map(f => f.name));
+					throw new Error(`输出文件 ${outputName} 未生成 - 所有方法都失败了`);
+				}
+			} catch (error) {
+				console.error('[动画合成] 输出文件验证失败:', error);
+				throw new Error(`动画合成失败：${error instanceof Error ? error.message : '输出文件未生成'}`);
+			}
+			
+			const result = (await this.ffmpeg.readFile(outputName)) as Uint8Array;
+			
+			// 验证结果
+			if (!result || result.length === 0) {
+				throw new Error('动画合成失败：输出文件为空');
+			}
+			
+			console.log(`[动画合成] 成功生成动画，大小: ${(result.length / 1024).toFixed(1)} KB`);
+			return result;
+			
 		} catch (error) {
 			console.error("动画创建失败:", error);
 			throw error;
 		} finally {
 			// 清理我们创建的临时文件
 			try {
-				// 删除帧文件 - 根据最终格式决定
-				const finalPattern = inputPattern.includes('png') ? 'png' : fileExtensions;
+				console.log(`[动画合成] 开始清理 ${createdFiles.length} 个临时文件...`);
 				
-				for (let i = 0; i < sortedImages.length; i++) {
-					// 如果进行了格式转换，清理PNG文件；否则清理原始格式文件
-					const fileName = typeof finalPattern === 'string' 
-						? `frame_${String(i).padStart(3, '0')}.png`
-						: `frame_${String(i).padStart(3, '0')}.${fileExtensions[i]}`;
-					
+				// 清理所有创建的文件
+				for (const fileName of createdFiles) {
 					try {
 						await this.ffmpeg.deleteFile(fileName);
 					} catch (e) {
@@ -895,6 +1034,35 @@ class FFMPEG {
 			window.gc();
 		}
 		console.log('[ffmpeg] 内存清理完成');
+	}
+
+	/**
+	 * 测试FFmpeg是否正常工作
+	 */
+	async testFFmpeg(): Promise<boolean> {
+		try {
+			await this.load();
+			if (!this.ffmpeg) return false;
+			
+			// 创建一个简单的测试文件
+			const testData = new Uint8Array([0xFF, 0xD8, 0xFF, 0xE0]); // JPEG文件头
+			await this.ffmpeg.writeFile('test.jpg', testData);
+			
+			// 列出文件
+			const files = await this.ffmpeg.listDir('/');
+			const testFileExists = files.some(f => f.name === 'test.jpg');
+			
+			// 清理测试文件
+			if (testFileExists) {
+				await this.ffmpeg.deleteFile('test.jpg');
+			}
+			
+			console.log('[ffmpeg] 测试结果:', testFileExists ? '正常' : '异常');
+			return testFileExists;
+		} catch (error) {
+			console.error('[ffmpeg] 测试失败:', error);
+			return false;
+		}
 	}
 }
 

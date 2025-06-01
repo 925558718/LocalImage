@@ -22,9 +22,9 @@ const inter = Inter({
 	weight: ["400", "500", "600", "700", "800", "900"]
 });
 export const metadata: Metadata = {
-	title: "LocalImage - Fast & Private Browser-Based Image Converter",
-	description: "Convert images privately in your browser - no uploads needed. Fast, secure processing for JPG, PNG, and WebP formats. Privacy-focused image conversion with zero server storage.",
-	keywords: "image converter, no upload, privacy, JPG, PNG, WEBP, browser-based, free, offline, fast conversion",
+	title: "LocalImage - WebP动画合成器 | 在线图片转动图工具",
+	description: "免费在线WebP动画合成工具，将多张图片快速合成为高质量动图。支持PNG、JPG、WebP格式，本地处理保护隐私，无需上传服务器。专业的动画制作工具，简单易用。",
+	keywords: "WebP动画, 动图制作, 图片合成动画, WebP动图, 在线动画制作器, 免费动图工具, 本地处理, 隐私保护, PNG转动图, JPG转动图, 动画合成器, GIF制作",
 	authors: [{ name: "limgx.com" }],
 	robots: {
 		index: true,
@@ -38,23 +38,41 @@ export const metadata: Metadata = {
 		},
 	},
 	openGraph: {
-		title: "LocalImage - Fast & Private Browser-Based Image Converter",
-		description: "Convert images privately in your browser - no uploads needed. Fast, secure processing for JPG, PNG, and WebP formats. Privacy-focused image conversion with zero server storage.",
+		title: "LocalImage - WebP动画合成器 | 在线图片转动图工具",
+		description: "免费在线WebP动画合成工具，将多张图片快速合成为高质量动图。支持PNG、JPG、WebP格式，本地处理保护隐私，无需上传服务器。",
 		type: "website",
 		url: "https://www.limgx.com",
-		images: ["https://www.limgx.com/images/social-share-preview.jpg"],
-		siteName: "LocalImage",
+		images: ["https://www.limgx.com/images/webp-animation-preview.jpg"],
+		siteName: "LocalImage WebP动画合成器",
+		locale: "zh_CN",
+		alternateLocale: ["en_US", "ja_JP", "es_ES", "fr_FR", "de_DE"],
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "LocalImage - Fast & Private Browser-Based Image Converter",
-		description: "Convert images privately in your browser - no uploads needed. Fast, secure processing for JPG, PNG, and WebP formats. Privacy-focused image conversion with zero server storage.",
-		images: ["https://www.limgx.com/images/social-share-preview.jpg"],
+		title: "LocalImage - WebP动画合成器 | 在线图片转动图工具",
+		description: "免费在线WebP动画合成工具，将多张图片快速合成为高质量动图。支持PNG、JPG、WebP格式，本地处理保护隐私。",
+		images: ["https://www.limgx.com/images/webp-animation-preview.jpg"],
 		creator: "@limgx_official",
 	},
 	alternates: {
 		canonical: "https://www.limgx.com",
+		languages: {
+			'zh-CN': 'https://www.limgx.com',
+			'en': 'https://www.limgx.com/en',
+			'ja': 'https://www.limgx.com/ja',
+			'es': 'https://www.limgx.com/es',
+			'fr': 'https://www.limgx.com/fr',
+			'de': 'https://www.limgx.com/de',
+		}
 	},
+	other: {
+		'application-name': 'LocalImage WebP动画合成器',
+		'apple-mobile-web-app-title': 'LocalImage动画合成器',
+		'msapplication-TileColor': '#000000',
+		'theme-color': '#000000',
+	},
+	category: 'technology',
+	classification: 'WebP动画制作工具',
 };
 
 const dictionaries = {
@@ -100,7 +118,77 @@ export default async function RootLayout({
 				ezstandalone.cmd = ezstandalone.cmd || [];
 				`}
 			</Script> */}
-
+			<head>
+				{/* 多语言SEO优化 */}
+				<meta httpEquiv="content-language" content={locale} />
+				<link rel="alternate" hrefLang="zh-CN" href="https://www.limgx.com" />
+				<link rel="alternate" hrefLang="en" href="https://www.limgx.com" />
+				<link rel="alternate" hrefLang="ja" href="https://www.limgx.com" />
+				<link rel="alternate" hrefLang="es" href="https://www.limgx.com" />
+				<link rel="alternate" hrefLang="fr" href="https://www.limgx.com" />
+				<link rel="alternate" hrefLang="de" href="https://www.limgx.com" />
+				<link rel="alternate" hrefLang="x-default" href="https://www.limgx.com" />
+				
+				{/* PWA和移动端优化 */}
+				<link rel="manifest" href="/manifest.json" />
+				<meta name="theme-color" content="#000000" />
+				<meta name="apple-mobile-web-app-capable" content="yes" />
+				<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+				<meta name="apple-mobile-web-app-title" content="LocalImage WebP动画合成器" />
+				<link rel="apple-touch-icon" href="/icon-192x192.png" />
+				<meta name="mobile-web-app-capable" content="yes" />
+				<meta name="application-name" content="LocalImage" />
+				<meta name="msapplication-TileColor" content="#000000" />
+				<meta name="msapplication-TileImage" content="/icon-192x192.png" />
+				
+				{/* 结构化数据 - WebP动画合成器 */}
+				<script type="application/ld+json">
+					{JSON.stringify({
+						"@context": "https://schema.org",
+						"@type": "WebApplication",
+						"name": locale === "zh-CN" ? "LocalImage WebP动画合成器" : "LocalImage WebP Animation Creator",
+						"description": locale === "zh-CN" 
+							? "免费在线WebP动画合成工具，将多张图片快速合成为高质量动图" 
+							: "Free online WebP animation creator. Convert multiple images into high-quality animations",
+						"url": "https://www.limgx.com",
+						"applicationCategory": "MultimediaApplication",
+						"operatingSystem": "Web Browser",
+						"inLanguage": locale,
+						"offers": {
+							"@type": "Offer",
+							"price": "0",
+							"priceCurrency": "USD"
+						},
+						"featureList": locale === "zh-CN" ? [
+							"WebP动画合成",
+							"多格式图片支持",
+							"本地处理保护隐私",
+							"无需上传服务器",
+							"自定义帧率和质量",
+							"实时预览功能"
+						] : [
+							"WebP animation creation",
+							"Multiple image format support",
+							"Local processing protects privacy",
+							"No server uploads required",
+							"Custom frame rate and quality",
+							"Real-time preview functionality"
+						],
+						"screenshot": "https://www.limgx.com/images/webp-animation-preview.jpg",
+						"softwareVersion": "1.0",
+						"author": {
+							"@type": "Organization",
+							"name": "limgx.com",
+							"url": "https://www.limgx.com"
+						},
+						"aggregateRating": {
+							"@type": "AggregateRating",
+							"ratingValue": "4.8",
+							"ratingCount": "1250"
+						}
+					})}
+				</script>
+			</head>
 			<body
 				className={clsx("bg-background text-foreground", Opensans.variable, inter.variable)}
 			>

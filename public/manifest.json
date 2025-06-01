@@ -1,0 +1,35 @@
+{
+  "name": "LocalImage WebP动画合成器",
+  "short_name": "LocalImage",
+  "description": "免费在线WebP动画合成工具，将多张图片快速合成为高质量动图",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "categories": ["photo", "graphics", "utilities"],
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/webp-animation-preview.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "WebP动画合成界面"
+    }
+  ]
+} 

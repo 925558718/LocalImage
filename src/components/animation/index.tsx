@@ -118,7 +118,7 @@ function AnimationComposer() {
 		
 		setLoading(true);
 		setProgress(0);
-		setCurrentFileName("正在合成动画...");
+		setCurrentFileName("正在初始化...");
 		stopPreview();
 		
 		try {
@@ -126,6 +126,15 @@ function AnimationComposer() {
 				throw new Error('FFmpeg实例未初始化，请刷新页面重试');
 			}
 
+			// 先测试FFmpeg是否正常工作
+			setCurrentFileName("正在测试FFmpeg...");
+			const isFFmpegWorking = await ffm_ins.testFFmpeg();
+			if (!isFFmpegWorking) {
+				throw new Error('FFmpeg测试失败，请刷新页面重试');
+			}
+			console.log('[动画合成] FFmpeg测试通过');
+
+			setCurrentFileName("正在合成动画...");
 			const outputName = `animation_${Date.now()}.${format}`;
 			
 			// 模拟进度更新
