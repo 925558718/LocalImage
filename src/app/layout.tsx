@@ -22,9 +22,9 @@ const inter = Inter({
 	weight: ["400", "500", "600", "700", "800", "900"]
 });
 export const metadata: Metadata = {
-	title: "LocalImage - WebP动画合成器 | 在线图片转动图工具",
-	description: "免费在线WebP动画合成工具，将多张图片快速合成为高质量动图。支持PNG、JPG、WebP格式，本地处理保护隐私，无需上传服务器。专业的动画制作工具，简单易用。",
-	keywords: "WebP动画, 动图制作, 图片合成动画, WebP动图, 在线动画制作器, 免费动图工具, 本地处理, 隐私保护, PNG转动图, JPG转动图, 动画合成器, GIF制作",
+	title: "LocalImage - WebP Animation Creator | Online Image to Animation Tool",
+	description: "Free online WebP animation creator tool. Convert multiple images into high-quality animations. Supports PNG, JPG, WebP formats with local processing to protect privacy. No server uploads required.",
+	keywords: "WebP animation, animation creator, image to animation, WebP animation maker, online animation tool, free animation creator, local processing, privacy protection, PNG to animation, JPG to animation, animation composer, GIF maker",
 	authors: [{ name: "limgx.com" }],
 	robots: {
 		index: true,
@@ -38,19 +38,19 @@ export const metadata: Metadata = {
 		},
 	},
 	openGraph: {
-		title: "LocalImage - WebP动画合成器 | 在线图片转动图工具",
-		description: "免费在线WebP动画合成工具，将多张图片快速合成为高质量动图。支持PNG、JPG、WebP格式，本地处理保护隐私，无需上传服务器。",
+		title: "LocalImage - WebP Animation Creator | Online Image to Animation Tool",
+		description: "Free online WebP animation creator tool. Convert multiple images into high-quality animations. Supports PNG, JPG, WebP formats with local processing to protect privacy.",
 		type: "website",
 		url: "https://www.limgx.com",
 		images: ["https://www.limgx.com/images/webp-animation-preview.jpg"],
-		siteName: "LocalImage WebP动画合成器",
-		locale: "zh_CN",
-		alternateLocale: ["en_US", "ja_JP", "es_ES", "fr_FR", "de_DE"],
+		siteName: "LocalImage WebP Animation Creator",
+		locale: "en_US",
+		alternateLocale: ["zh_CN", "ja_JP", "es_ES", "fr_FR", "de_DE"],
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "LocalImage - WebP动画合成器 | 在线图片转动图工具",
-		description: "免费在线WebP动画合成工具，将多张图片快速合成为高质量动图。支持PNG、JPG、WebP格式，本地处理保护隐私。",
+		title: "LocalImage - WebP Animation Creator | Online Image to Animation Tool",
+		description: "Free online WebP animation creator tool. Convert multiple images into high-quality animations. Supports PNG, JPG, WebP formats with local processing.",
 		images: ["https://www.limgx.com/images/webp-animation-preview.jpg"],
 		creator: "@limgx_official",
 	},
@@ -66,13 +66,13 @@ export const metadata: Metadata = {
 		}
 	},
 	other: {
-		'application-name': 'LocalImage WebP动画合成器',
-		'apple-mobile-web-app-title': 'LocalImage动画合成器',
+		'application-name': 'LocalImage WebP Animation Creator',
+		'apple-mobile-web-app-title': 'LocalImage Animation Creator',
 		'msapplication-TileColor': '#000000',
 		'theme-color': '#000000',
 	},
 	category: 'technology',
-	classification: 'WebP动画制作工具',
+	classification: 'WebP Animation Creation Tool',
 };
 
 const dictionaries = {
@@ -134,7 +134,7 @@ export default async function RootLayout({
 				<meta name="theme-color" content="#000000" />
 				<meta name="apple-mobile-web-app-capable" content="yes" />
 				<meta name="apple-mobile-web-app-status-bar-style" content="default" />
-				<meta name="apple-mobile-web-app-title" content="LocalImage WebP动画合成器" />
+				<meta name="apple-mobile-web-app-title" content="LocalImage WebP Animation Creator" />
 				<link rel="apple-touch-icon" href="/icon-192x192.png" />
 				<meta name="mobile-web-app-capable" content="yes" />
 				<meta name="application-name" content="LocalImage" />

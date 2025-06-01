@@ -1,14 +1,14 @@
 {
-  "name": "LocalImage WebP动画合成器",
+  "name": "LocalImage WebP Animation Creator",
   "short_name": "LocalImage",
-  "description": "免费在线WebP动画合成工具，将多张图片快速合成为高质量动图",
+  "description": "Free online WebP animation creator tool. Convert multiple images into high-quality animations",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "orientation": "portrait-primary",
   "categories": ["photo", "graphics", "utilities"],
-  "lang": "zh-CN",
+  "lang": "en",
   "icons": [
     {
       "src": "/icon-192x192.png",
@@ -29,7 +29,7 @@
       "sizes": "1280x720",
       "type": "image/jpeg",
       "form_factor": "wide",
-      "label": "WebP动画合成界面"
+      "label": "WebP Animation Creator Interface"
     }
   ]
 } 
