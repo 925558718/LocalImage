@@ -146,7 +146,7 @@ class FFMPEG {
 		this.loadingPromise = (async () => {
 			await (this.ffmpeg as FFmpeg).load({
 				coreURL: await toBlobURL(
-					"/js/ffmpeg-core.js",
+					"https://static.limgx.com/ffmpeg-core.js",
 					"text/javascript",
 				),
 				wasmURL: await toBlobURL(
