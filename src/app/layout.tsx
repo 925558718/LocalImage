@@ -8,7 +8,6 @@ import { headers } from "next/headers";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { Open_Sans, Inter } from "next/font/google";
 import clsx from "clsx";
-import Script from "next/script";
 import { Toaster } from "@/components/shadcn/sonner";
 
 const Opensans = Open_Sans({
@@ -56,23 +55,7 @@ export const metadata: Metadata = {
 	},
 	alternates: {
 		canonical: "https://www.limgx.com",
-		languages: {
-			'zh-CN': 'https://www.limgx.com',
-			'en': 'https://www.limgx.com',
-			'ja': 'https://www.limgx.com',
-			'es': 'https://www.limgx.com',
-			'fr': 'https://www.limgx.com',
-			'de': 'https://www.limgx.com',
-		}
-	},
-	other: {
-		'application-name': 'LocalImage WebP Animation Creator',
-		'apple-mobile-web-app-title': 'LocalImage Animation Creator',
-		'msapplication-TileColor': '#000000',
-		'theme-color': '#000000',
-	},
-	category: 'technology',
-	classification: 'WebP Animation Creation Tool',
+	}
 };
 
 const dictionaries = {
@@ -108,38 +91,9 @@ export default async function RootLayout({
 	const dictionary = await dictionaries[locale as keyof typeof dictionaries]();
 	return (
 		<html lang={locale} suppressHydrationWarning>
-			{/* 使用 Next.js Script 组件加载 Ezoic 脚本 */}
-			{/* <Script src="https://cmp.gatekeeperconsent.com/min.js" strategy="afterInteractive" data-cfasync="false" />
-			<Script src="https://the.gatekeeperconsent.com/cmp.min.js" strategy="afterInteractive" data-cfasync="false" />
-			<Script src="//www.ezojs.com/ezoic/sa.min.js" strategy="afterInteractive" />
-			<Script id="ezoic-init" strategy="afterInteractive">
-				{`
-				window.ezstandalone = window.ezstandalone || { };
-				ezstandalone.cmd = ezstandalone.cmd || [];
-				`}
-			</Script> */}
 			<head>
 				{/* 多语言SEO优化 */}
 				<meta httpEquiv="content-language" content={locale} />
-				<link rel="alternate" hrefLang="zh-CN" href="https://www.limgx.com" />
-				<link rel="alternate" hrefLang="en" href="https://www.limgx.com" />
-				<link rel="alternate" hrefLang="ja" href="https://www.limgx.com" />
-				<link rel="alternate" hrefLang="es" href="https://www.limgx.com" />
-				<link rel="alternate" hrefLang="fr" href="https://www.limgx.com" />
-				<link rel="alternate" hrefLang="de" href="https://www.limgx.com" />
-				<link rel="alternate" hrefLang="x-default" href="https://www.limgx.com" />
-				
-				{/* PWA和移动端优化 */}
-				<link rel="manifest" href="/manifest.json" />
-				<meta name="theme-color" content="#000000" />
-				<meta name="apple-mobile-web-app-capable" content="yes" />
-				<meta name="apple-mobile-web-app-status-bar-style" content="default" />
-				<meta name="apple-mobile-web-app-title" content="LocalImage WebP Animation Creator" />
-				<link rel="apple-touch-icon" href="/icon-192x192.png" />
-				<meta name="mobile-web-app-capable" content="yes" />
-				<meta name="application-name" content="LocalImage" />
-				<meta name="msapplication-TileColor" content="#000000" />
-				<meta name="msapplication-TileImage" content="/icon-192x192.png" />
 				
 				{/* 结构化数据 - WebP动画合成器 */}
 				<script type="application/ld+json">
