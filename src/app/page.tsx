@@ -110,53 +110,40 @@ function Page() {
 				}
 			`}</style>
 			
-			<main className="w-full h-full flex flex-col items-center min-h-[calc(100vh-4rem)] pb-[56px] pt-8">
-				{/* Hero Section */}
-				<div className="min-h-[25vh] flex items-center justify-center flex-col p-6 mb-6 max-w-4xl mx-auto">
-					<h1 className="animation-title mb-3 text-center">
-						{t("animation_composer")}
-					</h1>
-					<p className="font-OS text-base opacity-80 text-center max-w-2xl leading-relaxed mb-4">
-						{t("animation_desc")}
-					</p>
-					
-					{/* Feature highlights */}
-					<div className="flex flex-wrap justify-center gap-3">
-						<div className="flex items-center gap-2 bg-white/20 dark:bg-black/20 px-3 py-1 rounded-full text-sm backdrop-blur-sm">
-							<div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-							<span>WebP & GIF</span>
-						</div>
-						<div className="flex items-center gap-2 bg-white/20 dark:bg-black/20 px-3 py-1 rounded-full text-sm backdrop-blur-sm">
-							<div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-							<span>{t("local_processing")}</span>
-						</div>
-						<div className="flex items-center gap-2 bg-white/20 dark:bg-black/20 px-3 py-1 rounded-full text-sm backdrop-blur-sm">
-							<div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-							<span>{t("real_time_preview")}</span>
-						</div>
-					</div>
+			<main className="w-full min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+				{/* 背景渐变层 */}
+				<div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-slate-900 dark:via-slate-800/50 dark:to-slate-900"></div>
+				
+				{/* 装饰性背景元素 */}
+				<div className="absolute inset-0 overflow-hidden">
+					<div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"></div>
+					<div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-pink-400/20 rounded-full blur-3xl"></div>
+					<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-cyan-400/10 to-blue-400/10 rounded-full blur-3xl"></div>
 				</div>
 				
-				{isLoading ? (
-					<div className="flex flex-col items-center justify-center min-w-[700px] space-y-6">
-						<div className="text-center">
-							{/* Simple Loading Spinner */}
-							<div className="w-16 h-16 border-4 border-gray-200 dark:border-gray-700 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
-							
-							{/* Loading Text */}
-							<div className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-								{t("initializing_animation_engine")}
-							</div>
-							<div className="text-sm text-gray-500 dark:text-gray-400">
-								{t("loading_webp_gif_processing")}
+				{/* 内容区域 */}
+				<div className="relative z-10 w-full">
+					{isLoading ? (
+						<div className="flex flex-col items-center justify-center space-y-6">
+							<div className="text-center">
+								{/* Simple Loading Spinner */}
+								<div className="w-16 h-16 border-4 border-gray-200 dark:border-gray-700 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+								
+								{/* Loading Text */}
+								<div className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+									{t("initializing_animation_engine")}
+								</div>
+								<div className="text-sm text-gray-500 dark:text-gray-400">
+									{t("loading_webp_gif_processing")}
+								</div>
 							</div>
 						</div>
-					</div>
-				) : (
-					<div className="w-full max-w-7xl mx-auto px-4">
-						<AnimationComposer />
-					</div>
-				)}
+					) : (
+						<div className="w-full max-w-7xl mx-auto">
+							<AnimationComposer />
+						</div>
+					)}
+				</div>
 			</main>
 		</>
 	);

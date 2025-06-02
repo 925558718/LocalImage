@@ -140,6 +140,21 @@
     }
   }
   
+  /* 渐变移动动画 - 用于标题 */
+  .animate-gradient-shift {
+    background-size: 200% 200%;
+    animation: gradient-shift 4s ease-in-out infinite;
+  }
+  
+  @keyframes gradient-shift {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  
   /* 脉冲光晕效果 */
   .animate-glow {
     animation: glow 2s ease-in-out infinite alternate;
