@@ -34,7 +34,7 @@ function CompressionPage() {
 				<div className="flex flex-col items-center justify-center min-w-[700px] space-y-4">
 					<div className="text-center mb-4">
 						<div className="text-lg font-medium mb-2">{t("load_ffmpeg")}</div>
-						<div className="text-sm text-muted-foreground">正在初始化图像处理引擎...</div>
+						<div className="text-sm text-muted-foreground">{t("initializing_image_engine")}</div>
 					</div>
 					
 					{/* 主要内容区域骨架 - 匹配实际组件布局 */}

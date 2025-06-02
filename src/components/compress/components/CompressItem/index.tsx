@@ -258,12 +258,12 @@ function CompressItem({
 			// 优先使用存储的blob数据
 			if (blob) {
 				downloadUrl = URL.createObjectURL(blob);
-				console.log(`使用缓存的blob创建下载链接: ${name}`);
+				console.log(`${t("download_link_cached")}: ${name}`);
 			} else if (url && url !== '') {
 				downloadUrl = url;
-				console.log(`使用现有URL下载: ${name}`);
+				console.log(`${t("download_using_existing_url")}: ${name}`);
 			} else {
-				console.error(`下载失败：${name} - 没有可用的下载数据`);
+				console.error(t("download_failed_no_data").replace("{name}", name));
 				return;
 			}
 			
@@ -286,9 +286,9 @@ function CompressItem({
 				}, 1000);
 			}
 			
-			console.log(`开始下载: ${name}`);
+			console.log(`${t("download_started")}: ${name}`);
 		} catch (error) {
-			console.error('下载失败:', error);
+			console.error(`${t("download_failed")}:`, error);
 		}
 	};
 	

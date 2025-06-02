@@ -25,52 +25,140 @@ function Page() {
 	}, []);
 	
 	return (
-		<main className="w-full h-full flex flex-col items-center min-h-[calc(100vh-4rem)] pb-[56px] pt-8">
-			<div className="min-h-[30vh] flex items-center justify-center flex-col">
-				<h1 className="text-[40px] uppercase">{t("animation_composer")}</h1>
-				<p className="font-OS text-[12px] opacity-60 text-center">{t("animation_desc")}</p>
-			</div>
-			{isLoading ? (
-				<div className="flex flex-col items-center justify-center min-w-[700px] space-y-4">
-					<div className="text-center mb-4">
-						<div className="text-lg font-medium mb-2">正在初始化动画合成引擎...</div>
-						<div className="text-sm text-muted-foreground">请稍候，正在加载WebP/GIF处理功能</div>
-					</div>
+		<>
+			<style jsx>{`
+				@keyframes gradient-shift {
+					0% {
+						background-position: 0% 50%;
+					}
+					50% {
+						background-position: 100% 50%;
+					}
+					100% {
+						background-position: 0% 50%;
+					}
+				}
+				
+				@keyframes float {
+					0%, 100% {
+						transform: translateY(0px);
+					}
+					50% {
+						transform: translateY(-10px);
+					}
+				}
+				
+				@keyframes pulse-glow {
+					0%, 100% {
+						box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+					}
+					50% {
+						box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+					}
+				}
+				
+				.animation-title {
+					font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+					font-weight: 900;
+					font-size: 3.5rem;
+					letter-spacing: -0.025em;
+					background: linear-gradient(
+						-45deg,
+						#3b82f6,
+						#8b5cf6,
+						#06b6d4,
+						#10b981,
+						#f59e0b,
+						#ef4444,
+						#ec4899
+					);
+					background-size: 400% 400%;
+					background-clip: text;
+					-webkit-background-clip: text;
+					-webkit-text-fill-color: transparent;
+					animation: gradient-shift 4s ease infinite;
+					text-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+					filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.4));
+				}
+				
+				.hero-section {
+					background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+					border-radius: 20px;
+					backdrop-filter: blur(10px);
+					border: 1px solid rgba(255, 255, 255, 0.1);
+				}
+				
+				.loading-card {
+					background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+					backdrop-filter: blur(20px);
+					border: 1px solid rgba(59, 130, 246, 0.2);
+					animation: pulse-glow 3s ease-in-out infinite;
+				}
+				
+				.dark .loading-card {
+					background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+				}
+				
+				.float-animation {
+					animation: float 6s ease-in-out infinite;
+				}
+				
+				@media (max-width: 768px) {
+					.animation-title {
+						font-size: 2.5rem;
+					}
+				}
+			`}</style>
+			
+			<main className="w-full h-full flex flex-col items-center min-h-[calc(100vh-4rem)] pb-[56px] pt-8">
+				{/* Hero Section */}
+				<div className="min-h-[25vh] flex items-center justify-center flex-col p-6 mb-6 max-w-4xl mx-auto">
+					<h1 className="animation-title mb-3 text-center">
+						{t("animation_composer")}
+					</h1>
+					<p className="font-OS text-base opacity-80 text-center max-w-2xl leading-relaxed mb-4">
+						{t("animation_desc")}
+					</p>
 					
-					{/* 动画合成器加载骨架 */}
-					<div className="w-full min-w-[700px] space-y-4">
-						{/* 操作栏骨架 - 匹配动画合成器的操作栏布局 */}
-						<div className="flex gap-2 justify-center w-full">
-							<Skeleton className="h-9 w-[120px]" /> {/* Format Select */}
-							<Skeleton className="h-9 w-20" />      {/* Preview */}
-							<Skeleton className="h-9 w-28" />      {/* Create Animation */}
+					{/* Feature highlights */}
+					<div className="flex flex-wrap justify-center gap-3">
+						<div className="flex items-center gap-2 bg-white/20 dark:bg-black/20 px-3 py-1 rounded-full text-sm backdrop-blur-sm">
+							<div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+							<span>WebP & GIF</span>
 						</div>
-						
-						{/* 设置区域骨架 */}
-						<div className="flex gap-4 justify-center items-center">
-							<Skeleton className="h-6 w-24" />      {/* Frame Rate Label */}
-							<Skeleton className="h-6 w-32" />      {/* Frame Rate Slider */}
-							<Skeleton className="h-6 w-16" />      {/* Frame Rate Value */}
-							<Skeleton className="h-6 w-20" />      {/* Quality Label */}
-							<Skeleton className="h-6 w-32" />      {/* Quality Slider */}
-							<Skeleton className="h-6 w-16" />      {/* Quality Value */}
+						<div className="flex items-center gap-2 bg-white/20 dark:bg-black/20 px-3 py-1 rounded-full text-sm backdrop-blur-sm">
+							<div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+							<span>{t("local_processing")}</span>
 						</div>
-						
-						{/* 文件上传区域骨架 */}
-						<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-							<div className="space-y-4">
-								<Skeleton className="h-[300px] w-full rounded-lg" />
-							</div>
-							<div className="space-y-4">
-								<Skeleton className="h-[300px] w-full rounded-lg" />
-							</div>
+						<div className="flex items-center gap-2 bg-white/20 dark:bg-black/20 px-3 py-1 rounded-full text-sm backdrop-blur-sm">
+							<div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+							<span>{t("real_time_preview")}</span>
 						</div>
 					</div>
 				</div>
-			) : (
-				<AnimationComposer />
-			)}
-		</main>
+				
+				{isLoading ? (
+					<div className="flex flex-col items-center justify-center min-w-[700px] space-y-6">
+						<div className="text-center">
+							{/* Simple Loading Spinner */}
+							<div className="w-16 h-16 border-4 border-gray-200 dark:border-gray-700 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+							
+							{/* Loading Text */}
+							<div className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+								{t("initializing_animation_engine")}
+							</div>
+							<div className="text-sm text-gray-500 dark:text-gray-400">
+								{t("loading_webp_gif_processing")}
+							</div>
+						</div>
+					</div>
+				) : (
+					<div className="w-full max-w-7xl mx-auto px-4">
+						<AnimationComposer />
+					</div>
+				)}
+			</main>
+		</>
 	);
 }
 
