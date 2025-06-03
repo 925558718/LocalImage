@@ -21,9 +21,9 @@ const inter = Inter({
 	weight: ["400", "500", "600", "700", "800", "900"]
 });
 export const metadata: Metadata = {
-	title: "LocalImage - WebP Animation Creator",
-	description: "Free online WebP animation creator. Convert multiple images into high-quality animations with local processing. No uploads required.",
-	keywords: "WebP animation, animation creator, image to animation, online animation tool, local processing, privacy",
+	title: "WebP Animation Creator - LocalImage | Convert Images to Animated WebP & GIF",
+	description: "Free online WebP and GIF animation creator. Convert multiple images into high-quality animations with local processing. No uploads required, privacy protected.",
+	keywords: "WebP animation, GIF creator, animation creator, image to animation, online animation tool, local processing, privacy, webp converter, gif maker, image animation",
 	authors: [{ name: "limgx.com" }],
 	robots: {
 		index: true,
@@ -37,8 +37,8 @@ export const metadata: Metadata = {
 		},
 	},
 	openGraph: {
-		title: "LocalImage - WebP Animation Creator",
-		description: "Free online WebP animation creator. Convert multiple images into high-quality animations with local processing. No uploads required.",
+		title: "WebP Animation Creator - LocalImage | Convert Images to Animated WebP & GIF",
+		description: "Free online WebP and GIF animation creator. Convert multiple images into high-quality animations with local processing. No uploads required, privacy protected.",
 		type: "website",
 		url: "https://www.limgx.com",
 		images: ["https://www.limgx.com/images/webp-animation-preview.jpg"],
@@ -48,8 +48,8 @@ export const metadata: Metadata = {
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "LocalImage - WebP Animation Creator",
-		description: "Free online WebP animation creator. Convert multiple images into high-quality animations with local processing.",
+		title: "WebP Animation Creator - LocalImage | Convert Images to Animated WebP & GIF",
+		description: "Free online WebP and GIF animation creator with local processing for privacy protection.",
 		images: ["https://www.limgx.com/images/webp-animation-preview.jpg"],
 		creator: "@limgx_official",
 	},
