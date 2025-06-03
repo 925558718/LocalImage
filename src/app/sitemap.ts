@@ -3,25 +3,31 @@ import { MetadataRoute } from 'next';
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.limgx.com';
   
-  // 基本路由列表，动画合成为主要功能
+  // Basic route list, animation creator as main feature
   const routes = [
     {
-      path: '',            // 首页 - WebP动画合成器
+      path: '',            // Homepage - WebP Animation Creator
       priority: 1.0,
       changeFreq: 'daily' as const,
-      description: 'WebP动画合成器主页'
+      description: 'WebP Animation Creator Homepage'
     },
     {
-      path: '/compress',   // 图片压缩页面
+      path: '/compress',   // Image Compression Page
       priority: 0.8,
       changeFreq: 'weekly' as const,
-      description: '图片压缩工具页面'
+      description: 'Image Compression Tool Page'
+    },
+    {
+      path: '/dev/gradient', // CSS Gradient Generator Page
+      priority: 0.7,
+      changeFreq: 'weekly' as const,
+      description: 'CSS Gradient Generator Tool Page'
     },
   ];
 
   const currentDate = new Date().toISOString();
   
-  // 支持的语言
+  // Supported languages
   const languages = {
     'zh-CN': 'https://www.limgx.com',
     'en': 'https://www.limgx.com',
@@ -31,7 +37,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'de': 'https://www.limgx.com',
   };
 
-  // 将每个路由转换为sitemap条目
+  // Convert each route to sitemap entry
   return routes.map(route => {
     return {
       url: `${baseUrl}${route.path}`,
