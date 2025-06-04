@@ -1,7 +1,9 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { Button } from "@/components/shadcn/button";
 import { Label } from "@/components/shadcn/label";
+import Image from "next/image";
+import React from "react";
 
 interface DropzoneWithPreviewProps {
   onFilesSelected: (files: File[]) => void;
@@ -10,7 +12,7 @@ interface DropzoneWithPreviewProps {
   onClearAllFiles: () => void;
 }
 
-export function DropzoneWithPreview({ 
+export const DropzoneWithPreview = React.memo(function DropzoneWithPreview({ 
   onFilesSelected, 
   files, 
   onRemoveFile,
@@ -20,6 +22,25 @@ export function DropzoneWithPreview({
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  // 使用useMemo缓存文件URL，避免每次渲染时重新创建
+  const fileUrls = useMemo(() => {
+    return files.map(file => ({
+      file,
+      url: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
+    }));
+  }, [files]);
+
+  // 清理blob URLs以避免内存泄漏
+  useEffect(() => {
+    return () => {
+      fileUrls.forEach(({ url }) => {
+        if (url) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+  }, [fileUrls]);
+
   // 处理点击上传
   const handleClickUpload = () => {
     fileInputRef.current?.click();
@@ -138,24 +159,20 @@ export function DropzoneWithPreview({
           {/* 可滚动的图片列表区域 */}
           <div className="overflow-y-auto max-h-[250px]">
             <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3 p-3 min-h-[220px]">
-              {files.map((file, index) => {
-                // 创建文件预览URL
-                const filePreview = file.type.startsWith('image/') 
-                  ? URL.createObjectURL(file)
-                  : null;
+              {fileUrls.map((fileData, index) => {
+                const { file, url: filePreview } = fileData;
                 
                 return (
                   <div key={`${file.name}-${index}`} className="relative group">
                     <div className="h-[100px] w-[100px] rounded-md overflow-hidden border bg-muted flex items-center justify-center">
                       {filePreview ? (
-                        <img 
+                        <Image 
                           src={filePreview} 
                           alt={file.name} 
+                          width={100}
+                          height={100}
                           className="object-cover w-full h-full"
-                          onLoad={() => {
-                            // 加载后释放URL避免内存泄漏
-                            URL.revokeObjectURL(filePreview);
-                          }}
+                          unoptimized // 由于是blob URL，需要禁用优化
                         />
                       ) : (
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -206,4 +223,4 @@ export function DropzoneWithPreview({
       />
     </div>
   );
-}
+});

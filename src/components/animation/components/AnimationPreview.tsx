@@ -1,4 +1,5 @@
 import { useI18n } from "@/hooks/useI18n";
+import Image from "next/image";
 
 interface AnimationPreviewProps {
 	url: string;
@@ -16,18 +17,26 @@ function AnimationPreview({ url, format, size, frameCount, frameRate }: Animatio
 			{/* 动画预览 */}
 			<div className="relative max-w-md">
 				{format === "webp" ? (
-					<img
+					<Image
 						src={url}
 						alt="Animation Preview"
-						className="max-w-full h-auto rounded border"
-						style={{ maxHeight: "300px" }}
+						width={0}
+						height={0}
+						className="w-auto h-auto max-w-full max-h-80 rounded border"
+						style={{ maxWidth: "100%", maxHeight: "20rem" }}
+						unoptimized // 由于是blob URL，需要禁用优化
+						sizes="100vw"
 					/>
 				) : (
-					<img
+					<Image
 						src={url}
 						alt="Animation Preview"
-						className="max-w-full h-auto rounded border"
-						style={{ maxHeight: "300px" }}
+						width={0}
+						height={0}
+						className="w-auto h-auto max-w-full max-h-80 rounded border"
+						style={{ maxWidth: "100%", maxHeight: "20rem" }}
+						unoptimized // 由于是blob URL，需要禁用优化
+						sizes="100vw"
 					/>
 				)}
 			</div>

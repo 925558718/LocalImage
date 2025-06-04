@@ -1,5 +1,5 @@
 import ffm_ins from "@/lib/ffmpeg";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { useFFmpeg } from "@/hooks/useFFmpeg";
 import {
@@ -15,6 +15,8 @@ import {
 } from "@/components/shadcn";
 import { DropzoneWithPreview } from "../compress/components/DropzoneWithPreview";
 import { Download, Play, Pause, Loader2, Clapperboard } from "lucide-react";
+import Image from "next/image";
+import React from "react";
 
 function AnimationComposer() {
 	const [loading, setLoading] = useState(false);
@@ -34,7 +36,7 @@ function AnimationComposer() {
 	
 	// 动画设置
 	const [format, setFormat] = useState("webp");
-	const [frameRate, setFrameRate] = useState([10]);
+	const [frameRate, setFrameRate] = useState([30]);
 	const [quality, setQuality] = useState([75]);
 	
 	// 预览相关
@@ -43,7 +45,7 @@ function AnimationComposer() {
 	const intervalRef = useRef<NodeJS.Timeout | null>(null);
 	
 	// 文件排序函数 - 与FFmpeg中的逻辑保持一致
-	const getSortedFiles = (files: File[]) => {
+	const getSortedFiles = useCallback((files: File[]) => {
 		return [...files].sort((a, b) => {
 			// 提取文件名中的数字部分
 			const extractNumbers = (filename: string): number[] => {
@@ -66,7 +68,7 @@ function AnimationComposer() {
 			// 如果数字相同，按字符串排序
 			return a.name.localeCompare(b.name);
 		});
-	};
+	}, []);
 	
 	// 处理新文件添加
 	const handleFilesSelected = (newFiles: File[]) => {
@@ -101,6 +103,29 @@ function AnimationComposer() {
 			intervalRef.current = null;
 		}
 	};
+	
+	// 当帧率改变时，如果预览正在播放，重新启动预览
+	useEffect(() => {
+		if (isPlaying && files.length > 0 && intervalRef.current) {
+			// 只有在预览正在播放时才重新启动
+			clearInterval(intervalRef.current);
+			
+			const sortedFiles = getSortedFiles(files);
+			intervalRef.current = setInterval(() => {
+				setCurrentFrame(prev => (prev + 1) % sortedFiles.length);
+			}, 1000 / frameRate[0]);
+		}
+	}, [frameRate[0]]);  // 只监听帧率变化
+	
+	// 组件卸载时清理定时器
+	useEffect(() => {
+		return () => {
+			if (intervalRef.current) {
+				clearInterval(intervalRef.current);
+				intervalRef.current = null;
+			}
+		};
+	}, []);
 	
 	// 处理动画合成
 	async function handleCreateAnimation() {
@@ -520,10 +545,15 @@ function AnimationComposer() {
 													return currentFile && (
 														<div className="space-y-4 w-full max-w-md">
 															<div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 rounded-xl p-4 border border-slate-200 dark:border-slate-600">
-																<img
+																<Image
 																	src={URL.createObjectURL(currentFile)}
 																	alt={`Frame ${currentFrame + 1}`}
-																	className="max-w-full max-h-48 mx-auto rounded-lg shadow-sm"
+																	width={0}
+																	height={0}
+																	className="w-auto h-auto max-w-full max-h-48 mx-auto rounded-lg shadow-sm"
+																	style={{ maxWidth: '100%', maxHeight: '12rem' }}
+																	unoptimized // 由于是blob URL，需要禁用优化
+																	sizes="100vw"
 																/>
 															</div>
 															<div className="text-center space-y-2">
@@ -559,10 +589,15 @@ function AnimationComposer() {
 											
 											<div className="flex-1 flex items-center justify-center mb-6">
 												<div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-green-200 dark:border-green-800/50">
-													<img 
+													<Image 
 														src={animationResult.url} 
 														alt="Generated Animation" 
-														className="max-w-full max-h-48 mx-auto rounded-lg"
+														width={0}
+														height={0}
+														className="w-auto h-auto max-w-full max-h-48 mx-auto rounded-lg"
+														style={{ maxWidth: '100%', maxHeight: '12rem' }}
+														unoptimized // 由于是blob URL，需要禁用优化
+														sizes="100vw"
 													/>
 												</div>
 											</div>
