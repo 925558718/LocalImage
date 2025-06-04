@@ -1,6 +1,7 @@
 import ffm_ins from "@/lib/ffmpeg";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useI18n } from "@/hooks/useI18n";
+import { useFFmpeg } from "@/hooks/useFFmpeg";
 import {
 	Select,
 	SelectContent,
@@ -13,13 +14,16 @@ import {
 	Label,
 } from "@/components/shadcn";
 import { DropzoneWithPreview } from "../compress/components/DropzoneWithPreview";
-import { Download, Play, Pause } from "lucide-react";
+import { Download, Play, Pause, Loader2, Clapperboard } from "lucide-react";
+import Image from "next/image";
+import React from "react";
 
 function AnimationComposer() {
 	const [loading, setLoading] = useState(false);
 	const [progress, setProgress] = useState(0);
 	const [currentFileName, setCurrentFileName] = useState("");
 	const { t } = useI18n();
+	const { isLoading: ffmpegLoading, isReady: ffmpegReady, error: ffmpegError } = useFFmpeg();
 	const [animationResult, setAnimationResult] = useState<{
 		url: string;
 		name: string;
@@ -32,7 +36,7 @@ function AnimationComposer() {
 	
 	// 动画设置
 	const [format, setFormat] = useState("webp");
-	const [frameRate, setFrameRate] = useState([10]);
+	const [frameRate, setFrameRate] = useState([30]);
 	const [quality, setQuality] = useState([75]);
 	
 	// 预览相关
@@ -41,7 +45,7 @@ function AnimationComposer() {
 	const intervalRef = useRef<NodeJS.Timeout | null>(null);
 	
 	// 文件排序函数 - 与FFmpeg中的逻辑保持一致
-	const getSortedFiles = (files: File[]) => {
+	const getSortedFiles = useCallback((files: File[]) => {
 		return [...files].sort((a, b) => {
 			// 提取文件名中的数字部分
 			const extractNumbers = (filename: string): number[] => {
@@ -64,7 +68,7 @@ function AnimationComposer() {
 			// 如果数字相同，按字符串排序
 			return a.name.localeCompare(b.name);
 		});
-	};
+	}, []);
 	
 	// 处理新文件添加
 	const handleFilesSelected = (newFiles: File[]) => {
@@ -100,21 +104,37 @@ function AnimationComposer() {
 		}
 	};
 	
+	// 当帧率改变时，如果预览正在播放，重新启动预览
+	useEffect(() => {
+		if (isPlaying && files.length > 0 && intervalRef.current) {
+			// 只有在预览正在播放时才重新启动
+			clearInterval(intervalRef.current);
+			
+			const sortedFiles = getSortedFiles(files);
+			intervalRef.current = setInterval(() => {
+				setCurrentFrame(prev => (prev + 1) % sortedFiles.length);
+			}, 1000 / frameRate[0]);
+		}
+	}, [frameRate[0]]);  // 只监听帧率变化
+	
+	// 组件卸载时清理定时器
+	useEffect(() => {
+		return () => {
+			if (intervalRef.current) {
+				clearInterval(intervalRef.current);
+				intervalRef.current = null;
+			}
+		};
+	}, []);
+	
 	// 处理动画合成
 	async function handleCreateAnimation() {
 		// 检查是否有足够的图片
-		if (files.length < 2) {
-			alert(t("min_files_alert"));
-			return;
-		}
+		if (files.length < 2 || !ffmpegReady) return;
+
 		
 		// 显示文件排序信息
 		const sortedFiles = getSortedFiles(files);
-		console.log('=== 动画合成开始 ===');
-		console.log('原始文件顺序:', files.map(f => f.name));
-		console.log('排序后顺序:', sortedFiles.map(f => f.name));
-		console.log('文件数量:', sortedFiles.length);
-		console.log('设置 - 格式:', format, '帧率:', frameRate[0], '质量:', quality[0]);
 		
 		setLoading(true);
 		setProgress(0);
@@ -132,7 +152,6 @@ function AnimationComposer() {
 			if (!isFFmpegWorking) {
 				throw new Error(t("ffmpeg_test_failed"));
 			}
-			console.log('[动画合成] FFmpeg测试通过');
 
 			setCurrentFileName(t("composing_animation"));
 			const outputName = `animation_${Date.now()}.${format}`;
@@ -173,7 +192,6 @@ function AnimationComposer() {
 			}, 1000);
 			
 		} catch (error) {
-			console.error("动画合成失败:", error);
 			alert(`${t("animation_failed")}: ${error instanceof Error ? error.message : t("unknown_error")}`);
 		} finally {
 			setLoading(false);
@@ -297,7 +315,19 @@ function AnimationComposer() {
 				</div>
 
 				{/* Modern Container with Glass Effect */}
-				<div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden">
+				<div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden relative">
+					{/* Loading 状态指示器 - 绝对定位在容器外部顶部 */}
+					{(ffmpegLoading || !ffmpegReady || loading) && (
+						<div className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-10 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 backdrop-blur-sm rounded-2xl p-3 border border-purple-200/50 dark:border-purple-700/30 shadow-lg">
+							<div className="flex items-center gap-3">
+								<Loader2 className="w-4 h-4 text-purple-600 dark:text-purple-400 animate-spin" />
+								<span className="text-purple-700 dark:text-purple-300 font-medium text-sm">
+									{ffmpegLoading || !ffmpegReady ? t("load_ffmpeg") : t("creating_animation")}
+								</span>
+							</div>
+						</div>
+					)}
+
 					{/* Header Section */}
 					<div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 px-8 py-6 border-b border-slate-200/50 dark:border-slate-600/50">
 						<div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -401,11 +431,18 @@ function AnimationComposer() {
 								
 								<Button 
 									onClick={handleCreateAnimation} 
-									disabled={loading || files.length < 2}
+									disabled={loading || ffmpegLoading || !ffmpegReady || files.length < 2}
 									size="sm"
-									className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg"
+									className="w-40 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg disabled:opacity-50"
 								>
-									{loading ? t("creating_animation") : t("create_animation")}
+									{ffmpegLoading || !ffmpegReady || loading ? (
+										<Loader2 className="w-4 h-4 animate-spin" />
+									) : (
+										<>
+											<Clapperboard className="w-4 h-4 mr-2" />
+											{t("create_animation")}
+										</>
+									)}
 								</Button>
 							</div>
 						</div>
@@ -508,10 +545,15 @@ function AnimationComposer() {
 													return currentFile && (
 														<div className="space-y-4 w-full max-w-md">
 															<div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 rounded-xl p-4 border border-slate-200 dark:border-slate-600">
-																<img
+																<Image
 																	src={URL.createObjectURL(currentFile)}
 																	alt={`Frame ${currentFrame + 1}`}
-																	className="max-w-full max-h-48 mx-auto rounded-lg shadow-sm"
+																	width={0}
+																	height={0}
+																	className="w-auto h-auto max-w-full max-h-48 mx-auto rounded-lg shadow-sm"
+																	style={{ maxWidth: '100%', maxHeight: '12rem' }}
+																	unoptimized // 由于是blob URL，需要禁用优化
+																	sizes="100vw"
 																/>
 															</div>
 															<div className="text-center space-y-2">
@@ -547,10 +589,15 @@ function AnimationComposer() {
 											
 											<div className="flex-1 flex items-center justify-center mb-6">
 												<div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-green-200 dark:border-green-800/50">
-													<img 
+													<Image 
 														src={animationResult.url} 
 														alt="Generated Animation" 
-														className="max-w-full max-h-48 mx-auto rounded-lg"
+														width={0}
+														height={0}
+														className="w-auto h-auto max-w-full max-h-48 mx-auto rounded-lg"
+														style={{ maxWidth: '100%', maxHeight: '12rem' }}
+														unoptimized // 由于是blob URL，需要禁用优化
+														sizes="100vw"
 													/>
 												</div>
 											</div>

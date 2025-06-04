@@ -591,343 +591,371 @@ const GradientGenerator = () => {
         }
       `}</style>
       
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
-        <div className="mb-6 text-center">
-          <h1 className="gradient-title mb-3">
-            CSS Gradient Generator
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Create beautiful gradients with live preview and copy-ready CSS or Tailwind code
-          </p>
-        </div>
+      <div className="min-h-screen w-full relative overflow-hidden">
+        {/* 背景渐变装饰 - 与其他页面保持一致 */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/20" />
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-400/20 dark:bg-blue-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-400/20 dark:bg-indigo-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-400/10 dark:bg-purple-500/5 rounded-full blur-3xl" />
 
-        {/* Live Preview at top - Now rectangular */}
-        <Card className="mb-6">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Live Preview</CardTitle>
-            <CardDescription>See your gradient in real-time</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div 
-              className="w-full h-64 rounded-lg border-2 border-gray-200 dark:border-gray-700 shadow-sm mb-4"
-              style={{ background: cssGradient }}
-            />
+        <main className="relative z-10 container mx-auto px-4 py-12 max-w-7xl">
+          {/* 标题区域 */}
+          <div className="text-center mb-12">
+            <h1 className="gradient-title mb-4">
+              CSS Gradient Generator
+            </h1>
+            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+              Create beautiful gradients with live preview and copy-ready CSS or Tailwind code
+            </p>
             
-            {/* Interactive Gradient Bar */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Interactive Color Bar - Click to add, drag to move</Label>
-              <div 
-                ref={gradientBarRef}
-                onClick={handleGradientBarClick}
-                className="relative w-full h-12 rounded-lg border-2 border-gray-300 dark:border-gray-600 cursor-pointer transition-all duration-200 hover:border-primary hover:shadow-sm"
-                style={{ background: cssGradient }}
-              >
-                {/* Color stop handles - Now vertical bars with rounded corners */}
-                {config.stops.map((stop) => (
-                  <Popover key={stop.id}>
-                    <PopoverTrigger asChild>
-                      <div
-                        data-color-stop="true"
-                        className="absolute top-0 h-full flex items-center justify-center group cursor-pointer"
-                        style={{ left: `calc(${stop.position}% - 10px)`, width: '20px' }}
-                        onMouseDown={(e) => {
-                          e.stopPropagation();
-                          handleDragStart(e, stop.id);
-                        }}
-                      >
-                        <div
-                          className={`relative h-full w-4 border-2 border-white rounded-lg shadow-lg cursor-grab transform-gpu transition-all duration-200 hover:scale-110 hover:shadow-xl ${dragging?.id === stop.id ? 'scale-110 shadow-xl' : ''}`}
-                          style={{ 
-                            backgroundColor: stop.color,
-                            cursor: dragging?.id === stop.id ? 'grabbing' : 'grab',
-                            transformOrigin: 'center'
-                          }}
-                          title={`Click to edit • ${stop.color} at ${stop.position}%`}
-                        />
-                        {/* Hover X button for deletion */}
-                        {config.stops.length > 2 && (
+            {/* 特性标签 */}
+            <div className="flex items-center justify-center gap-6 mt-6 text-sm text-slate-500 dark:text-slate-400">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
+                <span>Live Preview</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                <span>CSS & Tailwind</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-pink-500 rounded-full animate-pulse" />
+                <span>Interactive Editor</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 玻璃效果容器 - 与其他页面保持一致 */}
+          <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl p-8 border border-white/20 dark:border-slate-700/20 shadow-xl">
+            {/* Live Preview at top - Now rectangular */}
+            <Card className="mb-6">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Live Preview</CardTitle>
+                <CardDescription>See your gradient in real-time</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div 
+                  className="w-full h-64 rounded-lg border-2 border-gray-200 dark:border-gray-700 shadow-sm mb-4"
+                  style={{ background: cssGradient }}
+                />
+                
+                {/* Interactive Gradient Bar */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Interactive Color Bar - Click to add, drag to move</Label>
+                  <div 
+                    ref={gradientBarRef}
+                    onClick={handleGradientBarClick}
+                    className="relative w-full h-12 rounded-lg border-2 border-gray-300 dark:border-gray-600 cursor-pointer transition-all duration-200 hover:border-primary hover:shadow-sm"
+                    style={{ background: cssGradient }}
+                  >
+                    {/* Color stop handles - Now vertical bars with rounded corners */}
+                    {config.stops.map((stop) => (
+                      <Popover key={stop.id}>
+                        <PopoverTrigger asChild>
                           <div
-                            className="absolute -top-3 -right-1 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full text-white text-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer shadow-lg border-2 border-white hover:scale-110 z-10"
-                            onClick={(e) => {
+                            data-color-stop="true"
+                            className="absolute top-0 h-full flex items-center justify-center group cursor-pointer"
+                            style={{ left: `calc(${stop.position}% - 10px)`, width: '20px' }}
+                            onMouseDown={(e) => {
                               e.stopPropagation();
-                              e.preventDefault();
-                              removeColorStop(stop.id);
+                              handleDragStart(e, stop.id);
                             }}
                           >
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M9 3L3 9M3 3L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-72 p-4" side="left" align="center" sideOffset={8}>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-medium text-sm">Edit Color Stop</h4>
-                          <span className="text-xs text-muted-foreground">#{config.stops.findIndex(s => s.id === stop.id) + 1}</span>
-                        </div>
-                        
-                        <div className="space-y-3">
-                          <div className="space-y-2">
-                            <Label className="text-sm font-medium">Color</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                type="color"
-                                value={stop.color.slice(0, 7)}
-                                onChange={(e) => {
-                                  const alpha = stop.color.length > 7 ? stop.color.slice(7) : '';
-                                  updateColorStop(stop.id, { color: e.target.value + alpha });
+                            <div
+                              className={`relative h-full w-4 border-2 border-white rounded-lg shadow-lg cursor-grab transform-gpu transition-all duration-200 hover:scale-110 hover:shadow-xl ${dragging?.id === stop.id ? 'scale-110 shadow-xl' : ''}`}
+                              style={{ 
+                                backgroundColor: stop.color,
+                                cursor: dragging?.id === stop.id ? 'grabbing' : 'grab',
+                                transformOrigin: 'center'
+                              }}
+                              title={`Click to edit • ${stop.color} at ${stop.position}%`}
+                            />
+                            {/* Hover X button for deletion */}
+                            {config.stops.length > 2 && (
+                              <div
+                                className="absolute -top-3 -right-1 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full text-white text-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer shadow-lg border-2 border-white hover:scale-110 z-10"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  removeColorStop(stop.id);
                                 }}
-                                className="w-12 h-9 p-1 rounded border cursor-pointer"
-                              />
-                              <Input
-                                type="text"
-                                value={stop.color}
-                                onChange={(e) => updateColorStop(stop.id, { color: e.target.value })}
-                                className="flex-1"
-                                placeholder="#000000"
-                              />
+                              >
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M9 3L3 9M3 3L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-72 p-4" side="left" align="center" sideOffset={8}>
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-medium text-sm">Edit Color Stop</h4>
+                              <span className="text-xs text-muted-foreground">#{config.stops.findIndex(s => s.id === stop.id) + 1}</span>
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <div className="space-y-2">
+                                <Label className="text-sm font-medium">Color</Label>
+                                <div className="flex gap-2">
+                                  <Input
+                                    type="color"
+                                    value={stop.color.slice(0, 7)}
+                                    onChange={(e) => {
+                                      const alpha = stop.color.length > 7 ? stop.color.slice(7) : '';
+                                      updateColorStop(stop.id, { color: e.target.value + alpha });
+                                    }}
+                                    className="w-12 h-9 p-1 rounded border cursor-pointer"
+                                  />
+                                  <Input
+                                    type="text"
+                                    value={stop.color}
+                                    onChange={(e) => updateColorStop(stop.id, { color: e.target.value })}
+                                    className="flex-1"
+                                    placeholder="#000000"
+                                  />
+                                </div>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">Position (%)</Label>
+                                  <Input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    value={stop.position}
+                                    onChange={(e) => updateColorStop(stop.id, { position: parseInt(e.target.value) || 0 })}
+                                    className="w-full"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">Opacity (%)</Label>
+                                  <Input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    value={Math.round((parseInt(stop.color.slice(7, 9) || 'ff', 16) / 255) * 100)}
+                                    onChange={(e) => {
+                                      const opacity = Math.max(0, Math.min(100, parseInt(e.target.value) || 100));
+                                      const alpha = Math.round((opacity / 100) * 255).toString(16).padStart(2, '0');
+                                      const baseColor = stop.color.slice(0, 7);
+                                      updateColorStop(stop.id, { color: baseColor + alpha });
+                                    }}
+                                    className="w-full"
+                                    placeholder="100"
+                                  />
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Position (%)</Label>
-                              <Input
-                                type="number"
-                                min="0"
-                                max="100"
-                                value={stop.position}
-                                onChange={(e) => updateColorStop(stop.id, { position: parseInt(e.target.value) || 0 })}
-                                className="w-full"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Opacity (%)</Label>
-                              <Input
-                                type="number"
-                                min="0"
-                                max="100"
-                                value={Math.round((parseInt(stop.color.slice(7, 9) || 'ff', 16) / 255) * 100)}
-                                onChange={(e) => {
-                                  const opacity = Math.max(0, Math.min(100, parseInt(e.target.value) || 100));
-                                  const alpha = Math.round((opacity / 100) * 255).toString(16).padStart(2, '0');
-                                  const baseColor = stop.color.slice(0, 7);
-                                  updateColorStop(stop.id, { color: baseColor + alpha });
-                                }}
-                                className="w-full"
-                                placeholder="100"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                💡 Click anywhere to add a color stop, drag existing stops to reposition them, click a stop to edit it
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Controls - Left Column */}
-          <div className="space-y-4">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Gradient Type */}
-                <div className="space-y-2">
-                  <Label>Type</Label>
-                  <Tabs value={config.type} onValueChange={(value: string) => setConfig(prev => ({ ...prev, type: value as "linear" | "radial" }))}>
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="linear">Linear</TabsTrigger>
-                      <TabsTrigger value="radial">Radial</TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-
-                {/* Direction/Shape */}
-                <div className="space-y-2">
-                  <Label>{config.type === "linear" ? "Direction" : "Shape"}</Label>
-                  <Select 
-                    value={config.direction} 
-                    onValueChange={(value) => setConfig(prev => ({ ...prev, direction: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(config.type === "linear" ? linearDirections : radialShapes).map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <Button onClick={generateRandomGradient} variant="outline" className="flex-1">
-                      <Shuffle className="w-4 h-4 mr-2" />
-                      Random
-                    </Button>
-                    <Button onClick={resetGradient} variant="outline" className="flex-1">
-                      <RotateCcw className="w-4 h-4 mr-2" />
-                      Reset
-                    </Button>
+                        </PopoverContent>
+                      </Popover>
+                    ))}
                   </div>
-                  {config.stops.length > 3 && (
-                    <Button onClick={simplifyGradient} variant="outline" className="w-full">
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                      Simplify for Tailwind
-                    </Button>
-                  )}
+                  <p className="text-xs text-muted-foreground">
+                    💡 Click anywhere to add a color stop, drag existing stops to reposition them, click a stop to edit it
+                  </p>
                 </div>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Output Code - Right Columns */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Generated Code</CardTitle>
-                <CardDescription>Copy the code to use in your project</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Tabs value={outputFormat} onValueChange={(value: string) => setOutputFormat(value as "css" | "tailwind")}>
-                  <TabsList className="grid w-full grid-cols-2 mb-4">
-                    <TabsTrigger value="css">CSS</TabsTrigger>
-                    <TabsTrigger value="tailwind">Tailwind</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="css" className="space-y-4">
+            <div className="grid lg:grid-cols-3 gap-6">
+              {/* Controls - Left Column */}
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Settings</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Gradient Type */}
                     <div className="space-y-2">
-                      <Label>Background Property</Label>
-                      <div className="relative">
-                        <pre className="p-3 bg-muted rounded text-sm overflow-x-auto border">
-                          <code>{`background: ${cssGradient};`}</code>
-                        </pre>
-                        <Button
-                          onClick={() => copyToClipboard(`background: ${cssGradient};`)}
-                          size="sm"
-                          className="absolute top-2 right-2"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>CSS Class</Label>
-                      <div className="relative">
-                        <pre className="p-3 bg-muted rounded text-sm overflow-x-auto border">
-                          <code>{`.gradient {\n  background: ${cssGradient};\n}`}</code>
-                        </pre>
-                        <Button
-                          onClick={() => copyToClipboard(`.gradient {\n  background: ${cssGradient};\n}`)}
-                          size="sm"
-                          className="absolute top-2 right-2"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="tailwind" className="space-y-4">
-                    {/* Version Selector */}
-                    <div className="space-y-2">
-                      <Label>Tailwind CSS Version</Label>
-                      <Tabs value={tailwindVersion} onValueChange={(value: string) => setTailwindVersion(value as "v3" | "v4")}>
+                      <Label>Type</Label>
+                      <Tabs value={config.type} onValueChange={(value: string) => setConfig(prev => ({ ...prev, type: value as "linear" | "radial" }))}>
                         <TabsList className="grid w-full grid-cols-2">
-                          <TabsTrigger value="v3">v3 (Current)</TabsTrigger>
-                          <TabsTrigger value="v4">v4 (Latest)</TabsTrigger>
+                          <TabsTrigger value="linear">Linear</TabsTrigger>
+                          <TabsTrigger value="radial">Radial</TabsTrigger>
                         </TabsList>
                       </Tabs>
                     </div>
 
+                    {/* Direction/Shape */}
                     <div className="space-y-2">
-                      <Label>Tailwind CSS {tailwindVersion.toUpperCase()} Classes</Label>
-                      <div className="relative">
-                        <pre className="p-3 bg-muted rounded text-sm overflow-x-auto border">
-                          <code>{tailwindGradient}</code>
-                        </pre>
-                        <Button
-                          onClick={() => copyToClipboard(tailwindGradient)}
-                          size="sm"
-                          className="absolute top-2 right-2"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </Button>
-                      </div>
+                      <Label>{config.type === "linear" ? "Direction" : "Shape"}</Label>
+                      <Select 
+                        value={config.direction} 
+                        onValueChange={(value) => setConfig(prev => ({ ...prev, direction: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(config.type === "linear" ? linearDirections : radialShapes).map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
 
+                    {/* Action Buttons */}
                     <div className="space-y-2">
-                      <Label>Usage Example</Label>
-                      <div className="relative">
-                        <pre className="p-3 bg-muted rounded text-sm overflow-x-auto border">
-                          <code>{`<div class="${tailwindGradient}">\n  <!-- Content -->\n</div>`}</code>
-                        </pre>
-                        <Button
-                          onClick={() => copyToClipboard(`<div class="${tailwindGradient}">\n  <!-- Content -->\n</div>`)}
-                          size="sm"
-                          className="absolute top-2 right-2"
-                        >
-                          <Copy className="w-4 h-4" />
+                      <div className="flex gap-2">
+                        <Button onClick={generateRandomGradient} variant="outline" className="flex-1">
+                          <Shuffle className="w-4 h-4 mr-2" />
+                          Random
+                        </Button>
+                        <Button onClick={resetGradient} variant="outline" className="flex-1">
+                          <RotateCcw className="w-4 h-4 mr-2" />
+                          Reset
                         </Button>
                       </div>
+                      {config.stops.length > 3 && (
+                        <Button onClick={simplifyGradient} variant="outline" className="w-full">
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                          Simplify for Tailwind
+                        </Button>
+                      )}
                     </div>
-                    
-                    {tailwindVersion === "v4" ? (
-                      <div className="p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded">
-                        <p className="text-sm text-blue-800 dark:text-blue-200">
-                          <strong>Tailwind CSS v4:</strong> Uses new gradient syntax (bg-linear-*, bg-radial-*). 
-                          This is the latest version with improved gradient utilities.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded">
-                        <p className="text-sm text-green-800 dark:text-green-200">
-                          <strong>Tailwind CSS v3:</strong> Uses traditional gradient syntax (bg-gradient-*). 
-                          This is the stable version currently in wide use.
-                        </p>
-                      </div>
-                    )}
-                    
-                    {tailwindGradient.includes("bg-[") && (
-                      <div className="p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded">
-                        <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                          <strong>Complex Gradient:</strong> Using arbitrary value because:
-                          <br />• Colors not in Tailwind&apos;s standard palette, or
-                          <br />• More than 3 color stops (Tailwind supports max 3: from/via/to)
-                          <br /><br />
-                          <strong>Note:</strong> Tailwind CSS supports position syntax like:
-                          <br />• <code>from-blue-500 from-10%</code>
-                          <br />• <code>via-red-500 via-30%</code> 
-                          <br />• <code>to-green-500 to-90%</code>
-                          <br /><br />
-                          <strong>Arbitrary Value Format:</strong> <code>bg-[linear-gradient(...)]</code>
-                        </p>
-                      </div>
-                    )}
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Output Code - Right Columns */}
+              <div className="lg:col-span-2">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Generated Code</CardTitle>
+                    <CardDescription>Copy the code to use in your project</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Tabs value={outputFormat} onValueChange={(value: string) => setOutputFormat(value as "css" | "tailwind")}>
+                      <TabsList className="grid w-full grid-cols-2 mb-4">
+                        <TabsTrigger value="css">CSS</TabsTrigger>
+                        <TabsTrigger value="tailwind">Tailwind</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="css" className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Background Property</Label>
+                          <div className="relative">
+                            <pre className="p-3 bg-muted rounded text-sm overflow-x-auto border">
+                              <code>{`background: ${cssGradient};`}</code>
+                            </pre>
+                            <Button
+                              onClick={() => copyToClipboard(`background: ${cssGradient};`)}
+                              size="sm"
+                              className="absolute top-2 right-2"
+                            >
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label>CSS Class</Label>
+                          <div className="relative">
+                            <pre className="p-3 bg-muted rounded text-sm overflow-x-auto border">
+                              <code>{`.gradient {\n  background: ${cssGradient};\n}`}</code>
+                            </pre>
+                            <Button
+                              onClick={() => copyToClipboard(`.gradient {\n  background: ${cssGradient};\n}`)}
+                              size="sm"
+                              className="absolute top-2 right-2"
+                            >
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </TabsContent>
+                      
+                      <TabsContent value="tailwind" className="space-y-4">
+                        {/* Version Selector */}
+                        <div className="space-y-2">
+                          <Label>Tailwind CSS Version</Label>
+                          <Tabs value={tailwindVersion} onValueChange={(value: string) => setTailwindVersion(value as "v3" | "v4")}>
+                            <TabsList className="grid w-full grid-cols-2">
+                              <TabsTrigger value="v3">v3 (Current)</TabsTrigger>
+                              <TabsTrigger value="v4">v4 (Latest)</TabsTrigger>
+                            </TabsList>
+                          </Tabs>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Tailwind CSS {tailwindVersion.toUpperCase()} Classes</Label>
+                          <div className="relative">
+                            <pre className="p-3 bg-muted rounded text-sm overflow-x-auto border">
+                              <code>{tailwindGradient}</code>
+                            </pre>
+                            <Button
+                              onClick={() => copyToClipboard(tailwindGradient)}
+                              size="sm"
+                              className="absolute top-2 right-2"
+                            >
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Usage Example</Label>
+                          <div className="relative">
+                            <pre className="p-3 bg-muted rounded text-sm overflow-x-auto border">
+                              <code>{`<div class="${tailwindGradient}">\n  <!-- Content -->\n</div>`}</code>
+                            </pre>
+                            <Button
+                              onClick={() => copyToClipboard(`<div class="${tailwindGradient}">\n  <!-- Content -->\n</div>`)}
+                              size="sm"
+                              className="absolute top-2 right-2"
+                            >
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        {tailwindVersion === "v4" ? (
+                          <div className="p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded">
+                            <p className="text-sm text-blue-800 dark:text-blue-200">
+                              <strong>Tailwind CSS v4:</strong> Uses new gradient syntax (bg-linear-*, bg-radial-*). 
+                              This is the latest version with improved gradient utilities.
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded">
+                            <p className="text-sm text-green-800 dark:text-green-200">
+                              <strong>Tailwind CSS v3:</strong> Uses traditional gradient syntax (bg-gradient-*). 
+                              This is the stable version currently in wide use.
+                            </p>
+                          </div>
+                        )}
+                        
+                        {tailwindGradient.includes("bg-[") && (
+                          <div className="p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded">
+                            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                              <strong>Complex Gradient:</strong> Using arbitrary value because:
+                              <br />• Colors not in Tailwind&apos;s standard palette, or
+                              <br />• More than 3 color stops (Tailwind supports max 3: from/via/to)
+                              <br /><br />
+                              <strong>Note:</strong> Tailwind CSS supports position syntax like:
+                              <br />• <code>from-blue-500 from-10%</code>
+                              <br />• <code>via-red-500 via-30%</code> 
+                              <br />• <code>to-green-500 to-90%</code>
+                              <br /><br />
+                              <strong>Arbitrary Value Format:</strong> <code>bg-[linear-gradient(...)]</code>
+                            </p>
+                          </div>
+                        )}
+                      </TabsContent>
+                    </Tabs>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
-        </div>
+        </main>
       </div>
     </>
   );
