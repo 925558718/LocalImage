@@ -22,9 +22,9 @@ const inter = Inter({
 	weight: ["400", "500", "600", "700", "800", "900"]
 });
 export const metadata: Metadata = {
-	title: "WebP Animation Creator - LocalImage | Convert Images to Animated WebP & GIF",
+	title: "WebP Animation Creator - LocalImage | Convert Images",
 	description: "Free online WebP and GIF animation creator. Convert multiple images into high-quality animations with local processing. No uploads required, privacy protected.",
-	keywords: "WebP animation, GIF creator, animation creator, image to animation, online animation tool, local processing, privacy, webp converter, gif maker, image animation",
+	keywords: "WebP animation, GIF creator, animation creator, image to animation, online animation tool",
 	authors: [{ name: "limgx.com" }],
 	robots: {
 		index: true,

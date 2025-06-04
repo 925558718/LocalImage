@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "CSS Gradient Generator - LocalImage | Create Beautiful Gradients with Tailwind Support",
+  title: "CSS Gradient Generator - LocalImage | Create Gradients",
   description: "Free online CSS gradient generator with live preview, Tailwind CSS v3/v4 support, and copy-ready code. Create beautiful linear and radial gradients for your web projects with real-time editing.",
-  keywords: "css gradient, gradient generator, tailwind gradients, linear gradient, radial gradient, css tools, web development, color picker, gradient maker, tailwind css, css generator",
+  keywords: "css gradient, gradient generator, tailwind gradients, linear gradient, radial gradient, css tools",
   authors: [{ name: "limgx.com" }],
   robots: {
     index: true,

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "Image Compressor - LocalImage | Reduce Image Size Online",
+	title: "Image Compressor - LocalImage | Reduce Image Size",
 	description: "Free online image compression tool. Reduce image file sizes without losing quality. Supports JPG, PNG, WebP formats with local processing for privacy protection.",
-	keywords: "image compression, compress images online, reduce image size, JPG compressor, PNG compressor, WebP optimizer, local image processing, privacy safe compression",
+	keywords: "image compression, compress images online, reduce image size, JPG compressor, PNG compressor",
 	authors: [{ name: "limgx.com" }],
 	robots: {
 		index: true,
