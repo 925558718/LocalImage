@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { useI18n } from "@/hooks/useI18n";
+import Image from "next/image";
 
 interface ImagePreviewProps {
   files: File[];
@@ -36,14 +37,17 @@ export function ImagePreview({ files, onRemoveFile, onClearAllFiles, onAddMoreFi
             <div key={`${file.name}-${index}`} className="relative group">
               <div className="h-[100px] w-[100px] rounded-md overflow-hidden border bg-muted flex items-center justify-center">
                 {filePreview ? (
-                  <img 
+                  <Image 
                     src={filePreview} 
                     alt={file.name} 
+                    width={100}
+                    height={100}
                     className="object-cover w-full h-full"
                     onLoad={() => {
                       // 加载后释放URL避免内存泄漏
                       URL.revokeObjectURL(filePreview);
                     }}
+                    unoptimized // 由于是blob URL，需要禁用优化
                   />
                 ) : (
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

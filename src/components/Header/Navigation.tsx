@@ -43,6 +43,26 @@ function Navigation() {
 				</svg>
 			),
 		},
+		{
+			href: "/dev/gradient",
+			labelKey: "nav_gradient_generator",
+			description: "gradient_generator_desc",
+			icon: (
+				<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<defs>
+						<linearGradient id="gradientIcon" x1="0%" y1="0%" x2="100%" y2="100%">
+							<stop offset="0%" stopColor="#3b82f6" />
+							<stop offset="50%" stopColor="#8b5cf6" />
+							<stop offset="100%" stopColor="#06b6d4" />
+						</linearGradient>
+					</defs>
+					<rect x="4" y="4" width="16" height="16" rx="2" fill="url(#gradientIcon)" fillOpacity="0.3" stroke="currentColor" strokeWidth={1.5} />
+					<circle cx="8" cy="8" r="1.5" fill="currentColor" />
+					<circle cx="16" cy="16" r="1.5" fill="currentColor" />
+					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 8L16 16" strokeDasharray="2 2" />
+				</svg>
+			),
+		},
 	];
 
 	return (

@@ -1,6 +1,7 @@
 import ffm_ins from "@/lib/ffmpeg";
 import { useState, useRef, useEffect } from "react";
 import { useI18n } from "@/hooks/useI18n";
+import { useFFmpeg } from "@/hooks/useFFmpeg";
 import CompressItem from "./components/CompressItem";
 import {
 	Select,
@@ -14,6 +15,7 @@ import {
 import Advanced from "./components/Advanced";
 import { DropzoneWithPreview } from "./components/DropzoneWithPreview";
 import EzoicAd from "@/components/AdSense";
+import { Loader2, Upload } from "lucide-react";
 
 // 导入FFMPEG类用于静态方法调用
 import { FFMPEG } from "@/lib/ffmpeg";
@@ -23,6 +25,7 @@ function ImageTrans() {
 	const [progress, setProgress] = useState(0);
 	const [currentFileName, setCurrentFileName] = useState("");
 	const { t } = useI18n();
+	const { isLoading: ffmpegLoading, isReady: ffmpegReady, error: ffmpegError } = useFFmpeg();
 	const [downloadList, setDownloadList] = useState<
 		{ 
 			url: string; 
@@ -50,14 +53,6 @@ function ImageTrans() {
 			const updatedFiles = [...prevFiles, ...newFiles];
 			console.log(`[文件选择] 更新后总文件数量: ${updatedFiles.length}`);
 			
-			// 文件选择后预热FFmpeg实例
-			if (updatedFiles.length > 0 && ffm_ins) {
-				console.log('[性能优化] 开始预热FFmpeg实例...');
-				ffm_ins.load().catch(error => {
-					console.warn('[性能优化] FFmpeg预热失败:', error);
-				});
-			}
-			
 			return updatedFiles;
 		});
 	};
@@ -76,16 +71,8 @@ function ImageTrans() {
 	const [format, setFormat] = useState("webp");
 	const [advanced, setAdvanced] = useState({ width: "", height: "", quality: 85 });
 	
-	// 组件卸载时清理内存
+	// 组件挂载时自动加载FFmpeg - 现在由useFFmpeg hook处理
 	useEffect(() => {
-		// 组件挂载时预热FFmpeg实例
-		if (ffm_ins) {
-			console.log('[性能优化] 组件挂载时预热FFmpeg实例...');
-			ffm_ins.load().catch(error => {
-				console.warn('[性能优化] 组件挂载时FFmpeg预热失败:', error);
-			});
-		}
-		
 		return () => {
 			// 清理FFmpeg内存和实例池
 			if (ffm_ins) {
@@ -133,6 +120,27 @@ function ImageTrans() {
 	// 处理压缩
 	async function handleCompress() {
 		if (files.length === 0) return;
+		
+		// 如果FFmpeg还在加载中，不执行
+		if (ffmpegLoading) {
+			console.log('[按钮点击] FFmpeg正在加载中，忽略点击');
+			return;
+		}
+		
+		// 如果FFmpeg未准备好，提示用户
+		if (!ffmpegReady) {
+			console.log('[按钮点击] FFmpeg未准备好，提示用户');
+			alert('FFmpeg正在加载中，请稍等...');
+			return;
+		}
+
+		// 如果有错误，提示用户
+		if (ffmpegError) {
+			alert(`FFmpeg加载失败: ${ffmpegError}`);
+			return;
+		}
+		
+		console.log('[压缩流程] 开始压缩流程');
 		setLoading(true);
 		setProgress(0);
 		setCurrentFileName("");
@@ -292,7 +300,19 @@ function ImageTrans() {
 	return (
 		<div className="w-full max-w-6xl mx-auto">
 			{/* 玻璃效果容器 */}
-			<div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl p-8 border border-white/20 dark:border-slate-700/20 shadow-xl">
+			<div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl p-8 border border-white/20 dark:border-slate-700/20 shadow-xl relative">
+				{/* Loading 状态指示器 - 绝对定位在容器外部顶部 */}
+				{(ffmpegLoading || !ffmpegReady || loading) && (
+					<div className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-10 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 backdrop-blur-sm rounded-2xl p-3 border border-blue-200/50 dark:border-blue-700/30 shadow-lg">
+						<div className="flex items-center gap-3">
+							<Loader2 className="w-4 h-4 text-blue-600 dark:text-blue-400 animate-spin" />
+							<span className="text-blue-700 dark:text-blue-300 font-medium text-sm">
+								{ffmpegLoading || !ffmpegReady ? '正在加载FFMPEG核心...' : t("compressing_btn")}
+							</span>
+						</div>
+					</div>
+				)}
+
 				{/* 操作栏 */}
 				<div className="flex gap-4 justify-center mb-8 flex-wrap">
 					{/* 格式选择器 */}
@@ -319,21 +339,16 @@ function ImageTrans() {
 					
 					<Button 
 						onClick={handleCompress} 
-						disabled={loading || files.length === 0}
-						className="px-8 h-[50px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+						disabled={loading || ffmpegLoading || !ffmpegReady || files.length === 0}
+						className="px-8 h-[50px] w-48 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
-						{loading ? (
-							<div className="flex items-center gap-2">
-								<div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-								<span>{t("compressing_btn")}</span>
-							</div>
+						{ffmpegLoading || !ffmpegReady || loading ? (
+							<Loader2 className="w-5 h-5 animate-spin" />
 						) : (
-							<div className="flex items-center gap-2">
-								<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-								</svg>
+							<>
+								<Upload className="w-5 h-5" />
 								<span>{t("compress_btn")}</span>
-							</div>
+							</>
 						)}
 					</Button>
 				</div>
