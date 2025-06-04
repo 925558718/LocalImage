@@ -143,6 +143,7 @@ export default async function RootLayout({
 						}
 					})}
 				</script>
+				<script src="https://analytics.ahrefs.com/analytics.js" data-key="fAy0GhLZ8HwbJfkrQ3zMOw" async></script>
 			</head>
 			<body
 				className={clsx("bg-background text-foreground", Opensans.variable, inter.variable)}
