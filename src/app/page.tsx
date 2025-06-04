@@ -1,29 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import ffmpeg from "@/lib/ffmpeg";
-import { Skeleton } from "@/components/shadcn";
 import AnimationComposer from "@/components/animation";
-import { useI18n } from "@/hooks/useI18n";
 
 function Page() {
-	const { t } = useI18n();
-	const [isLoading, setIsLoading] = useState(true);
-	
-	useEffect(() => {
-		if (ffmpeg) {
-			ffmpeg.load().then(() => {
-				setIsLoading(false);
-			}).catch((error) => {
-				console.error('FFmpeg加载失败:', error);
-				setIsLoading(false); // 即使失败也停止loading状态
-			});
-		} else {
-			// 如果ffmpeg实例不存在（比如在服务端），直接停止loading
-			setIsLoading(false);
-		}
-	}, []);
-	
 	return (
 		<>
 			<style jsx>{`
@@ -123,26 +102,9 @@ function Page() {
 				
 				{/* 内容区域 */}
 				<div className="relative z-10 w-full">
-					{isLoading ? (
-						<div className="flex flex-col items-center justify-center space-y-6">
-							<div className="text-center">
-								{/* Simple Loading Spinner */}
-								<div className="w-16 h-16 border-4 border-gray-200 dark:border-gray-700 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
-								
-								{/* Loading Text */}
-								<div className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-									{t("initializing_animation_engine")}
-								</div>
-								<div className="text-sm text-gray-500 dark:text-gray-400">
-									{t("loading_webp_gif_processing")}
-								</div>
-							</div>
-						</div>
-					) : (
-						<div className="w-full max-w-7xl mx-auto">
-							<AnimationComposer />
-						</div>
-					)}
+					<div className="w-full max-w-7xl mx-auto">
+						<AnimationComposer />
+					</div>
 				</div>
 			</main>
 		</>

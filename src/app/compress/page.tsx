@@ -1,28 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import ffmpeg from "@/lib/ffmpeg";
-import { Skeleton } from "@/components/shadcn";
 import Compress from "@/components/compress";
 import { useI18n } from "@/hooks/useI18n";
 
 function CompressionPage() {
 	const { t } = useI18n();
-	const [isLoading, setIsLoading] = useState(true);
-	
-	useEffect(() => {
-		if (ffmpeg) {
-			ffmpeg.load().then(() => {
-				setIsLoading(false);
-			}).catch((error) => {
-				console.error('FFmpeg加载失败:', error);
-				setIsLoading(false); // 即使失败也停止loading状态
-			});
-		} else {
-			// 如果ffmpeg实例不存在（比如在服务端），直接停止loading
-			setIsLoading(false);
-		}
-	}, []);
 	
 	return (
 		<div className="min-h-screen w-full relative overflow-hidden">
@@ -61,34 +43,7 @@ function CompressionPage() {
 
 				{/* 内容区域 */}
 				<div className="w-full max-w-6xl">
-					{isLoading ? (
-						<div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl p-8 border border-white/20 dark:border-slate-700/20 shadow-xl">
-							<div className="text-center mb-6">
-								<div className="text-xl font-semibold mb-2 text-slate-800 dark:text-slate-200">
-									{t("load_ffmpeg")}
-								</div>
-								<div className="text-sm text-slate-600 dark:text-slate-400">
-									{t("initializing_image_engine")}
-								</div>
-							</div>
-							
-							{/* 加载骨架 */}
-							<div className="space-y-6">
-								{/* 操作栏骨架 */}
-								<div className="flex gap-3 justify-center flex-wrap">
-									<Skeleton className="h-10 w-32 rounded-xl" />
-									<Skeleton className="h-10 w-24 rounded-xl" />
-									<Skeleton className="h-10 w-28 rounded-xl" />
-									<Skeleton className="h-10 w-32 rounded-xl" />
-								</div>
-								
-								{/* 上传区域骨架 */}
-								<Skeleton className="h-64 w-full rounded-2xl" />
-							</div>
-						</div>
-					) : (
-						<Compress />
-					)}
+					<Compress />
 				</div>
 			</main>
 		</div>

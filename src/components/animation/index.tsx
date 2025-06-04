@@ -1,6 +1,7 @@
 import ffm_ins from "@/lib/ffmpeg";
 import { useState, useRef } from "react";
 import { useI18n } from "@/hooks/useI18n";
+import { useFFmpeg } from "@/hooks/useFFmpeg";
 import {
 	Select,
 	SelectContent,
@@ -13,13 +14,14 @@ import {
 	Label,
 } from "@/components/shadcn";
 import { DropzoneWithPreview } from "../compress/components/DropzoneWithPreview";
-import { Download, Play, Pause } from "lucide-react";
+import { Download, Play, Pause, Loader2, Clapperboard } from "lucide-react";
 
 function AnimationComposer() {
 	const [loading, setLoading] = useState(false);
 	const [progress, setProgress] = useState(0);
 	const [currentFileName, setCurrentFileName] = useState("");
 	const { t } = useI18n();
+	const { isLoading: ffmpegLoading, isReady: ffmpegReady, error: ffmpegError } = useFFmpeg();
 	const [animationResult, setAnimationResult] = useState<{
 		url: string;
 		name: string;
@@ -103,18 +105,11 @@ function AnimationComposer() {
 	// 处理动画合成
 	async function handleCreateAnimation() {
 		// 检查是否有足够的图片
-		if (files.length < 2) {
-			alert(t("min_files_alert"));
-			return;
-		}
+		if (files.length < 2 || !ffmpegReady) return;
+
 		
 		// 显示文件排序信息
 		const sortedFiles = getSortedFiles(files);
-		console.log('=== 动画合成开始 ===');
-		console.log('原始文件顺序:', files.map(f => f.name));
-		console.log('排序后顺序:', sortedFiles.map(f => f.name));
-		console.log('文件数量:', sortedFiles.length);
-		console.log('设置 - 格式:', format, '帧率:', frameRate[0], '质量:', quality[0]);
 		
 		setLoading(true);
 		setProgress(0);
@@ -132,7 +127,6 @@ function AnimationComposer() {
 			if (!isFFmpegWorking) {
 				throw new Error(t("ffmpeg_test_failed"));
 			}
-			console.log('[动画合成] FFmpeg测试通过');
 
 			setCurrentFileName(t("composing_animation"));
 			const outputName = `animation_${Date.now()}.${format}`;
@@ -173,7 +167,6 @@ function AnimationComposer() {
 			}, 1000);
 			
 		} catch (error) {
-			console.error("动画合成失败:", error);
 			alert(`${t("animation_failed")}: ${error instanceof Error ? error.message : t("unknown_error")}`);
 		} finally {
 			setLoading(false);
@@ -297,7 +290,19 @@ function AnimationComposer() {
 				</div>
 
 				{/* Modern Container with Glass Effect */}
-				<div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden">
+				<div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden relative">
+					{/* Loading 状态指示器 - 绝对定位在容器外部顶部 */}
+					{(ffmpegLoading || !ffmpegReady || loading) && (
+						<div className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-10 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 backdrop-blur-sm rounded-2xl p-3 border border-purple-200/50 dark:border-purple-700/30 shadow-lg">
+							<div className="flex items-center gap-3">
+								<Loader2 className="w-4 h-4 text-purple-600 dark:text-purple-400 animate-spin" />
+								<span className="text-purple-700 dark:text-purple-300 font-medium text-sm">
+									{ffmpegLoading || !ffmpegReady ? t("load_ffmpeg") : t("creating_animation")}
+								</span>
+							</div>
+						</div>
+					)}
+
 					{/* Header Section */}
 					<div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 px-8 py-6 border-b border-slate-200/50 dark:border-slate-600/50">
 						<div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -401,11 +406,18 @@ function AnimationComposer() {
 								
 								<Button 
 									onClick={handleCreateAnimation} 
-									disabled={loading || files.length < 2}
+									disabled={loading || ffmpegLoading || !ffmpegReady || files.length < 2}
 									size="sm"
-									className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg"
+									className="w-40 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg disabled:opacity-50"
 								>
-									{loading ? t("creating_animation") : t("create_animation")}
+									{ffmpegLoading || !ffmpegReady || loading ? (
+										<Loader2 className="w-4 h-4 animate-spin" />
+									) : (
+										<>
+											<Clapperboard className="w-4 h-4 mr-2" />
+											{t("create_animation")}
+										</>
+									)}
 								</Button>
 							</div>
 						</div>

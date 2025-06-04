@@ -57,7 +57,9 @@ function Navigation() {
 						</linearGradient>
 					</defs>
 					<rect x="4" y="4" width="16" height="16" rx="2" fill="url(#gradientIcon)" fillOpacity="0.3" stroke="currentColor" strokeWidth={1.5} />
-					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 8l8 8M8 16l8-8" />
+					<circle cx="8" cy="8" r="1.5" fill="currentColor" />
+					<circle cx="16" cy="16" r="1.5" fill="currentColor" />
+					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 8L16 16" strokeDasharray="2 2" />
 				</svg>
 			),
 		},

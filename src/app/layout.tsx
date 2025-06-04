@@ -9,6 +9,7 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import { Open_Sans, Inter } from "next/font/google";
 import clsx from "clsx";
 import { Toaster } from "@/components/shadcn/sonner";
+import { Provider as JotaiProvider } from "jotai";
 
 const Opensans = Open_Sans({
 	subsets: ["latin"],
@@ -153,10 +154,12 @@ export default async function RootLayout({
 					enableSystem={false}
 				>
 					<TranslationProvider value={dictionary}>
-						<Header />
-						{children}
-						<Footer />
-						<Toaster />
+						<JotaiProvider>
+							<Header />
+							{children}
+							<Footer />
+							<Toaster />
+						</JotaiProvider>
 					</TranslationProvider>
 				</ThemeProvider>
 				<GoogleAnalytics gaId="G-89618T8EX2" />
