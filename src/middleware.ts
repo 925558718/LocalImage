@@ -3,9 +3,20 @@ import type { NextRequest } from 'next/server';
 import { routing } from './i18n/routing';
 import createMiddleware from 'next-intl/middleware';
 
-export default createMiddleware(routing);
+const intlMiddleware = createMiddleware(routing);
 
-export const middleware = createMiddleware(routing);
+// 自定义中间件，确保sitemap.xml和robots.txt在根路径可用
+export default function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  
+  // 对于sitemap.xml和robots.txt特殊处理，让它们不通过语言路由
+  if (pathname === '/sitemap.xml' || pathname === '/robots.txt') {
+    return NextResponse.next();
+  }
+  
+  // 其他路径使用next-intl的中间件
+  return intlMiddleware(request);
+}
 
 // 配置中间件应用于所有路由
 export const config = {

@@ -1,11 +1,14 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
+  const baseUrl = 'https://www.limgx.com';
+  
   return {
     rules: {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://www.limgx.com/sitemap.xml',
+    // next-intl 将自动处理这个路径
+    sitemap: `${baseUrl}/sitemap.xml`,
   };
 }
