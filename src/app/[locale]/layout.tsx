@@ -14,7 +14,8 @@ import {
 	dictionaries, 
 	defaultLocale, 
 	getOpenGraphLocale,
-	SupportedLocale 
+	SupportedLocale,
+	supportedLocales
 } from '@/i18n/langMap';
 
 const Opensans = Open_Sans({
@@ -47,6 +48,25 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 	// 构建其他语言的alternate locales
 	const alternateLocales = ['en_US', 'zh_CN', 'ja_JP', 'es_ES', 'fr_FR', 'de_DE', 'ru_RU'].filter(l => l !== ogLocale);
 	
+	// 构建基础URL
+	const baseUrl = "https://www.limgx.com";
+	
+	// 构建当前语言的URL (默认语言不需要语言前缀)
+	const currentUrl = locale === defaultLocale ? baseUrl : `${baseUrl}/${locale}`;
+	
+	// 构建备用语言链接
+	const languageAlternates: Record<string, string> = {};
+	
+	// 添加默认语言链接
+	languageAlternates[defaultLocale] = baseUrl;
+	
+	// 添加其他语言链接
+	supportedLocales.forEach(lang => {
+		if (lang !== defaultLocale) {
+			languageAlternates[lang] = `${baseUrl}/${lang}`;
+		}
+	});
+	
 	return {
 		title,
 		description,
@@ -67,7 +87,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 			title,
 			description,
 			type: "website",
-			url: "https://www.limgx.com",
+			url: currentUrl,
 			images: ["https://www.limgx.com/images/webp-animation-preview.jpg"],
 			siteName: "LocalImage WebP Animation Creator",
 			locale: ogLocale,
@@ -81,7 +101,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 			creator: "@limgx_official",
 		},
 		alternates: {
-			canonical: "https://www.limgx.com",
+			canonical: currentUrl,
+			languages: languageAlternates
 		}
 	};
 }
