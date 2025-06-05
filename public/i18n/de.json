@@ -9,6 +9,19 @@
 	"download": "Herunterladen",
 	"download_all": "Alle herunterladen",
 	"advance": "Erweiterte Einstellungen",
+	"meta_title": "WebP-Animations-Generator - LocalImage | Konvertieren Sie Bilder zu animierten WebP & GIF",
+	"meta_description": "Kostenloser Online-WebP- und GIF-Animations-Generator. Konvertieren Sie mehrere Bilder in hochwertige Animationen mit lokaler Verarbeitung. Keine Uploads erforderlich, Datenschutz geschützt.",
+	"meta_keywords": "WebP-Animation, GIF-Generator, Animations-Generator, Bild zu Animation, Online-Animationstool, WebP-Konverter, kostenloser Animations-Ersteller",
+	"structured_data_app_name": "LocalImage WebP-Animations-Generator",
+	"structured_data_description": "Kostenloser Online-WebP-Animations-Generator. Konvertieren Sie mehrere Bilder in hochwertige Animationen mit lokaler Verarbeitung.",
+	"structured_data_features": [
+		"WebP-Animations-Erstellung",
+		"Unterstützung multipler Bildformate",
+		"Lokale Verarbeitung schützt Privatsphäre",
+		"Keine Server-Uploads erforderlich",
+		"Anpassbare Bildrate und Qualität",
+		"Echtzeit-Vorschau-Funktionalität"
+	],
 	"advanceoption": {
 		"width": "Breite",
 		"height": "Höhe",

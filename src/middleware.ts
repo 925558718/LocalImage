@@ -1,15 +1,11 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { routing } from './i18n/routing';
+import createMiddleware from 'next-intl/middleware';
 
-export function middleware(request: NextRequest) {
-  // 获取响应
-  const response = NextResponse.next();
-  
-  // 添加X-Robots-Tag头部，允许索引和跟踪
-  response.headers.set('X-Robots-Tag', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
-  
-  return response;
-}
+export default createMiddleware(routing);
+
+export const middleware = createMiddleware(routing);
 
 // 配置中间件应用于所有路由
 export const config = {

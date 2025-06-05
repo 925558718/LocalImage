@@ -1,6 +1,7 @@
+"use client";
 import ffm_ins from "@/lib/ffmpeg";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useI18n } from "@/hooks/useI18n";
+import { useTranslations } from 'next-intl';
 import { useFFmpeg } from "@/hooks/useFFmpeg";
 import {
 	Select,
@@ -22,7 +23,7 @@ function AnimationComposer() {
 	const [loading, setLoading] = useState(false);
 	const [progress, setProgress] = useState(0);
 	const [currentFileName, setCurrentFileName] = useState("");
-	const { t } = useI18n();
+	const t = useTranslations();
 	const { isLoading: ffmpegLoading, isReady: ffmpegReady, error: ffmpegError } = useFFmpeg();
 	const [animationResult, setAnimationResult] = useState<{
 		url: string;

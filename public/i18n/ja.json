@@ -9,6 +9,19 @@
 	"download": "ダウンロード",
 	"download_all": "すべてダウンロード",
 	"advance": "詳細設定",
+	"meta_title": "WebPアニメーション作成ツール - LocalImage | 画像をアニメーションに変換",
+	"meta_description": "無料オンラインWebPおよびGIFアニメーション作成ツール。複数の画像を高品質アニメーションに変換、ローカル処理でアップロード不要、プライバシー保護。",
+	"meta_keywords": "WebPアニメーション, GIF作成ツール, アニメーション作成, 画像からアニメーション, オンラインアニメーションツール, WebP変換, 無料アニメーション作成",
+	"structured_data_app_name": "LocalImage WebPアニメーション作成ツール",
+	"structured_data_description": "無料オンラインWebPアニメーション作成ツール。複数の画像を高品質アニメーションに変換、ローカル処理でプライバシー保護。",
+	"structured_data_features": [
+		"WebPアニメーション作成",
+		"複数画像フォーマット対応",
+		"ローカル処理でプライバシー保護",
+		"サーバーアップロード不要",
+		"カスタムフレームレートと品質",
+		"リアルタイムプレビュー機能"
+	],
 	"advanceoption": {
 		"width": "幅",
 		"height": "高さ",

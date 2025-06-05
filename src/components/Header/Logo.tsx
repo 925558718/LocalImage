@@ -1,10 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { useI18n } from "@/hooks/useI18n";
+import { Link } from '@/i18n/navigation';
+import { useTheme } from "next-themes";
+import { useTranslations } from 'next-intl';
 
 function Logo() {
-	const { t } = useI18n();
+	const { theme } = useTheme();
+	const t = useTranslations();
 
 	return (
 		<Link href="/" className="flex items-center space-x-3 hover:opacity-90 transition-all duration-300 group">

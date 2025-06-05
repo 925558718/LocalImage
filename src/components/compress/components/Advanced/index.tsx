@@ -7,7 +7,7 @@ import {
 	Label,
 	Slider,
 } from "@/components/shadcn";
-import { useI18n } from "@/hooks/useI18n";
+import { useTranslations } from 'next-intl';
 import { useState } from "react";
 
 interface AdvancedProps {
@@ -15,7 +15,7 @@ interface AdvancedProps {
 }
 
 function Advanced({ onChange }: AdvancedProps) {
-	const { t } = useI18n();
+	const t = useTranslations();
 	const [width, setWidth] = useState("");
 	const [height, setHeight] = useState("");
 	const [quality, setQuality] = useState(85);

@@ -1,4 +1,4 @@
-import { useI18n } from "@/hooks/useI18n";
+import { useTranslations } from 'next-intl';
 import Image from "next/image";
 
 interface AnimationPreviewProps {
@@ -10,7 +10,7 @@ interface AnimationPreviewProps {
 }
 
 function AnimationPreview({ url, format, size, frameCount, frameRate }: AnimationPreviewProps) {
-	const { t } = useI18n();
+	const t = useTranslations();
 
 	return (
 		<div className="flex flex-col items-center space-y-4 p-4 border rounded-lg bg-muted/20">
