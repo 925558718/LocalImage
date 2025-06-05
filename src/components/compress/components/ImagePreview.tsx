@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { useI18n } from "@/hooks/useI18n";
+import { useTranslations } from 'next-intl';
 import Image from "next/image";
 
 interface ImagePreviewProps {
@@ -10,7 +10,7 @@ interface ImagePreviewProps {
 }
 
 export function ImagePreview({ files, onRemoveFile, onClearAllFiles, onAddMoreFiles }: ImagePreviewProps) {
-  const { t } = useI18n();
+  const t = useTranslations();
   
   if (files.length === 0) return null;
   

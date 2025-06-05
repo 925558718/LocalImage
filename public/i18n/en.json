@@ -9,6 +9,19 @@
 	"download": "Download",
 	"download_all": "Download All",
 	"advance": "Advanced Settings",
+	"meta_title": "WebP Animation Creator - LocalImage | Convert Images to Animated WebP & GIF",
+	"meta_description": "Free online WebP and GIF animation creator. Convert multiple images into high-quality animations with local processing. No uploads required, privacy protected.",
+	"meta_keywords": "WebP animation, GIF creator, animation creator, image to animation, online animation tool, WebP converter, free animation maker",
+	"structured_data_app_name": "LocalImage WebP Animation Creator",
+	"structured_data_description": "Free online WebP animation creator. Convert multiple images into high-quality animations with local processing.",
+	"structured_data_features": [
+		"WebP animation creation",
+		"Multiple image format support",
+		"Local processing protects privacy",
+		"No server uploads required",
+		"Custom frame rate and quality",
+		"Real-time preview functionality"
+	],
 	"advanceoption": {
 		"width": "Width",
 		"height": "Height",

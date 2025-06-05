@@ -1,10 +1,10 @@
 "use client";
 
 import Compress from "@/components/compress";
-import { useI18n } from "@/hooks/useI18n";
+import { useTranslations } from 'next-intl';
 
 function CompressionPage() {
-	const { t } = useI18n();
+	const t = useTranslations();
 	
 	return (
 		<div className="min-h-screen w-full relative overflow-hidden">

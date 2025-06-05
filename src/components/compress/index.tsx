@@ -1,6 +1,7 @@
+"use client";
 import ffm_ins from "@/lib/ffmpeg";
 import { useState, useRef, useEffect } from "react";
-import { useI18n } from "@/hooks/useI18n";
+import { useTranslations } from 'next-intl';
 import { useFFmpeg } from "@/hooks/useFFmpeg";
 import CompressItem from "./components/CompressItem";
 import {
@@ -20,11 +21,11 @@ import { Loader2, Upload } from "lucide-react";
 // 导入FFMPEG类用于静态方法调用
 import { FFMPEG } from "@/lib/ffmpeg";
 
-function ImageTrans() {
+export default function Compress() {
 	const [loading, setLoading] = useState(false);
 	const [progress, setProgress] = useState(0);
 	const [currentFileName, setCurrentFileName] = useState("");
-	const { t } = useI18n();
+	const t = useTranslations();
 	const { isLoading: ffmpegLoading, isReady: ffmpegReady, error: ffmpegError } = useFFmpeg();
 	const [downloadList, setDownloadList] = useState<
 		{ 
@@ -501,5 +502,3 @@ function ImageTrans() {
 		</div>
 	);
 }
-
-export default ImageTrans;

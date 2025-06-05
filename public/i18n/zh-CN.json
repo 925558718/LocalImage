@@ -9,6 +9,19 @@
 	"download": "下载",
 	"download_all": "全部下载",
 	"advance": "高级设置",
+	"meta_title": "WebP动画制作工具 - LocalImage | 将图片转换为动画",
+	"meta_description": "免费在线WebP和GIF动画制作工具。将多张图片快速合成为高质量动画，本地处理不上传服务器，保护您的隐私。",
+	"meta_keywords": "WebP动画, GIF制作器, 动画制作, 图片转动画, 在线动画工具, WebP转换器, 免费动画制作",
+	"structured_data_app_name": "LocalImage WebP动画合成器",
+	"structured_data_description": "免费在线WebP动画合成工具，将多张图片快速合成为高质量动图，本地处理保护隐私。",
+	"structured_data_features": [
+		"WebP动画合成",
+		"多格式图片支持",
+		"本地处理保护隐私",
+		"无需上传服务器",
+		"自定义帧率和质量",
+		"实时预览功能"
+	],
 	"advanceoption": {
 		"width": "宽度",
 		"height": "高度",

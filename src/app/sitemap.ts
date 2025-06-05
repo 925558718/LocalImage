@@ -27,14 +27,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const currentDate = new Date().toISOString();
   
-  // Supported languages
+  // 支持的语言 - 显式声明
   const languages = {
-    'zh-CN': 'https://www.limgx.com',
     'en': 'https://www.limgx.com',
-    'ja': 'https://www.limgx.com',
-    'es': 'https://www.limgx.com',
-    'fr': 'https://www.limgx.com',
-    'de': 'https://www.limgx.com',
+    'zh-CN': 'https://www.limgx.com/zh-CN',
+    'ja': 'https://www.limgx.com/ja',
+    'es': 'https://www.limgx.com/es',
+    'fr': 'https://www.limgx.com/fr',
+    'de': 'https://www.limgx.com/de',
+    'ru': 'https://www.limgx.com/ru'
   };
 
   // Convert each route to sitemap entry

@@ -1,9 +1,9 @@
 "use client"
-import { useI18n } from "@/hooks/useI18n";
-import Link from "next/link";
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 function Footer() {
-	const { t } = useI18n();
+	const t = useTranslations();
 	return (
 		<footer className="w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-white/20 dark:border-slate-700/50 shadow-lg shadow-black/5">
 			<div className="max-w-7xl mx-auto px-4 py-16 relative">

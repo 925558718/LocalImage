@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useI18n } from "@/hooks/useI18n";
+import { useTranslations } from 'next-intl';
 
 interface DropZoneProps {
   onFilesSelected: (files: File[]) => void;
@@ -7,7 +7,7 @@ interface DropZoneProps {
 }
 
 export function DropZone({ onFilesSelected, filesCount }: DropZoneProps) {
-  const { t } = useI18n();
+  const t = useTranslations();
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   

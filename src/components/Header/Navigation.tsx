@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useI18n } from "@/hooks/useI18n";
+import { useTranslations } from 'next-intl';
 import { cn } from "@/lib/utils";
+import { Link } from '@/i18n/navigation';
 
 interface NavigationItem {
 	href: string;
@@ -13,7 +13,7 @@ interface NavigationItem {
 }
 
 function Navigation() {
-	const { t } = useI18n();
+	const t = useTranslations();
 	const pathname = usePathname();
 
 	// 图片工具组

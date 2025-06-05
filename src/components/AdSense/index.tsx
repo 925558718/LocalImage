@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useI18n } from "@/hooks/useI18n";
+import { useTranslations } from 'next-intl';
 
 interface EzoicAdProps {
   className?: string;
@@ -16,7 +16,7 @@ export default function EzoicAd({
   style,
   showLabel = true,
 }: EzoicAdProps) {
-  const { t } = useI18n();
+  const t = useTranslations();
   const [isLoaded, setIsLoaded] = useState(false);
   const [adLabel, setAdLabel] = useState<string>("");
   const isDev = process.env.NODE_ENV === 'development';

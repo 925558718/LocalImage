@@ -1,5 +1,5 @@
 import { useRef, useState, useMemo, useEffect } from "react";
-import { useI18n } from "@/hooks/useI18n";
+import { useTranslations } from 'next-intl';
 import { Button } from "@/components/shadcn/button";
 import { Label } from "@/components/shadcn/label";
 import Image from "next/image";
@@ -18,7 +18,7 @@ export const DropzoneWithPreview = React.memo(function DropzoneWithPreview({
   onRemoveFile,
   onClearAllFiles 
 }: DropzoneWithPreviewProps) {
-  const { t } = useI18n();
+  const t = useTranslations();
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
