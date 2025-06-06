@@ -453,17 +453,23 @@ class FFMPEG {
 	 * @param outputName 输出文件名
 	 * @param frameRate 帧率，默认10fps
 	 * @param quality 质量，默认75
+	 * @param videoCodec 视频编解码器，默认为libx264（MP4）或libvpx-vp9（WebM）
+	 * @param format 输出格式（webp/gif/mp4/webm）
 	 */
 	async createAnimation({
 		images,
 		outputName,
 		frameRate = 10,
 		quality = 75,
+		videoCodec,
+		format
 	}: {
 		images: File[];
 		outputName: string;
 		frameRate?: number;
 		quality?: number;
+		videoCodec?: string;
+		format: string;
 	}): Promise<Uint8Array> {
 		await this.load();
 		
@@ -568,8 +574,14 @@ class FFMPEG {
 			// 获取输出格式
 			const ext = outputName.split(".").pop()?.toLowerCase() || "webp";
 			
+			// 确保质量在有效范围内 (1-100)
+			quality = Math.max(1, Math.min(100, quality || 75));
+			
 			console.log(`[动画合成] 开始合成 ${sortedImages.length} 张图片为 ${ext.toUpperCase()} 动画`);
 			console.log(`[动画合成] 帧率: ${frameRate}fps, 质量: ${quality}`);
+			if (videoCodec) {
+				console.log(`[动画合成] 视频编解码器: ${videoCodec}`);
+			}
 			
 			// 检查输入文件格式是否一致
 			const uniqueExts = [...new Set(fileExtensions)];
@@ -630,7 +642,78 @@ class FFMPEG {
 				// 忽略检查/删除失败
 			}
 			
-			if (ext === "webp") {
+			if (ext === "mp4" || ext === "webm") {
+				// 视频格式处理（MP4/WebM）
+				const isWebM = ext === "webm";
+				const codec = videoCodec || (isWebM ? "libvpx-vp9" : "libx264");
+				
+				// 将质量从0-100映射到编解码器特定的范围
+				let qualityParam: string[] = [];
+				
+				if (isWebM) {
+					// WebM (VP8/VP9) 质量范围: 0-63 (0=最高质量, 63=最低质量)
+					// 将0-100映射到15-35 (VP9) 或 4-63 (VP8)
+					const vpQuality = Math.round(63 - (quality / 100 * 48)); // 63-15=48
+					if (codec === "libvpx-vp9") {
+						qualityParam = ["-crf", String(vpQuality), "-b:v", "0"];
+					} else {
+						qualityParam = ["-crf", String(vpQuality), "-b:v", "1M"];
+					}
+					console.log(`[动画合成] WebM 质量: ${quality}% -> CRF ${vpQuality}`);
+				} else {
+					// MP4 (H.264/H.265) 质量范围: 0-51 (0=无损, 51=最差质量)
+					// 将0-100映射到18-36 (常用范围)
+					const crf = Math.round(51 - (quality / 100 * 33)); // 51-18=33
+					qualityParam = ["-crf", String(crf)];
+					console.log(`[动画合成] MP4 质量: ${quality}% -> CRF ${crf}`);
+				}
+				
+				const args = [
+					"-framerate", String(frameRate),
+					"-i", inputPattern,
+					"-c:v", codec,
+					...qualityParam,
+					"-pix_fmt", "yuv420p", // 确保兼容性
+					"-movflags", "+faststart", // 优化网络播放
+					"-y", // 覆盖输出文件
+					outputName
+				];
+				
+				// 添加编解码器特定参数
+				if (isWebM) {
+					if (codec === "libvpx-vp9") {
+						args.push("-deadline", "good");
+						args.push("-cpu-used", "4");
+					} else {
+						args.push("-deadline", "realtime");
+						args.push("-cpu-used", "8");
+					}
+				} else {
+					// MP4 参数
+					args.push("-preset", "medium");
+					if (codec === "libx265") {
+						args.push("-tag:v", "hvc1"); // 确保Safari兼容性
+					}
+				}
+				
+				console.log(`[动画合成] ${ext.toUpperCase()} 视频命令: ffmpeg ${args.join(' ')}`);
+				
+				try {
+					await this.ffmpeg.exec(args);
+					
+					// 检查文件是否生成
+					const checkFiles = await this.ffmpeg.listDir('/');
+					const outputExists = checkFiles.some(f => f.name === outputName);
+					console.log(`[动画合成] ${ext.toUpperCase()} 视频执行后文件检查: ${outputExists ? '成功' : '失败'}`);
+					
+					if (!outputExists) {
+						throw new Error(`${ext.toUpperCase()} 视频生成失败`);
+					}
+				} catch (error) {
+					console.error(`[动画合成] ${ext.toUpperCase()} 视频生成失败:`, error);
+					throw new Error(`${ext.toUpperCase()} 视频生成失败: ${error instanceof Error ? error.message : '未知错误'}`);
+				}
+			} else if (ext === "webp") {
 				// WebP 动画 - 使用专门的WebP动画编解码器
 				const args = [
 					"-framerate", String(frameRate),
@@ -692,11 +775,12 @@ class FFMPEG {
 					}
 				}
 			} else if (ext === "gif") {
-				// 先生成调色板
+				// GIF 动画
+				// 生成调色板
 				const paletteArgs = [
 					"-framerate", String(frameRate),
 					"-i", inputPattern,
-					"-vf", "palettegen",
+					"-vf", "fps=10,scale=320:-1:flags=lanczos,palettegen",
 					"-y", // 覆盖输出文件
 					"palette.png"
 				];
@@ -775,7 +859,7 @@ class FFMPEG {
 					}
 				}
 			} else {
-				throw new Error("仅支持WebP和GIF格式");
+				throw new Error("不支持的格式。支持: WebP, GIF, MP4, WebM");
 			}
 			
 			// 验证输出文件是否生成（最终检查）

@@ -177,5 +177,6 @@
 	"output_format": "Output Format",
 	"performance_tips": "Performance Tips",
 	"memory_optimization_tip": "Compress large files first, then process smaller ones",
-	"browser_tab_tip": "Close other memory-intensive browser tabs"
+	"browser_tab_tip": "Close other memory-intensive browser tabs",
+	"browser_not_support_video": "Your browser does not support video playback. Please try a modern browser like Chrome, Firefox, Edge, or Safari."
 }
