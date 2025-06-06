@@ -172,10 +172,14 @@
 	"animation_composer_subtitle": "Outil de Création d'Animation Professionnel",
 	"realtime_preview_desc": "Aperçu d'animation en temps réel",
 	"images_count": "images",
-	"high_quality": "Haute Qualité",
-	"fast_processing": "Traitement Rapide",
-	"output_format": "Format de Sortie",
-	"performance_tips": "Conseils de Performance",
-	"memory_optimization_tip": "Compresser d'abord les gros fichiers, puis traiter les plus petits",
-	"browser_tab_tip": "Fermer les autres onglets du navigateur qui consomment de la mémoire"
+	"high_quality": "Haute qualité",
+	"fast_processing": "Traitement rapide",
+	"output_format": "Format de sortie",
+	"select_format": "Sélectionner le format",
+	"animation": "Animation",
+	"video": "Vidéo",
+	"performance_tips": "Conseils de performance",
+	"memory_optimization_tip": "Compressez d'abord les gros fichiers, puis les plus petits",
+	"browser_tab_tip": "Fermez les autres onglets du navigateur gourmands en mémoire",
+	"browser_not_support_video": "Votre navigateur ne prend pas en charge la lecture vidéo. Veuillez essayer un navigateur moderne comme Chrome, Firefox, Edge ou Safari."
 }
