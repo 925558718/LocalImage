@@ -181,5 +181,9 @@
 	"performance_tips": "Performance Tips",
 	"memory_optimization_tip": "Compress large files first, then process smaller ones",
 	"browser_tab_tip": "Close other memory-intensive browser tabs",
-	"browser_not_support_video": "Your browser does not support video playback. Please try a modern browser like Chrome, Firefox, Edge, or Safari."
+	"browser_not_support_video": "Your browser does not support video playback. Please try a modern browser like Chrome, Firefox, Edge, or Safari.",
+	"drop_files_here": "Drop files here",
+	"drag_or_click_upload": "Drag images here or click to upload",
+	"select_files": "Select Files",
+	"supported_formats": "Supported formats"
 }

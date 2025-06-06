@@ -181,5 +181,9 @@
 	"performance_tips": "性能提示",
 	"memory_optimization_tip": "先压缩大文件，再处理小文件",
 	"browser_tab_tip": "关闭其他占用内存的浏览器标签页",
-	"browser_not_support_video": "您的浏览器不支持视频播放。请使用现代浏览器如Chrome、Firefox、Edge或Safari。"
+	"browser_not_support_video": "您的浏览器不支持视频播放。请使用现代浏览器如Chrome、Firefox、Edge或Safari。",
+	"drop_files_here": "拖放文件到这里",
+	"drag_or_click_upload": "拖拽图片到这里或点击上传",
+	"select_files": "选择文件",
+	"supported_formats": "支持的格式"
 }
