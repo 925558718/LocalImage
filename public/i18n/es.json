@@ -181,5 +181,9 @@
 	"performance_tips": "Consejos de rendimiento",
 	"memory_optimization_tip": "Comprima primero archivos grandes, luego procese los más pequeños",
 	"browser_tab_tip": "Cierre otras pestañas del navegador que consuman mucha memoria",
-	"browser_not_support_video": "Su navegador no soporta la reproducción de video. Por favor, use un navegador moderno como Chrome, Firefox, Edge o Safari."
+	"browser_not_support_video": "Su navegador no soporta la reproducción de video. Por favor, use un navegador moderno como Chrome, Firefox, Edge o Safari.",
+	"drop_files_here": "Suelta archivos aquí",
+	"drag_or_click_upload": "Arrastra imágenes aquí o haz clic para subir",
+	"select_files": "Seleccionar archivos",
+	"supported_formats": "Formatos soportados"
 }

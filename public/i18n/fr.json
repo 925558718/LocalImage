@@ -181,5 +181,9 @@
 	"performance_tips": "Conseils de performance",
 	"memory_optimization_tip": "Compressez d'abord les gros fichiers, puis les plus petits",
 	"browser_tab_tip": "Fermez les autres onglets du navigateur gourmands en mémoire",
-	"browser_not_support_video": "Votre navigateur ne prend pas en charge la lecture vidéo. Veuillez essayer un navigateur moderne comme Chrome, Firefox, Edge ou Safari."
+	"browser_not_support_video": "Votre navigateur ne prend pas en charge la lecture vidéo. Veuillez essayer un navigateur moderne comme Chrome, Firefox, Edge ou Safari.",
+	"drop_files_here": "Déposez les fichiers ici",
+	"drag_or_click_upload": "Faites glisser des images ici ou cliquez pour téléverser",
+	"select_files": "Sélectionner des fichiers",
+	"supported_formats": "Formats pris en charge"
 }

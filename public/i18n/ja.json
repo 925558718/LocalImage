@@ -181,5 +181,9 @@
 	"performance_tips": "パフォーマンスのヒント",
 	"memory_optimization_tip": "大きいファイルから処理し、その後小さいファイルを処理する",
 	"browser_tab_tip": "メモリを大量に使用する他のブラウザタブを閉じる",
-	"browser_not_support_video": "お使いのブラウザはビデオ再生をサポートしていません。Chrome、Firefox、Edge、Safariなどの現代的なブラウザをお試しください。"
+	"browser_not_support_video": "お使いのブラウザはビデオ再生をサポートしていません。Chrome、Firefox、Edge、Safariなどの現代的なブラウザをお試しください。",
+	"drag_or_click_upload": "画像をここにドラッグするか、クリックしてアップロード",
+	"drop_files_here": "ファイルをここにドロップ",
+	"select_files": "ファイルを選択",
+	"supported_formats": "サポートされている形式"
 }

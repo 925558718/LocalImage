@@ -55,7 +55,7 @@ export default function ResultArea({ result, onDownload, onClear }: ResultAreaPr
 
       <div className="flex-1 flex items-center justify-center mb-6">
         <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-green-200 dark:border-green-800/50">
-          {result.format === "mp4" || result.format === "webm" ? (
+          {result.format === "mp4" ? (
             // 视频播放器
             <video
               src={result.url}

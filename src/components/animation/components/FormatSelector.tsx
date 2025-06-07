@@ -25,7 +25,6 @@ export default function FormatSelector({ value, onChange }: FormatSelectorProps)
           <SelectItem value="webp">WebP {t("animation")}</SelectItem>
           <SelectItem value="gif">GIF {t("animation")}</SelectItem>
           <SelectItem value="mp4">MP4 {t("video")}</SelectItem>
-          <SelectItem value="webm">WebM {t("video")}</SelectItem>
         </SelectContent>
       </Select>
     </div>

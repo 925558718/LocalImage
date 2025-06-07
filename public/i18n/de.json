@@ -181,5 +181,9 @@
 	"performance_tips": "Leistungstipps",
 	"memory_optimization_tip": "Komprimieren Sie zuerst große Dateien, dann kleinere",
 	"browser_tab_tip": "Schließen Sie andere speicherintensive Browser-Tabs",
-	"browser_not_support_video": "Ihr Browser unterstützt keine Videowiedergabe. Bitte verwenden Sie einen modernen Browser wie Chrome, Firefox, Edge oder Safari."
+	"browser_not_support_video": "Ihr Browser unterstützt keine Videowiedergabe. Bitte verwenden Sie einen modernen Browser wie Chrome, Firefox, Edge oder Safari.",
+	"drop_files_here": "Dateien hier ablegen",
+	"drag_or_click_upload": "Bilder hierher ziehen oder zum Hochladen klicken",
+	"select_files": "Dateien auswählen",
+	"supported_formats": "Unterstützte Formate"
 }

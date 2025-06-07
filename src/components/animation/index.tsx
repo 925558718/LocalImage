@@ -173,12 +173,10 @@ function AnimationComposer() {
         setProgress((prev) => Math.min(prev + 10, 90));
       }, 200);
 
-      // 确定视频编解码器（仅MP4和WebM需要）
+      // 确定视频编解码器（仅MP4需要）
       let videoCodec = "";
       if (format === "mp4") {
         videoCodec = "libx264"; // MP4标准编解码器
-      } else if (format === "webm") {
-        videoCodec = "libvpx-vp9"; // WebM推荐编解码器
       }
 
       const result = await ffm_ins.createAnimation({
@@ -196,8 +194,7 @@ function AnimationComposer() {
       const mimeMap: Record<string, string> = {
         webp: "image/webp",
         gif: "image/gif",
-        mp4: "video/mp4",
-        webm: "video/webm"
+        mp4: "video/mp4"
       };
 
       const blob = new Blob([result], {
