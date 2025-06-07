@@ -39,6 +39,8 @@
     "radash": "^12.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-dropzone": "^14.3.8",
+    "sass": "^1.89.1",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.3.0",
     "zustand": "^5.0.5"

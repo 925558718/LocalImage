@@ -175,7 +175,15 @@
 	"high_quality": "Hohe Qualität",
 	"fast_processing": "Schnelle Verarbeitung",
 	"output_format": "Ausgabeformat",
+	"select_format": "Format wählen",
+	"animation": "Animation",
+	"video": "Video",
 	"performance_tips": "Leistungstipps",
-	"memory_optimization_tip": "Große Dateien zuerst komprimieren, dann kleinere verarbeiten",
-	"browser_tab_tip": "Andere speicherintensive Browser-Tabs schließen"
+	"memory_optimization_tip": "Komprimieren Sie zuerst große Dateien, dann kleinere",
+	"browser_tab_tip": "Schließen Sie andere speicherintensive Browser-Tabs",
+	"browser_not_support_video": "Ihr Browser unterstützt keine Videowiedergabe. Bitte verwenden Sie einen modernen Browser wie Chrome, Firefox, Edge oder Safari.",
+	"drop_files_here": "Dateien hier ablegen",
+	"drag_or_click_upload": "Bilder hierher ziehen oder zum Hochladen klicken",
+	"select_files": "Dateien auswählen",
+	"supported_formats": "Unterstützte Formate"
 }

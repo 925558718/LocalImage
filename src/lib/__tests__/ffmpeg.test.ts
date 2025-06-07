@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { FORMAT_CONVERSION_MAP, ImageFormat } from '../ffmpeg'
+import { FORMAT_CONVERSION_MAP, ImageFormat } from '../conversions'
 
 // 创建一个简化的FFmpeg类用于测试
 class MockFFMPEG {

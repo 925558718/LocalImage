@@ -1,126 +1,24 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
 import { isBrowser } from "./utils";
+import { 
+	AnimationStrategy, 
+	AnimationStrategyFactory,
+	GifAnimationStrategy,
+	WebPAnimationStrategy,
+	MP4AnimationStrategy
+} from "./animations";
+import {
+	ConversionStrategy,
+	ConversionStrategyFactory,
+	ImageFormat,
+	FORMAT_CONVERSION_MAP
+} from "./conversions";
 
 // 扩展Window接口以包含gc方法
 declare global {
 	interface Window {
 		gc?: () => void;
-	}
-}
-
-// 支持的图片格式
-export type ImageFormat = 'png' | 'jpg' | 'jpeg' | 'webp' | 'avif';
-
-// 格式转换映射表
-export const FORMAT_CONVERSION_MAP: Record<ImageFormat, ImageFormat[]> = {
-	png: ['jpg', 'webp', 'avif'],
-	jpg: ['png', 'webp', 'avif'],
-	jpeg: ['png', 'webp', 'avif'],
-	webp: ['png', 'jpg', 'avif'],
-	avif: ['png', 'jpg', 'webp']
-};
-
-// 转换策略接口
-interface ConversionStrategy {
-	getArgs(inputFileName: string, outputName: string, quality: number, width?: number, height?: number): string[];
-}
-
-// 默认转换策略
-class DefaultConversionStrategy implements ConversionStrategy {
-	getArgs(inputFileName: string, outputName: string, quality: number, width?: number, height?: number): string[] {
-		const args = ['-i', inputFileName];
-		
-		// 分辨率缩放
-		if (width || height) {
-			let scaleArg = 'scale=';
-			scaleArg += width ? `${width}:` : '-1:';
-			scaleArg += height ? `${height}` : '-1';
-			args.push('-vf', scaleArg);
-		}
-		
-		args.push(outputName);
-		return args;
-	}
-}
-
-// JPEG转换策略
-class JpegConversionStrategy implements ConversionStrategy {
-	getArgs(inputFileName: string, outputName: string, quality: number, width?: number, height?: number): string[] {
-		const args = ['-i', inputFileName];
-		
-		if (width || height) {
-			let scaleArg = 'scale=';
-			scaleArg += width ? `${width}:` : '-1:';
-			scaleArg += height ? `${height}` : '-1';
-			args.push('-vf', scaleArg);
-		}
-		
-		args.push('-q:v', String(Math.round((100 - quality) / 2.5))); // 0(高质量)-31(低质量)
-		args.push(outputName);
-		return args;
-	}
-}
-
-// WebP转换策略
-class WebPConversionStrategy implements ConversionStrategy {
-	getArgs(inputFileName: string, outputName: string, quality: number, width?: number, height?: number): string[] {
-		const args = ['-i', inputFileName];
-		
-		if (width || height) {
-			let scaleArg = 'scale=';
-			scaleArg += width ? `${width}:` : '-1:';
-			scaleArg += height ? `${height}` : '-1';
-			args.push('-vf', scaleArg);
-		}
-		
-		// 明确指定使用libwebp编码器，而不是libwebp_anim
-		args.push('-c:v', 'libwebp');
-		args.push('-quality', String(quality)); // 使用-quality参数而不是-qscale
-		args.push('-lossless', '0'); // 确保使用有损压缩
-		args.push('-method', '6'); // 使用最佳压缩方法
-		args.push(outputName);
-		return args;
-	}
-}
-
-// AVIF转换策略
-class AvifConversionStrategy implements ConversionStrategy {
-	getArgs(inputFileName: string, outputName: string, quality: number, width?: number, height?: number): string[] {
-		const args = ['-i', inputFileName];
-		
-		if (width || height) {
-			let scaleArg = 'scale=';
-			scaleArg += width ? `${width}:` : '-1:';
-			scaleArg += height ? `${height}` : '-1';
-			args.push('-vf', scaleArg);
-		}
-		
-		args.push('-c:v', 'libaom-av1');
-		args.push('-strict', 'experimental');
-		args.push('-crf', String(Math.round((100 - quality) * 0.63))); // 将quality转换为crf值(0-63)
-		args.push('-b:v', '0'); // 使用CRF而非比特率
-		args.push(outputName);
-		return args;
-	}
-}
-
-// 策略工厂
-class ConversionStrategyFactory {
-	private static strategies: Record<string, ConversionStrategy> = {
-		jpg: new JpegConversionStrategy(),
-		jpeg: new JpegConversionStrategy(),
-		webp: new WebPConversionStrategy(),
-		avif: new AvifConversionStrategy(),
-		png: new DefaultConversionStrategy()
-	};
-
-	static getStrategy(format: string): ConversionStrategy {
-		return this.strategies[format] || new DefaultConversionStrategy();
-	}
-
-	static canConvert(sourceFormat: string, targetFormat: string): boolean {
-		return FORMAT_CONVERSION_MAP[sourceFormat as ImageFormat]?.includes(targetFormat as ImageFormat) || false;
 	}
 }
 
@@ -178,7 +76,7 @@ class FFMPEG {
 			
 			// 只删除我们创建的临时文件 - 批量删除以提高性能
 			const filesToDelete = files.filter(file => 
-				file.name && 
+				file && file.name && 
 				!systemPaths.has(file.name) && 
 				!file.name.endsWith('/') && 
 				(file.name.includes('input_image') || 
@@ -346,6 +244,7 @@ class FFMPEG {
 	 * @param outputName 输出文件名
 	 * @param frameRate 帧率
 	 * @param loop 循环次数，0为无限循环
+	 * @deprecated 请使用 createAnimation 方法代替
 	 */
 	async createGifAnimation({
 		framePattern,
@@ -358,31 +257,17 @@ class FFMPEG {
 		frameRate?: number;
 		loop?: number;
 	}): Promise<Uint8Array> {
+		console.warn('createGifAnimation 方法已弃用，请使用 createAnimation 方法代替');
 		await this.load();
 		if (!this.ffmpeg) throw new Error("ffmpeg 未初始化");
 
-		const args = [
-			'-framerate', frameRate.toString(),
-			'-i', framePattern,
-			'-vf', 'palettegen=reserve_transparent=1',
-			'palette.png'
-		];
-
-		// 生成调色板
-		await this.ffmpeg.exec(args);
-
-		// 创建GIF
-		const gifArgs = [
-			'-framerate', frameRate.toString(),
-			'-i', framePattern,
-			'-i', 'palette.png',
-			'-lavfi', 'paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle',
-			'-loop', loop.toString(),
-			outputName
-		];
-
-		await this.ffmpeg.exec(gifArgs);
-		const result = (await this.ffmpeg.readFile(outputName)) as Uint8Array;
+		const strategy = new GifAnimationStrategy();
+		const result = await strategy.createAnimation(this.ffmpeg, {
+			inputPattern: framePattern,
+			outputName,
+			frameRate,
+			quality: 75 // GIF不使用质量参数，但需要传递
+		});
 		
 		// 清理临时文件
 		try {
@@ -403,6 +288,7 @@ class FFMPEG {
 	 * @param frameRate 帧率
 	 * @param quality 质量
 	 * @param loop 循环次数，0为无限循环
+	 * @deprecated 请使用 createAnimation 方法代替
 	 */
 	async createWebPAnimation({
 		framePattern,
@@ -417,24 +303,17 @@ class FFMPEG {
 		quality?: number;
 		loop?: number;
 	}): Promise<Uint8Array> {
+		console.warn('createWebPAnimation 方法已弃用，请使用 createAnimation 方法代替');
 		await this.load();
 		if (!this.ffmpeg) throw new Error("ffmpeg 未初始化");
 
-		// 使用专门的WebP动画编解码器
-		const args = [
-			'-framerate', frameRate.toString(),
-			'-i', framePattern,
-			'-c:v', 'libwebp_anim', // 使用专门的WebP动画编解码器
-			'-quality', quality.toString(),
-			'-lossless', '0',
-			'-loop', loop.toString(),
-			'-preset', 'default',
-			'-method', '6',
-			outputName
-		];
-
-		await this.ffmpeg.exec(args);
-		const result = (await this.ffmpeg.readFile(outputName)) as Uint8Array;
+		const strategy = new WebPAnimationStrategy();
+		const result = await strategy.createAnimation(this.ffmpeg, {
+			inputPattern: framePattern,
+			outputName,
+			frameRate,
+			quality
+		});
 		
 		// 清理临时文件
 		try {
@@ -448,27 +327,41 @@ class FFMPEG {
 	}
 
 	/**
-	 * 从多个图片创建动画
+	 * 从多个图片创建动画 - 统一入口
 	 * @param images 图片文件数组
 	 * @param outputName 输出文件名
 	 * @param frameRate 帧率，默认10fps
 	 * @param quality 质量，默认75
+	 * @param videoCodec 视频编解码器，默认为libx264（MP4）或libvpx-vp9（WebM）
+	 * @param format 输出格式（webp/gif/mp4/webm）
 	 */
 	async createAnimation({
 		images,
 		outputName,
 		frameRate = 10,
 		quality = 75,
+		videoCodec,
+		format
 	}: {
 		images: File[];
 		outputName: string;
 		frameRate?: number;
 		quality?: number;
+		videoCodec?: string;
+		format?: string;
 	}): Promise<Uint8Array> {
 		await this.load();
 		
 		if (!this.ffmpeg) throw new Error("ffmpeg 未初始化");
 		if (images.length === 0) throw new Error("至少需要一张图片");
+		
+		// 获取输出格式，优先使用指定的format，其次从输出文件名中提取
+		const outputFormat = format?.toLowerCase() || outputName.split(".").pop()?.toLowerCase() || "webp";
+		
+		// 验证格式支持
+		if (!['webp', 'gif', 'mp4'].includes(outputFormat)) {
+			throw new Error("不支持的格式。支持: WebP, GIF, MP4");
+		}
 		
 		// 先清理文件系统，确保干净的环境
 		try {
@@ -555,7 +448,7 @@ class FFMPEG {
 			// 验证写入的文件
 			try {
 				const writtenFiles = await this.ffmpeg.listDir('/');
-				const frameFiles = writtenFiles.filter(f => f.name.startsWith('frame_')).sort();
+				const frameFiles = writtenFiles.filter(f => f && f.name && f.name.startsWith('frame_')).sort();
 				console.log(`[动画合成] 已写入的帧文件:`, frameFiles.map(f => f.name));
 				
 				if (frameFiles.length !== sortedImages.length) {
@@ -565,11 +458,14 @@ class FFMPEG {
 				console.warn('[动画合成] 文件验证失败:', error);
 			}
 			
-			// 获取输出格式
-			const ext = outputName.split(".").pop()?.toLowerCase() || "webp";
+			// 确保质量在有效范围内 (1-100)
+			quality = Math.max(1, Math.min(100, quality || 75));
 			
-			console.log(`[动画合成] 开始合成 ${sortedImages.length} 张图片为 ${ext.toUpperCase()} 动画`);
+			console.log(`[动画合成] 开始合成 ${sortedImages.length} 张图片为 ${outputFormat.toUpperCase()} 动画`);
 			console.log(`[动画合成] 帧率: ${frameRate}fps, 质量: ${quality}`);
+			if (videoCodec) {
+				console.log(`[动画合成] 视频编解码器: ${videoCodec}`);
+			}
 			
 			// 检查输入文件格式是否一致
 			const uniqueExts = [...new Set(fileExtensions)];
@@ -621,7 +517,7 @@ class FFMPEG {
 			// 确保输出文件不存在
 			try {
 				const existingFiles = await this.ffmpeg.listDir('/');
-				const outputExists = existingFiles.some(f => f.name === outputName);
+				const outputExists = existingFiles.some(f => f && f.name === outputName);
 				if (outputExists) {
 					await this.ffmpeg.deleteFile(outputName);
 					console.log(`[动画合成] 删除已存在的输出文件: ${outputName}`);
@@ -630,171 +526,31 @@ class FFMPEG {
 				// 忽略检查/删除失败
 			}
 			
-			if (ext === "webp") {
-				// WebP 动画 - 使用专门的WebP动画编解码器
-				const args = [
-					"-framerate", String(frameRate),
-					"-i", inputPattern,
-					"-c:v", "libwebp_anim", // 使用专门的WebP动画编解码器
-					"-quality", String(quality),
-					"-lossless", "0",
-					"-loop", "0",
-					"-preset", "default",
-					"-method", "6",
-					"-y", // 覆盖输出文件
-					outputName
-				];
-				
-				console.log(`[动画合成] WebP动画命令: ffmpeg ${args.join(' ')}`);
-				
-				try {
-					await this.ffmpeg.exec(args);
-					
-					// 立即检查文件是否生成
-					const checkFiles = await this.ffmpeg.listDir('/');
-					const outputExists = checkFiles.some(f => f.name === outputName);
-					console.log(`[动画合成] WebP动画执行后文件检查: ${outputExists ? '成功' : '失败'}`);
-					
-					if (!outputExists) {
-						throw new Error('WebP动画方法执行后文件未生成');
-					}
-				} catch (error) {
-					console.warn(`[动画合成] WebP动画方法失败:`, error);
-					
-					// 备用方法：使用libwebp编解码器
-					const fallbackArgs = [
-						"-framerate", String(frameRate),
-						"-i", inputPattern,
-						"-c:v", "libwebp", // 备用编解码器
-						"-quality", String(quality),
-						"-lossless", "0",
-						"-loop", "0",
-						"-y", // 覆盖输出文件
-						outputName
-					];
-					
-					console.log(`[动画合成] WebP备用命令: ffmpeg ${fallbackArgs.join(' ')}`);
-					
-					try {
-						await this.ffmpeg.exec(fallbackArgs);
-						
-						// 再次检查文件是否生成
-						const checkFiles2 = await this.ffmpeg.listDir('/');
-						const outputExists2 = checkFiles2.some(f => f.name === outputName);
-						console.log(`[动画合成] WebP备用执行后文件检查: ${outputExists2 ? '成功' : '失败'}`);
-						
-						if (!outputExists2) {
-							throw new Error('WebP备用方法执行后文件仍未生成');
-						}
-					} catch (fallbackError) {
-						console.error(`[动画合成] WebP备用方法也失败:`, fallbackError);
-						throw new Error(`WebP动画生成失败: ${fallbackError instanceof Error ? fallbackError.message : '未知错误'}`);
-					}
-				}
-			} else if (ext === "gif") {
-				// 先生成调色板
-				const paletteArgs = [
-					"-framerate", String(frameRate),
-					"-i", inputPattern,
-					"-vf", "palettegen",
-					"-y", // 覆盖输出文件
-					"palette.png"
-				];
-				
-				console.log(`[动画合成] GIF调色板命令: ffmpeg ${paletteArgs.join(' ')}`);
-				
-				try {
-					await this.ffmpeg.exec(paletteArgs);
-					createdFiles.push("palette.png");
-					
-					// 检查调色板是否生成
-					const paletteFiles = await this.ffmpeg.listDir('/');
-					const paletteExists = paletteFiles.some(f => f.name === "palette.png");
-					console.log(`[动画合成] 调色板生成检查: ${paletteExists ? '成功' : '失败'}`);
-					
-					if (!paletteExists) {
-						throw new Error('调色板文件未生成');
-					}
-				} catch (error) {
-					console.warn(`[动画合成] GIF调色板失败:`, error);
-					throw new Error(`GIF调色板生成失败: ${error instanceof Error ? error.message : '未知错误'}`);
-				}
-				
-				// 生成 GIF
-				const gifArgs = [
-					"-framerate", String(frameRate),
-					"-i", inputPattern,
-					"-i", "palette.png",
-					"-lavfi", "paletteuse",
-					"-loop", "0",
-					"-y", // 覆盖输出文件
-					outputName
-				];
-				
-				console.log(`[动画合成] GIF生成命令: ffmpeg ${gifArgs.join(' ')}`);
-				
-				try {
-					await this.ffmpeg.exec(gifArgs);
-					
-					// 检查GIF是否生成
-					const gifFiles = await this.ffmpeg.listDir('/');
-					const gifExists = gifFiles.some(f => f.name === outputName);
-					console.log(`[动画合成] GIF生成检查: ${gifExists ? '成功' : '失败'}`);
-					
-					if (!gifExists) {
-						throw new Error('GIF标准方法执行后文件未生成');
-					}
-				} catch (error) {
-					console.warn(`[动画合成] GIF标准方法失败:`, error);
-					
-					// 最简化的GIF生成方法
-					const simpleGifArgs = [
-						"-framerate", String(frameRate),
-						"-i", inputPattern,
-						"-vf", `fps=${frameRate}`,
-						"-y", // 覆盖输出文件
-						outputName
-					];
-					
-					console.log(`[动画合成] GIF最简化命令: ffmpeg ${simpleGifArgs.join(' ')}`);
-					
-					try {
-						await this.ffmpeg.exec(simpleGifArgs);
-						
-						// 最后检查GIF是否生成
-						const gifFiles2 = await this.ffmpeg.listDir('/');
-						const gifExists2 = gifFiles2.some(f => f.name === outputName);
-						console.log(`[动画合成] GIF简化生成检查: ${gifExists2 ? '成功' : '失败'}`);
-						
-						if (!gifExists2) {
-							throw new Error('GIF简化方法执行后文件仍未生成');
-						}
-					} catch (simpleError) {
-						console.error(`[动画合成] GIF简化方法也失败:`, simpleError);
-						throw new Error(`GIF动画生成失败: ${simpleError instanceof Error ? simpleError.message : '未知错误'}`);
-					}
-				}
-			} else {
-				throw new Error("仅支持WebP和GIF格式");
-			}
+			// 使用策略模式创建动画
+			const strategy = AnimationStrategyFactory.getStrategy(outputFormat);
+			const result = await strategy.createAnimation(this.ffmpeg, {
+				inputPattern,
+				outputName,
+				frameRate,
+				quality,
+				videoCodec
+			});
 			
 			// 验证输出文件是否生成（最终检查）
 			try {
 				const outputFiles = await this.ffmpeg.listDir('/');
-				const outputExists = outputFiles.some(f => f.name === outputName);
+				const outputExists = outputFiles.some(f => f && f.name === outputName);
 				console.log(`[动画合成] 最终文件检查: ${outputExists ? '成功' : '失败'}`);
 				
 				if (!outputExists) {
 					// 列出当前所有文件用于调试
-					console.error('[动画合成] 当前文件系统内容:', outputFiles.map(f => f.name));
+					console.error('[动画合成] 当前文件系统内容:', outputFiles.map(f => f && f.name ? f.name : "未知文件").filter(Boolean));
 					throw new Error(`输出文件 ${outputName} 未生成 - 所有方法都失败了`);
 				}
 			} catch (error) {
 				console.error('[动画合成] 输出文件验证失败:', error);
 				throw new Error(`动画合成失败：${error instanceof Error ? error.message : '输出文件未生成'}`);
 			}
-			
-			const result = (await this.ffmpeg.readFile(outputName)) as Uint8Array;
 			
 			// 验证结果
 			if (!result || result.length === 0) {
@@ -829,8 +585,7 @@ class FFMPEG {
 				}
 				
 				// 如果是GIF，还要删除调色板文件
-				const ext = outputName.split(".").pop()?.toLowerCase();
-				if (ext === "gif") {
+				if (outputFormat === "gif") {
 					try {
 						await this.ffmpeg.deleteFile("palette.png");
 					} catch (e) {
