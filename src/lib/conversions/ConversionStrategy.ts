@@ -20,9 +20,9 @@ export type ImageFormat = 'png' | 'jpg' | 'jpeg' | 'webp' | 'avif';
 
 // 格式转换映射表
 export const FORMAT_CONVERSION_MAP: Record<ImageFormat, ImageFormat[]> = {
-	png: ['jpg', 'webp', 'avif'],
-	jpg: ['png', 'webp', 'avif'],
-	jpeg: ['png', 'webp', 'avif'],
-	webp: ['png', 'jpg', 'avif'],
-	avif: ['png', 'jpg', 'webp']
+	png: ['png', 'jpg', 'webp', 'avif'],
+	jpg: ['jpg', 'png', 'webp', 'avif'],
+	jpeg: ['jpeg', 'png', 'webp', 'avif'],
+	webp: ['webp', 'png', 'jpg', 'avif'],
+	avif: ['avif', 'png', 'jpg', 'webp']
 }; 
