@@ -19,6 +19,9 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
+			"style": {
+				"useImportType": "off"
+			},
 			"recommended": true
 		},
 		"ignore": ["public/*"]
