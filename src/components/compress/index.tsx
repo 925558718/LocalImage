@@ -13,6 +13,7 @@ import {
 	Button,
 	Progress,
 } from "@/components/shadcn";
+import { toast } from "sonner";
 import Advanced from "./components/Advanced";
 import { DropzoneWithPreview } from "./components/DropzoneWithPreview";
 import { Loader2, Upload } from "lucide-react";
@@ -46,7 +47,6 @@ export default function Compress() {
 	// 核心状态
 	const [loading, setLoading] = useState(false);
 	const [progress, setProgress] = useState(0);
-	const [currentFileName, setCurrentFileName] = useState("");
 	const [files, setFiles] = useState<File[]>([]);
 	const [downloadList, setDownloadList] = useState<DownloadItem[]>([]);
 	const [fileProgress, setFileProgress] = useState<FileProgressMap>({});
@@ -140,132 +140,212 @@ export default function Compress() {
 		// 初始化状态
 		setLoading(true);
 		setProgress(0);
-		setCurrentFileName("正在准备文件...");
 		setDownloadList([]);
 		setFileProgress({});
 		
-		// 开始处理前先清理内存
+		// 开始处理前先彻底清理内存
 		await cleanupResources();
 		
+		// 大图片警告
+		const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+		const largeImageWarningSize = 20 * 1024 * 1024; // 20MB
+		const maxBatchSize = 100 * 1024 * 1024; // 100MB
+		
+		if (totalSize > maxBatchSize) {
+			const confirmProcess = confirm(`警告：您选择的图片总大小超过 ${Math.round(maxBatchSize / 1024 / 1024)}MB，可能导致内存不足。建议您分批处理或选择较小的图片。是否继续？`);
+			if (!confirmProcess) {
+				setLoading(false);
+				return;
+			}
+		} else if (files.some(file => file.size > largeImageWarningSize)) {
+			console.warn(`检测到超过 ${Math.round(largeImageWarningSize / 1024 / 1024)}MB 的大图片，可能影响处理性能`);
+		}
+		
 		try {
+			// 强制垃圾回收以腾出更多内存
+			if (window.gc) {
+				window.gc();
+				// 等待垃圾回收完成
+				await new Promise(resolve => setTimeout(resolve, 200));
+			}
 			
-			// 并行读取所有文件
-			const fileData = await Promise.all(
-				files.map(async (file) => {
-					setFileProgress(prev => ({
-						...prev,
-						[file.name]: { isProcessing: true, progress: 0 }
-					}));
-					
-					const arrayBuffer = await file.arrayBuffer();
-					return {
-						data: arrayBuffer,
-						name: file.name,
-						originalSize: file.size
-					};
-				})
-			);
+			// 智能批处理：将大文件拆分处理，防止内存溢出
+			const fileGroups: File[][] = [];
+			let currentGroup: File[] = [];
+			let currentGroupSize = 0;
+			const maxGroupSize = 50 * 1024 * 1024; // 50MB
 			
-			setCurrentFileName("开始压缩文件...");
+			// 首先处理大文件
+			const sortedFiles = [...files].sort((a, b) => b.size - a.size);
+			
+			for (const file of sortedFiles) {
+				// 特别大的文件单独处理
+				if (file.size > maxGroupSize / 2) {
+					fileGroups.push([file]);
+					continue;
+				}
+				
+				// 如果当前组加上这个文件会超过限制，创建新组
+				if (currentGroupSize + file.size > maxGroupSize && currentGroup.length > 0) {
+					fileGroups.push(currentGroup);
+					currentGroup = [file];
+					currentGroupSize = file.size;
+				} else {
+					currentGroup.push(file);
+					currentGroupSize += file.size;
+				}
+			}
+			
+			// 添加最后一组（如果有）
+			if (currentGroup.length > 0) {
+				fileGroups.push(currentGroup);
+			}
+			
+			console.log(`智能批处理：将 ${files.length} 个文件分为 ${fileGroups.length} 批处理`);
+			
+			// 为批处理跟踪总进度
+			let processedFiles = 0;
+			const totalFiles = files.length;
 			
 			// 确保FFmpeg已加载
 			if (ffm_ins) {
 				await ffm_ins.load();
 			}
-
-			if (fileData.length > 0) {
-				setCurrentFileName(fileData[0].name);
-			}
-
-			// 使用串行压缩模式
-			await FFMPEG.convertImagesSerial({
-				files: fileData,
-				format,
-				quality: advanced.quality,
-				width: advanced.width ? Number.parseInt(advanced.width) : undefined,
-				height: advanced.height ? Number.parseInt(advanced.height) : undefined,
-				onFileStart: (fileName, index, total) => {
-					setCurrentFileName(fileName);
-					setFileProgress(prev => ({
-						...prev,
-						[fileName]: { isProcessing: true, progress: 0 }
-					}));
-					
-					const overallProgress = Math.round((index / total) * 100);
-					setProgress(overallProgress);
-				},
-				onProgress: (completed, total) => {
-					const compressionProgress = (completed / total) * 80;
-					const totalProgress = 15 + compressionProgress;
-					setProgress(Math.round(totalProgress));
-					
-					if (completed < total) {
-						const currentFileIndex = completed;
-						const currentFileName = fileData[currentFileIndex]?.name;
-						if (currentFileName) {
-							setFileProgress(prev => ({
-								...prev,
-								[currentFileName]: { isProcessing: true, progress: 50 }
-							}));
-						}
-					}
-				},
-				onFileComplete: (result: DownloadItem) => {
-					const originalFileName = fileData.find(
-						file => result.name.includes(file.name.replace(/\.[^.]+$/, ""))
-					)?.name || result.name;
-					
-					setFileProgress(prev => ({
-						...prev,
-						[originalFileName]: { isProcessing: false, progress: 100 }
-					}));
-					
-					setDownloadList(prev => {
-						const newList = [...prev, result];
+			
+			// 按批次顺序处理文件
+			for (let groupIndex = 0; groupIndex < fileGroups.length; groupIndex++) {
+				const fileGroup = fileGroups[groupIndex];
+				console.log(`处理第 ${groupIndex + 1}/${fileGroups.length} 批，包含 ${fileGroup.length} 个文件`);
+				
+				// 并行读取当前批次的所有文件
+				const fileData = await Promise.all(
+					fileGroup.map(async (file) => {
+						setFileProgress(prev => ({
+							...prev,
+							[file.name]: { isProcessing: true, progress: 0 }
+						}));
 						
-						// 异步获取并缓存blob数据
-						setTimeout(async () => {
-							try {
-								if (result.url?.startsWith('blob:')) {
-									const response = await fetch(result.url);
-									if (response.ok) {
-										const blob = await response.blob();
-										if (blob && blob.size > 0) {
-											setDownloadList(currentList => 
-												currentList.map(item => 
-													item.url === result.url && item.name === result.name
-														? { ...item, blob }
-														: item
-												)
-											);
+						const arrayBuffer = await file.arrayBuffer();
+						return {
+							data: arrayBuffer,
+							name: file.name,
+							originalSize: file.size
+						};
+					})
+				);
+				
+				// 使用串行压缩模式处理当前批次
+				await FFMPEG.convertImagesSerial({
+					files: fileData,
+					format,
+					quality: advanced.quality,
+					width: advanced.width ? Number.parseInt(advanced.width) : undefined,
+					height: advanced.height ? Number.parseInt(advanced.height) : undefined,
+					onProgress: (completed, total) => {
+						const batchProgress = (completed / total) * 100;
+						const overallProgress = Math.round(((processedFiles + completed) / totalFiles) * 100);
+						setProgress(Math.min(95, overallProgress));
+						
+						// 更新当前处理文件的进度
+						if (completed < total) {
+							const currentFileName = fileData[completed]?.name;
+							if (currentFileName) {
+								setFileProgress(prev => ({
+									...prev,
+									[currentFileName]: { 
+										isProcessing: true, 
+										progress: Math.round(batchProgress) 
+									}
+								}));
+							}
+						}
+					},
+					onFileComplete: (result: DownloadItem) => {
+						processedFiles++; // 增加已处理文件计数
+						
+						const originalFileName = fileData.find(
+							file => result.name.includes(file.name.replace(/\.[^.]+$/, ""))
+						)?.name || result.name;
+						
+						setFileProgress(prev => ({
+							...prev,
+							[originalFileName]: { isProcessing: false, progress: 100 }
+						}));
+						
+						setDownloadList(prev => {
+							const newList = [...prev, result];
+							
+							// 异步获取并缓存blob数据
+							setTimeout(async () => {
+								try {
+									if (result.url?.startsWith('blob:')) {
+										const response = await fetch(result.url);
+										if (response.ok) {
+											const blob = await response.blob();
+											if (blob && blob.size > 0) {
+												setDownloadList(currentList => 
+													currentList.map(item => 
+														item.url === result.url && item.name === result.name
+															? { ...item, blob }
+															: item
+													)
+												);
+											}
 										}
 									}
+								} catch (error) {
+									console.warn(`[blob缓存] 缓存失败: ${result.name}`, error);
 								}
-							} catch (error) {
-								console.warn(`[blob缓存] 缓存失败: ${result.name}`, error);
-							}
-						}, 0);
-						
-						return newList;
-					});
+							}, 0);
+							
+							return newList;
+						});
+					}
+				});
+				
+				// 批次处理完成后，强制清理内存
+				if (groupIndex < fileGroups.length - 1) {
+					console.log(`批次 ${groupIndex + 1} 完成，清理内存准备下一批`);
+					await cleanupResources();
+					
+					// 更长的延迟，让浏览器有更多时间回收内存
+					await new Promise(resolve => setTimeout(resolve, 500));
 				}
-			});
+			}
 
 			// 完成所有文件处理
 			setTimeout(() => {
 				setProgress(100);
-				setCurrentFileName("所有文件处理完成");
 				setShowDragDrop(false);
 			}, 300);
 			
 		} catch (e) {
 			console.error("压缩失败", e);
 			setFileProgress({});
+			setShowDragDrop(true);
+			setFiles([]);
+			setDownloadList([]);
+			setProgress(0);
+			
+			const errorMessage = e instanceof Error ? e.message : String(e);
+			// 处理内存超出边界错误
+			if (errorMessage.includes("RuntimeError: memory access out of bounds")) {
+				toast.error("内存超出限制", {
+					description: "处理图片时内存不足，请尝试压缩更小的图片或减少批量处理数量。",
+					duration: 5000,
+				});
+			} else {
+				// 其他错误使用常规提示
+				toast.error("图片压缩失败", {
+					description: "请重试或尝试压缩更小的图片。",
+					duration: 3000,
+				});
+			}
+			
 			await cleanupResources();
 		} finally {
 			setLoading(false);
 			setProgress(0);
-			setCurrentFileName("");
 		}
 	}
 
@@ -274,18 +354,6 @@ export default function Compress() {
 		<div className="w-full max-w-6xl mx-auto">
 			{/* 主容器 */}
 			<div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl p-8 border border-white/20 dark:border-slate-700/20 shadow-xl relative">
-				{/* 加载状态指示器 */}
-				{(ffmpegLoading || !ffmpegReady || loading) && (
-					<div className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-10 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 backdrop-blur-sm rounded-2xl p-3 border border-blue-200/50 dark:border-blue-700/30 shadow-lg">
-						<div className="flex items-center gap-3">
-							<Loader2 className="w-4 h-4 text-blue-600 dark:text-blue-400 animate-spin" />
-							<span className="text-blue-700 dark:text-blue-300 font-medium text-sm">
-								{ffmpegLoading || !ffmpegReady ? '正在加载FFMPEG核心...' : t("compressing_btn")}
-							</span>
-						</div>
-					</div>
-				)}
-
 				{/* 操作栏 */}
 				<div className="flex gap-4 justify-center mb-8 flex-wrap">
 					{/* 格式选择器 */}
@@ -344,17 +412,6 @@ export default function Compress() {
 							</div>
 							
 							<Progress value={progress} className="w-full h-3 mb-4" />
-							
-							{currentFileName && (
-								<div className="text-center">
-									<div className="text-sm text-slate-600 dark:text-slate-400 mb-2">
-										<span className="font-medium">{t("current_file")}:</span>
-									</div>
-									<div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl px-4 py-2 text-sm text-slate-700 dark:text-slate-300 border border-white/30 dark:border-slate-600/30">
-										{currentFileName}
-									</div>
-								</div>
-							)}
 							
 							{files.length > 1 && (
 								<div className="text-center mt-3 text-sm text-slate-600 dark:text-slate-400">
