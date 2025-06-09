@@ -158,7 +158,7 @@ export const DropzoneWithPreview = React.memo(function DropzoneWithPreview({
           
           {/* 可滚动的图片列表区域 */}
           <div className="overflow-y-auto max-h-[250px]">
-            <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3 p-3 min-h-[220px]">
+            <div className="flex flex-wrap gap-3 p-3 min-h-[220px]">
               {fileUrls.map((fileData, index) => {
                 const { file, url: filePreview } = fileData;
                 
@@ -186,7 +186,7 @@ export const DropzoneWithPreview = React.memo(function DropzoneWithPreview({
                         e.stopPropagation();
                         onRemoveFile(index);
                       }}
-                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                      className="absolute -top-2 -right-2 bg-white text-destructive rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity p-1 z-10"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

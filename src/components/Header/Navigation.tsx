@@ -23,7 +23,7 @@ function Navigation() {
 			labelKey: "nav_animation",
 			description: "animation_desc",
 			icon: (
-				<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
 					<circle cx="8" cy="12" r="1" fill="currentColor" />
 					<circle cx="12" cy="10" r="1" fill="currentColor" />
@@ -36,7 +36,7 @@ function Navigation() {
 			labelKey: "nav_compress",
 			description: "compress_desc",
 			icon: (
-				<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 9V7a2 2 0 00-2-2H6a2 2 0 00-2 2v2" />
 					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 15v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
 					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12l4-4m0 0l4 4m-4-4v8" />
@@ -48,7 +48,7 @@ function Navigation() {
 			labelKey: "nav_gradient_generator",
 			description: "gradient_generator_desc",
 			icon: (
-				<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 					<defs>
 						<linearGradient id="gradientIcon" x1="0%" y1="0%" x2="100%" y2="100%">
 							<stop offset="0%" stopColor="#3b82f6" />

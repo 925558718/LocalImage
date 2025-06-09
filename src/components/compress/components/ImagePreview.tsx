@@ -26,7 +26,7 @@ export function ImagePreview({ files, onRemoveFile, onClearAllFiles, onAddMoreFi
         </button>
       </div>
       
-      <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3">
+      <div className="flex flex-wrap gap-3">
         {files.map((file, index) => {
           // 创建文件预览URL
           const filePreview = file.type.startsWith('image/') 
@@ -61,7 +61,7 @@ export function ImagePreview({ files, onRemoveFile, onClearAllFiles, onAddMoreFi
                   e.stopPropagation();
                   onRemoveFile(index);
                 }}
-                className="absolute -top-2 -right-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                className="absolute -top-2 -right-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity p-1 z-10"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

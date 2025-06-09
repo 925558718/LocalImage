@@ -15,6 +15,9 @@
     "publish": true
   },
   "dependencies": {
+    "@bugsnag/browser-performance": "^2.13.0",
+    "@bugsnag/js": "^8.2.0",
+    "@bugsnag/plugin-react": "^8.2.0",
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
     "@lottiefiles/dotlottie-react": "^0.13.5",

@@ -1,40 +1,33 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
 import { isBrowser } from "./utils";
-import { 
-	AnimationStrategy, 
+import {
 	AnimationStrategyFactory,
 	GifAnimationStrategy,
-	WebPAnimationStrategy,
-	MP4AnimationStrategy
+	WebPAnimationStrategy
 } from "./animations";
 import {
-	ConversionStrategy,
 	ConversionStrategyFactory,
-	ImageFormat,
-	FORMAT_CONVERSION_MAP
+	ImageFormat
 } from "./conversions";
 
-// 扩展Window接口以包含gc方法
-declare global {
-	interface Window {
-		gc?: () => void;
-	}
-}
+// 注意：原来这里有window.gc的声明，但实际上这是非标准API，已移除
 
 class FFMPEG {
 	private ffmpeg: FFmpeg | null = null;
 	private isLoaded = false;
 	private loadingPromise: Promise<void> | null = null;
+	private _processCount = 0;
+	private _processedBytes = 0; // 跟踪处理的文件大小总字节数
 
 	constructor() {
 		if (!isBrowser()) {
 			return;
 		}
 		this.ffmpeg = new FFmpeg();
-		this.ffmpeg.on("log", ({ message }: { message: string }) => {
-			console.log("[ffmpeg]", message);
-		});
+		// this.ffmpeg.on("log", ({ message }: { message: string }) => {
+		// 	console.log("[ffmpeg]", message);
+		// });
 	}
 
 	async load() {
@@ -63,33 +56,31 @@ class FFMPEG {
 	 */
 	async cleanupMemory(): Promise<void> {
 		if (!this.ffmpeg || !this.isLoaded) return;
-		
+
 		try {
 			// 获取当前文件系统中的所有文件
 			const files = await this.ffmpeg.listDir('/');
-			
+
 			// 定义系统目录和文件，这些不应该被删除
 			const systemPaths = new Set([
 				'tmp', 'home', 'dev', 'proc', 'sys', 'etc', 'bin', 'usr', 'var',
 				'.', '..', 'ffmpeg-core.js', 'ffmpeg-core.wasm'
 			]);
-			
+
 			// 只删除我们创建的临时文件 - 批量删除以提高性能
-			const filesToDelete = files.filter(file => 
-				file && file.name && 
-				!systemPaths.has(file.name) && 
-				!file.name.endsWith('/') && 
-				(file.name.includes('input_image') || 
-				 file.name.includes('_compressed') || 
-				 file.name.includes('frame_') || 
-				 file.name.includes('palette') ||
-				 file.name.match(/\.(png|jpg|jpeg|webp|avif|gif)$/i))
+			const filesToDelete = files.filter(file =>
+				file?.name &&
+				!systemPaths.has(file.name) &&
+				!file.name.endsWith('/') &&
+				(file.name.includes('input_image') ||
+					file.name.includes('_compressed') ||
+					file.name.includes('frame_') ||
+					file.name.includes('palette') ||
+					file.name.match(/\.(png|jpg|jpeg|webp|avif|gif)$/i))
 			);
-			
+
 			// 批量删除文件，减少日志输出
 			if (filesToDelete.length > 0) {
-				console.log(`[ffmpeg] 清理 ${filesToDelete.length} 个临时文件...`);
-				
 				// 串行删除文件，避免并发删除导致的FS错误
 				for (const file of filesToDelete) {
 					try {
@@ -99,18 +90,41 @@ class FFMPEG {
 						console.debug(`[ffmpeg] 删除文件 ${file.name} 失败:`, error);
 					}
 				}
-				
 				console.log('[ffmpeg] 内存清理完成');
+			}
+
+			// 定期重置实例 - 检查是否已经处理了大量图片
+			const shouldResetInstance = this._shouldResetInstance();
+			if (shouldResetInstance) {
+				console.log('[ffmpeg] 检测到处理了大量图片，重置实例以释放内存');
+				await this.reset();
+				return;
 			}
 		} catch (error) {
 			console.warn('[ffmpeg] 内存清理失败:', error);
-			// 如果清理失败，尝试重置实例
-			if (error instanceof Error && error.message.includes('FS error')) {
-				console.warn('[ffmpeg] 检测到FS错误，将在下次使用时重置实例');
-				this.isLoaded = false;
-				this.loadingPromise = null;
-			}
+			this.isLoaded = false;
+			this.loadingPromise = null;
+			await this.reset();
 		}
+	}
+
+	// 判断是否应该重置实例 - 根据处理的文件大小来决定
+	private _shouldResetInstance(): boolean {
+		// 每处理一张图片，增加计数（保留原有计数逻辑作为备用）
+		this._processCount++;
+		
+		// 基于处理的文件总大小的阈值 (100MB)
+		const resetThresholdBytes = 100 * 1024 * 1024;
+		
+		// 当处理超过阈值大小的文件时，重置实例
+		if (this._processedBytes >= resetThresholdBytes) {
+			console.log(`[ffmpeg] 已处理 ${Math.round(this._processedBytes / (1024 * 1024))} MB 数据，重置实例以释放内存`);
+			this._processCount = 0; // 重置计数器
+			this._processedBytes = 0; // 重置字节计数器
+			return true;
+		}
+		
+		return false;
 	}
 
 	/**
@@ -119,19 +133,38 @@ class FFMPEG {
 	 */
 	async reset(): Promise<void> {
 		try {
-			await this.cleanupMemory();
+			// 尝试最后清理一次
+			if (this.ffmpeg && this.isLoaded) {
+				try {
+					const files = await this.ffmpeg.listDir('/');
+					for (const file of files) {
+						if (file?.name && !file.name.endsWith('/') && file.name !== '.' && file.name !== '..') {
+							try {
+								await this.ffmpeg.deleteFile(file.name);
+							} catch (e) {
+								// 忽略错误
+							}
+						}
+					}
+				} catch (e) {
+					// 忽略错误
+				}
+			}
 		} catch (error) {
 			console.warn('[ffmpeg] 重置时清理内存失败:', error);
-		}
-		
-		// 重新创建FFmpeg实例
-		if (isBrowser()) {
-			this.ffmpeg = new FFmpeg();
-			this.ffmpeg.on("log", ({ message }: { message: string }) => {
-				console.log("[ffmpeg]", message);
-			});
-			this.isLoaded = false;
-			this.loadingPromise = null;
+		} finally {
+
+
+			// 重新创建FFmpeg实例
+			if (isBrowser()) {
+				this.ffmpeg = new FFmpeg();
+				this.isLoaded = false;
+				this.loadingPromise = null;
+				this._processCount = 0; // 重置处理计数
+				this._processedBytes = 0; // 重置处理的字节数
+
+				console.log('[ffmpeg] 实例已完全重置');
+			}
 		}
 	}
 
@@ -157,20 +190,20 @@ class FFMPEG {
 		height?: number;
 	}): Promise<Uint8Array> {
 		await this.load();
-		
+
 		// 获取源格式，确保是有效的字符串
-		const sourceExt = (typeof input === "string" && input.includes(".") 
-			? input.split(".").pop()?.toLowerCase() 
+		const sourceExt = (typeof input === "string" && input.includes(".")
+			? input.split(".").pop()?.toLowerCase()
 			: "jpg") as ImageFormat;
-		
+
 		// 获取目标格式，确保是有效的字符串
 		const targetExt = (outputName.split(".").pop()?.toLowerCase() || "jpg") as ImageFormat;
-		
+
 		// 验证格式转换是否支持
 		if (!ConversionStrategyFactory.canConvert(sourceExt, targetExt)) {
 			throw new Error(`不支持从 ${sourceExt} 转换到 ${targetExt}`);
 		}
-		
+
 		// 自动判断输入格式
 		let inputFileName = `input_image.${sourceExt}`;
 		if (
@@ -210,32 +243,45 @@ class FFMPEG {
 		if (!this.ffmpeg) throw new Error("ffmpeg 未初始化");
 		await this.ffmpeg.writeFile(inputFileName, fileData);
 
-		// 使用策略模式获取转换参数
-		const strategy = ConversionStrategyFactory.getStrategy(targetExt);
-		const args = strategy.getArgs(inputFileName, outputName, quality, width, height);
-
-		await this.ffmpeg.exec(args);
-		const result = (await this.ffmpeg.readFile(outputName)) as Uint8Array;
-		
-		// 清理临时文件，防止内存泄漏
 		try {
-			// 只删除我们明确创建的文件
-			if (inputFileName && inputFileName !== outputName) {
-				await this.ffmpeg.deleteFile(inputFileName);
+			// 使用策略模式获取转换参数
+			const strategy = ConversionStrategyFactory.getStrategy(targetExt);
+			const args = strategy.getArgs(inputFileName, outputName, quality, width, height);
+
+			await this.ffmpeg.exec(args);
+			const result = (await this.ffmpeg.readFile(outputName)) as Uint8Array;
+
+			// 验证压缩结果
+			if (!result || result.length === 0) {
+				throw new Error("压缩失败：压缩结果为空");
 			}
-			if (outputName) {
-				await this.ffmpeg.deleteFile(outputName);
+
+			return result;
+		} finally {
+			// 更新处理计数
+			this._processCount++;
+			
+			// 累加处理的文件大小
+			this._processedBytes += fileData.length;
+			
+			// 清理临时文件，防止内存泄漏
+			try {
+				// 只删除我们明确创建的文件
+				if (inputFileName && inputFileName !== outputName) {
+					await this.ffmpeg.deleteFile(inputFileName);
+				}
+				if (outputName) {
+					await this.ffmpeg.deleteFile(outputName);
+				}
+				
+				// 每处理3个文件后，给浏览器一点时间进行自动垃圾回收
+				if (this._processCount % 3 === 0) {
+					await new Promise(resolve => setTimeout(resolve, 50));
+				}
+			} catch (error) {
+				console.warn('[ffmpeg] 清理临时文件失败:', error);
 			}
-		} catch (error) {
-			console.warn('[ffmpeg] 清理临时文件失败:', error);
 		}
-		
-		// 验证压缩结果
-		if (!result || result.length === 0) {
-			throw new Error(`压缩失败：压缩结果为空`);
-		}
-		
-		return result;
 	}
 
 	/**
@@ -268,7 +314,7 @@ class FFMPEG {
 			frameRate,
 			quality: 75 // GIF不使用质量参数，但需要传递
 		});
-		
+
 		// 清理临时文件
 		try {
 			// 只删除我们明确创建的文件
@@ -277,7 +323,7 @@ class FFMPEG {
 		} catch (error) {
 			console.warn('[ffmpeg] GIF创建后清理临时文件失败:', error);
 		}
-		
+
 		return result;
 	}
 
@@ -314,7 +360,7 @@ class FFMPEG {
 			frameRate,
 			quality
 		});
-		
+
 		// 清理临时文件
 		try {
 			// 只删除我们明确创建的文件
@@ -322,7 +368,7 @@ class FFMPEG {
 		} catch (error) {
 			console.warn('[ffmpeg] WebP动画创建后清理临时文件失败:', error);
 		}
-		
+
 		return result;
 	}
 
@@ -351,36 +397,36 @@ class FFMPEG {
 		format?: string;
 	}): Promise<Uint8Array> {
 		await this.load();
-		
+
 		if (!this.ffmpeg) throw new Error("ffmpeg 未初始化");
 		if (images.length === 0) throw new Error("至少需要一张图片");
-		
+
 		// 获取输出格式，优先使用指定的format，其次从输出文件名中提取
 		const outputFormat = format?.toLowerCase() || outputName.split(".").pop()?.toLowerCase() || "webp";
-		
+
 		// 验证格式支持
 		if (!['webp', 'gif', 'mp4'].includes(outputFormat)) {
 			throw new Error("不支持的格式。支持: WebP, GIF, MP4");
 		}
-		
+
 		// 先清理文件系统，确保干净的环境
 		try {
 			await this.cleanupMemory();
 		} catch (error) {
 			console.warn('[动画合成] 预清理失败，继续执行:', error);
 		}
-		
+
 		// 按文件名排序 - 提取文件名中的数字进行自然排序
 		const sortedImages = [...images].sort((a, b) => {
 			// 提取文件名中的数字部分
 			const extractNumbers = (filename: string): number[] => {
 				const numbers = filename.match(/\d+/g);
-				return numbers ? numbers.map(num => parseInt(num, 10)) : [];
+				return numbers ? numbers.map(num => Number.parseInt(num, 10)) : [];
 			};
-			
+
 			const aNumbers = extractNumbers(a.name);
 			const bNumbers = extractNumbers(b.name);
-			
+
 			// 按数字序列比较
 			for (let i = 0; i < Math.max(aNumbers.length, bNumbers.length); i++) {
 				const aNum = aNumbers[i] || 0;
@@ -389,37 +435,37 @@ class FFMPEG {
 					return aNum - bNum;
 				}
 			}
-			
+
 			// 如果数字相同，按字符串排序
 			return a.name.localeCompare(b.name);
 		});
-		
+
 		console.log('[动画合成] 文件排序结果:', sortedImages.map(f => f.name));
-		
+
 		// 定义变量用于清理
 		const fileExtensions: string[] = [];
 		const createdFiles: string[] = []; // 跟踪创建的文件
-		let inputPattern: string = "";
-		
+		let inputPattern = "";
+
 		try {
 			// 写入所有图片文件（使用排序后的顺序，保持原始格式）
 			for (let i = 0; i < sortedImages.length; i++) {
 				const file = sortedImages[i];
-				
+
 				try {
 					const arrayBuffer = await file.arrayBuffer();
 					const fileData = new Uint8Array(arrayBuffer);
-					
+
 					// 验证文件数据
 					if (!fileData || fileData.length === 0) {
 						throw new Error(`文件 ${file.name} 数据为空`);
 					}
-					
+
 					// 获取原始文件扩展名
 					const originalExt = file.name.split('.').pop()?.toLowerCase() || 'png';
 					const fileName = `frame_${String(i).padStart(3, '0')}.${originalExt}`;
 					fileExtensions.push(originalExt);
-					
+
 					// 检查文件是否已存在，如果存在则先删除
 					try {
 						const existingFiles = await this.ffmpeg.listDir('/');
@@ -431,54 +477,54 @@ class FFMPEG {
 					} catch (error) {
 						// 忽略检查/删除失败
 					}
-					
+
 					await this.ffmpeg.writeFile(fileName, fileData);
 					createdFiles.push(fileName);
 					console.log(`[动画合成] 写入帧文件: ${fileName} (${file.name}), 格式: ${originalExt}, 大小: ${fileData.length} bytes`);
-					
+
 				} catch (error) {
 					console.error(`[动画合成] 处理文件 ${file.name} 失败:`, error);
 					throw new Error(`文件 ${file.name} 处理失败: ${error instanceof Error ? error.message : '未知错误'}`);
 				}
 			}
-			
+
 			console.log(`[动画合成] 所有帧文件写入完成，共 ${sortedImages.length} 帧`);
-			console.log(`[动画合成] 文件格式分布:`, fileExtensions);
-			
+			console.log("[动画合成] 文件格式分布:", fileExtensions);
+
 			// 验证写入的文件
 			try {
 				const writtenFiles = await this.ffmpeg.listDir('/');
-				const frameFiles = writtenFiles.filter(f => f && f.name && f.name.startsWith('frame_')).sort();
-				console.log(`[动画合成] 已写入的帧文件:`, frameFiles.map(f => f.name));
-				
+				const frameFiles = writtenFiles.filter(f => f?.name.startsWith('frame_')).sort();
+				console.log("[动画合成] 已写入的帧文件:", frameFiles.map(f => f.name));
+
 				if (frameFiles.length !== sortedImages.length) {
 					throw new Error(`文件写入不完整：期望 ${sortedImages.length} 个文件，实际 ${frameFiles.length} 个`);
 				}
 			} catch (error) {
 				console.warn('[动画合成] 文件验证失败:', error);
 			}
-			
+
 			// 确保质量在有效范围内 (1-100)
 			quality = Math.max(1, Math.min(100, quality || 75));
-			
+
 			console.log(`[动画合成] 开始合成 ${sortedImages.length} 张图片为 ${outputFormat.toUpperCase()} 动画`);
 			console.log(`[动画合成] 帧率: ${frameRate}fps, 质量: ${quality}`);
 			if (videoCodec) {
 				console.log(`[动画合成] 视频编解码器: ${videoCodec}`);
 			}
-			
+
 			// 检查输入文件格式是否一致
 			const uniqueExts = [...new Set(fileExtensions)];
 			console.log(`[动画合成] 检测到 ${uniqueExts.length} 种文件格式: ${uniqueExts.join(', ')}`);
-			
+
 			// 如果格式不一致，需要统一转换为PNG
 			if (uniqueExts.length > 1) {
-				console.log(`[动画合成] 格式不一致，将所有文件转换为PNG格式`);
-				
+				console.log("[动画合成] 格式不一致，将所有文件转换为PNG格式");
+
 				for (let i = 0; i < sortedImages.length; i++) {
 					const originalFileName = `frame_${String(i).padStart(3, '0')}.${fileExtensions[i]}`;
 					const pngFileName = `frame_${String(i).padStart(3, '0')}.png`;
-					
+
 					// 如果不是PNG格式，则转换
 					if (fileExtensions[i] !== 'png') {
 						try {
@@ -487,7 +533,7 @@ class FFMPEG {
 								'-y', // 覆盖输出文件
 								pngFileName
 							]);
-							
+
 							// 删除原始文件
 							await this.ffmpeg.deleteFile(originalFileName);
 							// 更新创建文件列表
@@ -502,7 +548,7 @@ class FFMPEG {
 						}
 					}
 				}
-				
+
 				// 更新输入模式为PNG
 				inputPattern = "frame_%03d.png";
 				console.log(`[动画合成] 格式统一完成，使用模式: ${inputPattern}`);
@@ -511,9 +557,9 @@ class FFMPEG {
 				inputPattern = `frame_%03d.${uniqueExts[0]}`;
 				console.log(`[动画合成] 格式一致，使用模式: ${inputPattern}`);
 			}
-			
+
 			console.log(`[动画合成] 使用输入模式: ${inputPattern}`);
-			
+
 			// 确保输出文件不存在
 			try {
 				const existingFiles = await this.ffmpeg.listDir('/');
@@ -525,7 +571,7 @@ class FFMPEG {
 			} catch (error) {
 				// 忽略检查/删除失败
 			}
-			
+
 			// 使用策略模式创建动画
 			const strategy = AnimationStrategyFactory.getStrategy(outputFormat);
 			const result = await strategy.createAnimation(this.ffmpeg, {
@@ -535,31 +581,31 @@ class FFMPEG {
 				quality,
 				videoCodec
 			});
-			
+
 			// 验证输出文件是否生成（最终检查）
 			try {
 				const outputFiles = await this.ffmpeg.listDir('/');
 				const outputExists = outputFiles.some(f => f && f.name === outputName);
 				console.log(`[动画合成] 最终文件检查: ${outputExists ? '成功' : '失败'}`);
-				
+
 				if (!outputExists) {
 					// 列出当前所有文件用于调试
-					console.error('[动画合成] 当前文件系统内容:', outputFiles.map(f => f && f.name ? f.name : "未知文件").filter(Boolean));
+					console.error('[动画合成] 当前文件系统内容:', outputFiles.map(f => f?.name ? f.name : "未知文件").filter(Boolean));
 					throw new Error(`输出文件 ${outputName} 未生成 - 所有方法都失败了`);
 				}
 			} catch (error) {
 				console.error('[动画合成] 输出文件验证失败:', error);
 				throw new Error(`动画合成失败：${error instanceof Error ? error.message : '输出文件未生成'}`);
 			}
-			
+
 			// 验证结果
 			if (!result || result.length === 0) {
 				throw new Error('动画合成失败：输出文件为空');
 			}
-			
+
 			console.log(`[动画合成] 成功生成动画，大小: ${(result.length / 1024).toFixed(1)} KB`);
 			return result;
-			
+
 		} catch (error) {
 			console.error("动画创建失败:", error);
 			throw error;
@@ -567,7 +613,7 @@ class FFMPEG {
 			// 清理我们创建的临时文件
 			try {
 				console.log(`[动画合成] 开始清理 ${createdFiles.length} 个临时文件...`);
-				
+
 				// 清理所有创建的文件
 				for (const fileName of createdFiles) {
 					try {
@@ -576,14 +622,14 @@ class FFMPEG {
 						// 忽略单个文件删除失败
 					}
 				}
-				
+
 				// 删除输出文件
 				try {
 					await this.ffmpeg.deleteFile(outputName);
 				} catch (e) {
 					// 忽略输出文件删除失败
 				}
-				
+
 				// 如果是GIF，还要删除调色板文件
 				if (outputFormat === "gif") {
 					try {
@@ -592,7 +638,7 @@ class FFMPEG {
 						// 忽略调色板文件删除失败
 					}
 				}
-				
+
 				console.log('[ffmpeg] 动画创建后临时文件清理完成');
 			} catch (cleanupError) {
 				console.warn('[ffmpeg] 动画创建后清理临时文件失败:', cleanupError);
@@ -610,7 +656,8 @@ class FFMPEG {
 		width,
 		height,
 		onProgress,
-		onFileComplete
+		onFileComplete,
+		processedCount = 0  // 添加一个参数来跟踪已处理的文件数，不受实例重置影响
 	}: {
 		files: { data: ArrayBuffer; name: string; originalSize: number }[];
 		format: string;
@@ -627,6 +674,7 @@ class FFMPEG {
 			format: string;
 			quality: number;
 		}) => void;
+		processedCount?: number; // 已处理的文件数，用于保持进度准确
 	}): Promise<{
 		url: string;
 		name: string;
@@ -645,29 +693,39 @@ class FFMPEG {
 			format: string;
 			quality: number;
 		}[] = [];
-		
+
 		try {
 			console.log('[ffmpeg] 开始串行处理模式 - 稳定且内存高效');
-			
-			// 清理内存和强制垃圾回收
-			await this.clearInstancePool();
-			if (window.gc) {
-				window.gc();
-			}
-			await new Promise(resolve => setTimeout(resolve, 200));
-			
+
 			// 使用主实例进行处理
+			
 			const instance = ffm_ins;
+			await instance?.reset();
 			if (!instance) {
 				throw new Error('FFmpeg实例未初始化，请确保在浏览器环境中运行');
 			}
 			await instance.load();
+			
+			// 跟踪本次处理的文件总大小
+			let bytesProcessedSinceReset = 0;
+			// 设置重置阈值为100MB
+			const resetThresholdBytes = 100 * 1024 * 1024;
+			
+			console.log(`[ffmpeg] 设置实例重置阈值: 处理 ${Math.round(resetThresholdBytes / (1024 * 1024))} MB 数据后重置`);
 			
 			for (let i = 0; i < files.length; i++) {
 				const file = files[i];
 				const startTime = performance.now();
 				
 				try {
+					// 检查是否需要重置实例 - 基于处理的文件大小
+					if (bytesProcessedSinceReset >= resetThresholdBytes) {
+						console.log(`[ffmpeg] 已处理 ${Math.round(bytesProcessedSinceReset / (1024 * 1024))} MB 数据，重置实例以释放内存`);
+						await instance.reset();
+						await instance.load(); // 重新加载
+						bytesProcessedSinceReset = 0; // 重置字节计数器
+					}
+					
 					const baseName = file.name.replace(/\.[^.]+$/, "");
 					// 清理文件名中的非法字符
 					const cleanBaseName = baseName.replace(/[<>:"/\\|?*]/g, '_');
@@ -723,7 +781,7 @@ class FFMPEG {
 					// 验证Blob是否正确创建
 					if (blob.size === 0) {
 						console.error(`[ffmpeg] 警告: 压缩后的Blob大小为0，文件: ${file.name}`);
-						throw new Error(`压缩失败：生成的文件大小为0`);
+						throw new Error("压缩失败：生成的文件大小为0");
 					}
 					
 					// 创建Blob URL并验证
@@ -732,8 +790,8 @@ class FFMPEG {
 						blobUrl = URL.createObjectURL(blob);
 						console.log(`[ffmpeg] 创建Blob URL成功: ${blobUrl.substring(0, 50)}...`);
 					} catch (error) {
-						console.error(`[ffmpeg] 创建Blob URL失败:`, error);
-						throw new Error(`下载链接创建失败`);
+						console.error("[ffmpeg] 创建Blob URL失败:", error);
+						throw new Error("下载链接创建失败");
 					}
 					
 					const result = {
@@ -751,72 +809,60 @@ class FFMPEG {
 					results.push(result);
 					onFileComplete?.(result);
 					
-					// 更新进度
+					// 更新进度 - 使用全局计数来确保进度准确，即使实例被重置
 					const completed = i + 1;
-					onProgress?.(completed, files.length);
+					const totalCompleted = processedCount + completed;
+					onProgress?.(totalCompleted, files.length + processedCount);
 					
-					// 优化内存清理策略：只在处理大量文件时才清理
-					if (files.length > 5 && (i + 1) % 5 === 0) {
-						await instance.cleanupMemory();
-						if (window.gc) {
-							window.gc();
-							await new Promise(resolve => setTimeout(resolve, 100));
-						}
+					// 累加处理的文件大小
+					bytesProcessedSinceReset += file.data.byteLength;
+					
+					// 每次处理完一个文件后清理内存，不管文件大小
+					await instance.cleanupMemory();
+
+					// 减少ArrayBuffer的引用，帮助垃圾回收
+					// @ts-ignore
+					file.data = null;
+
+					// 增加每个文件处理后的短暂延迟，给浏览器喘息的机会
+					if (i < files.length - 1) {
+						await new Promise(resolve => setTimeout(resolve, 50));
 					}
-					
+
 				} catch (error) {
 					console.error(`串行处理文件 ${file.name} 失败:`, error);
-					throw error;
+					
+					// 尝试重置实例并继续处理其他文件
+					try {
+						console.warn('[ffmpeg] 处理文件失败，重置实例后继续...');
+						await instance.reset();
+						await instance.load();
+						bytesProcessedSinceReset = 0;
+
+						// 如果是最后一个文件，则抛出错误，否则继续处理
+						if (i === files.length - 1) {
+							throw error;
+						}
+					} catch (resetError) {
+						console.error('[ffmpeg] 重置实例失败，中断处理:', resetError);
+						throw error;
+					}
 				}
 			}
-			
+
 			return results;
-			
+
 		} finally {
-			// 最终垃圾回收
-			if (window.gc) {
-				window.gc();
-			}
-		}
-	}
 
-	/**
-	 * 简化的实例池清理方法
-	 */
-	static async clearInstancePool(): Promise<void> {
-		// 简化版本 - 只进行垃圾回收
-		if (window.gc) {
-			window.gc();
-		}
-		console.log('[ffmpeg] 内存清理完成');
-	}
-
-	/**
-	 * 测试FFmpeg是否正常工作
-	 */
-	async testFFmpeg(): Promise<boolean> {
-		try {
-			await this.load();
-			if (!this.ffmpeg) return false;
-			
-			// 创建一个简单的测试文件
-			const testData = new Uint8Array([0xFF, 0xD8, 0xFF, 0xE0]); // JPEG文件头
-			await this.ffmpeg.writeFile('test.jpg', testData);
-			
-			// 列出文件
-			const files = await this.ffmpeg.listDir('/');
-			const testFileExists = files.some(f => f.name === 'test.jpg');
-			
-			// 清理测试文件
-			if (testFileExists) {
-				await this.ffmpeg.deleteFile('test.jpg');
+			// 调用清理方法
+			try {
+				const instance = ffm_ins;
+				if (instance) {
+					await instance.cleanupMemory();
+				}
+			} catch (e) {
+				console.warn('[ffmpeg] 最终清理失败:', e);
 			}
-			
-			console.log('[ffmpeg] 测试结果:', testFileExists ? '正常' : '异常');
-			return testFileExists;
-		} catch (error) {
-			console.error('[ffmpeg] 测试失败:', error);
-			return false;
 		}
 	}
 }

@@ -55,7 +55,7 @@ function AnimationComposer() {
       // 提取文件名中的数字部分
       const extractNumbers = (filename: string): number[] => {
         const numbers = filename.match(/\d+/g);
-        return numbers ? numbers.map((num) => parseInt(num, 10)) : [];
+        return numbers ? numbers.map((num) => Number.parseInt(num, 10)) : [];
       };
 
       const aNumbers = extractNumbers(a.name);
@@ -158,13 +158,6 @@ function AnimationComposer() {
         throw new Error(t("ffmpeg_not_initialized"));
       }
 
-      // 先测试FFmpeg是否正常工作
-      setCurrentFileName(t("testing_ffmpeg"));
-      const isFFmpegWorking = await ffm_ins.testFFmpeg();
-      if (!isFFmpegWorking) {
-        throw new Error(t("ffmpeg_test_failed"));
-      }
-
       setCurrentFileName(t("composing_animation"));
       const outputName = `animation_${Date.now()}.${format}`;
 
@@ -258,15 +251,15 @@ function AnimationComposer() {
           {/* Feature highlights */}
           <div className="flex flex-wrap justify-center gap-3">
             <div className="flex items-center gap-2 bg-white/20 dark:bg-black/20 px-4 py-2 rounded-full text-sm backdrop-blur-sm">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"/>
               <span>WebP & GIF</span>
             </div>
             <div className="flex items-center gap-2 bg-white/20 dark:bg-black/20 px-4 py-2 rounded-full text-sm backdrop-blur-sm">
-              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"/>
               <span>{t("local_processing")}</span>
             </div>
             <div className="flex items-center gap-2 bg-white/20 dark:bg-black/20 px-4 py-2 rounded-full text-sm backdrop-blur-sm">
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"/>
               <span>{t("real_time_preview")}</span>
             </div>
           </div>
@@ -299,6 +292,7 @@ function AnimationComposer() {
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
+                    <title>limgx</title>
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -321,13 +315,13 @@ function AnimationComposer() {
               {files.length > 0 && (
                 <div className="flex items-center gap-4 text-sm">
                   <div className="flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/50 rounded-full">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <span className="w-2 h-2 bg-blue-500 rounded-full"/>
                     <span className="text-blue-700 dark:text-blue-300">
                       {files.length} {t("images_count")}
                     </span>
                   </div>
                   <div className="flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/50 rounded-full">
-                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    <span className="w-2 h-2 bg-green-500 rounded-full"/>
                     <span className="text-green-700 dark:text-green-300">
                       {frameRate[0]} FPS
                     </span>
