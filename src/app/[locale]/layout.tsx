@@ -17,6 +17,7 @@ import {
 	SupportedLocale,
 	supportedLocales,
 } from "@/i18n/langMap";
+import BugsnagErrorBoundary from "@/components/Bugsnap";
 // import Bugsnag from "@bugsnag/js";
 // import BugsnagPluginReact from "@bugsnag/plugin-react";
 // import BugsnagPerformance from "@bugsnag/browser-performance";
@@ -215,21 +216,23 @@ export default async function RootLayout({
 					inter.variable,
 				)}
 			>
-				<ThemeProvider
-					attribute="class"
-					defaultTheme="light"
-					disableTransitionOnChange
-					enableSystem={false}
-				>
-					<NextIntlClientProvider locale={locale} messages={dictionary}>
-						<JotaiProvider>
-							<Header />
-							{children}
-							<Footer />
-							<Toaster />
-						</JotaiProvider>
-					</NextIntlClientProvider>
-				</ThemeProvider>
+				<BugsnagErrorBoundary>
+					<ThemeProvider
+						attribute="class"
+						defaultTheme="light"
+						disableTransitionOnChange
+						enableSystem={false}
+					>
+						<NextIntlClientProvider locale={locale} messages={dictionary}>
+							<JotaiProvider>
+								<Header />
+								{children}
+								<Footer />
+								<Toaster />
+							</JotaiProvider>
+						</NextIntlClientProvider>
+					</ThemeProvider>
+				</BugsnagErrorBoundary>
 				<GoogleAnalytics gaId="G-89618T8EX2" />
 			</body>
 		</html>
