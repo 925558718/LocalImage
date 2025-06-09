@@ -16,7 +16,7 @@ import {
 import { toast } from "sonner";
 import Advanced from "./components/Advanced";
 import { DropzoneWithPreview } from "./components/DropzoneWithPreview";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, FileType } from "lucide-react";
 
 // 导入FFMPEG类用于静态方法调用
 import { FFMPEG } from "@/lib/ffmpeg";
@@ -62,7 +62,6 @@ export default function Compress() {
 			if (ffm_ins) {
 				await ffm_ins.cleanupMemory();
 			}
-			await FFMPEG.clearInstancePool();
 		} catch (error) {
 			console.warn('清理FFmpeg资源失败:', error);
 		}
@@ -162,12 +161,6 @@ export default function Compress() {
 		}
 		
 		try {
-			// 强制垃圾回收以腾出更多内存
-			if (window.gc) {
-				window.gc();
-				// 等待垃圾回收完成
-				await new Promise(resolve => setTimeout(resolve, 200));
-			}
 			
 			// 智能批处理：将大文件拆分处理，防止内存溢出
 			const fileGroups: File[][] = [];
@@ -241,14 +234,17 @@ export default function Compress() {
 					quality: advanced.quality,
 					width: advanced.width ? Number.parseInt(advanced.width) : undefined,
 					height: advanced.height ? Number.parseInt(advanced.height) : undefined,
+					processedCount: processedFiles,
 					onProgress: (completed, total) => {
-						const batchProgress = (completed / total) * 100;
-						const overallProgress = Math.round(((processedFiles + completed) / totalFiles) * 100);
-						setProgress(Math.min(95, overallProgress));
+						// 计算当前批次的进度百分比
+						const batchProgress = ((completed - processedFiles) / fileData.length) * 100;
+						setProgress(Math.round(completed / totalFiles * 100));
 						
 						// 更新当前处理文件的进度
-						if (completed < total) {
-							const currentFileName = fileData[completed]?.name;
+						// 获取当前正在处理的文件在当前批次中的索引
+						const currentBatchIndex = completed - processedFiles - 1;
+						if (currentBatchIndex >= 0 && currentBatchIndex < fileData.length) {
+							const currentFileName = fileData[currentBatchIndex]?.name;
 							if (currentFileName) {
 								setFileProgress(prev => ({
 									...prev,
@@ -307,9 +303,6 @@ export default function Compress() {
 				if (groupIndex < fileGroups.length - 1) {
 					console.log(`批次 ${groupIndex + 1} 完成，清理内存准备下一批`);
 					await cleanupResources();
-					
-					// 更长的延迟，让浏览器有更多时间回收内存
-					await new Promise(resolve => setTimeout(resolve, 500));
 				}
 			}
 
@@ -359,10 +352,7 @@ export default function Compress() {
 					{/* 格式选择器 */}
 					<div className="flex items-center gap-3 px-6 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-white/30 dark:border-slate-700/30">
 						<div className="flex items-center gap-2">
-							<svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-								<title>输出格式</title>
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-							</svg>
+							<FileType className="w-5 h-5 text-blue-600 dark:text-blue-400" />
 							<span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t("output_format")}</span>
 						</div>
 						<Select value={format} onValueChange={setFormat}>
