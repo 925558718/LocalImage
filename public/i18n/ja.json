@@ -22,6 +22,12 @@
 		"カスタムフレームレートと品質",
 		"リアルタイムプレビュー機能"
 	],
+	"gradient_meta_title": "CSSグラデーションジェネレーター - LocalImage | 美しいグラデーションを作成",
+	"gradient_meta_description": "リアルタイムプレビュー、Tailwind CSS v3/v4サポート、コピー可能なコード付きの無料オンラインCSSグラデーションジェネレーター。リアルタイム編集で美しい線形および放射状グラデーションをウェブプロジェクト用に作成。",
+	"gradient_meta_keywords": "CSSグラデーション, グラデーションジェネレーター, Tailwindグラデーション, 線形グラデーション, 放射状グラデーション, CSSツール, 背景ジェネレーター",
+	"compress_meta_title": "画像圧縮ツール - LocalImage | 画像サイズを縮小",
+	"compress_meta_description": "無料オンライン画像圧縮ツール。品質を損なわずに画像ファイルサイズを縮小。JPG、PNG、WebP形式に対応し、ローカル処理でプライバシーを保護。",
+	"compress_meta_keywords": "画像圧縮, オンライン画像圧縮, 画像サイズ縮小, JPG圧縮, PNG圧縮, 写真圧縮ツール",
 	"advanceoption": {
 		"width": "幅",
 		"height": "高さ",

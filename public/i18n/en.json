@@ -22,6 +22,12 @@
 		"Custom frame rate and quality",
 		"Real-time preview functionality"
 	],
+	"gradient_meta_title": "CSS Gradient Generator - LocalImage | Create Beautiful Gradients",
+	"gradient_meta_description": "Free online CSS gradient generator with live preview, Tailwind CSS v3/v4 support, and copy-ready code. Create beautiful linear and radial gradients for your web projects with real-time editing.",
+	"gradient_meta_keywords": "css gradient, gradient generator, tailwind gradients, linear gradient, radial gradient, css tools, background generator",
+	"compress_meta_title": "Image Compressor - LocalImage | Reduce Image Size Online",
+	"compress_meta_description": "Free online image compression tool. Reduce image file sizes without losing quality. Supports JPG, PNG, WebP formats with local processing for privacy protection.",
+	"compress_meta_keywords": "image compression, compress images online, reduce image size, JPG compressor, PNG compressor, photo compression tool",
 	"advanceoption": {
 		"width": "Width",
 		"height": "Height",

@@ -22,6 +22,12 @@
 		"自定义帧率和质量",
 		"实时预览功能"
 	],
+	"gradient_meta_title": "CSS渐变生成器 - LocalImage | 创建美丽的渐变效果",
+	"gradient_meta_description": "免费在线CSS渐变生成器，具有实时预览功能，支持Tailwind CSS v3/v4，生成即用代码。为您的网页项目创建精美的线性和径向渐变，支持实时编辑。",
+	"gradient_meta_keywords": "CSS渐变, 渐变生成器, Tailwind渐变, 线性渐变, 径向渐变, CSS工具, 背景生成器",
+	"compress_meta_title": "图片压缩工具 - LocalImage | 在线减小图片尺寸",
+	"compress_meta_description": "免费在线图像压缩工具。减小图片文件大小而不损失质量。支持JPG、PNG、WebP等格式，本地处理保护隐私安全。",
+	"compress_meta_keywords": "图片压缩, 在线压缩图片, 减小图片大小, JPG压缩器, PNG压缩器, 照片压缩工具",
 	"advanceoption": {
 		"width": "宽度",
 		"height": "高度",
