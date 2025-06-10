@@ -13,8 +13,6 @@ import {
 	getNormalizedLocale,
 	dictionaries,
 	defaultLocale,
-	getOpenGraphLocale,
-	SupportedLocale,
 	supportedLocales,
 } from "@/i18n/langMap";
 import BugsnagErrorBoundary from "@/components/Bugsnap";
@@ -60,22 +58,8 @@ export async function generateMetadata({
 		dictionary.meta_description ||
 		"Free online WebP and GIF animation creator. Convert multiple images into high-quality animations with local processing. No uploads required, privacy protected.";
 
-	// 获取OpenGraph格式的locale
-	const ogLocale = getOpenGraphLocale(locale);
-
-	// 构建其他语言的alternate locales
-	const alternateLocales = [
-		"en_US",
-		"zh_CN",
-		"ja_JP",
-		"es_ES",
-		"fr_FR",
-		"de_DE",
-		"ru_RU",
-	].filter((l) => l !== ogLocale);
-
 	// 构建基础URL
-	const baseUrl = "https://www.limgx.com";
+	const baseUrl = "https://limgx.com";
 
 	// 构建当前语言的URL (默认语言不需要语言前缀)
 	const currentUrl =
@@ -111,23 +95,6 @@ export async function generateMetadata({
 				"max-image-preview": "large",
 				"max-snippet": -1,
 			},
-		},
-		openGraph: {
-			title,
-			description,
-			type: "website",
-			url: currentUrl,
-			images: ["https://www.limgx.com/images/webp-animation-preview.jpg"],
-			siteName: "LocalImage WebP Animation Creator",
-			locale: ogLocale,
-			alternateLocale: alternateLocales,
-		},
-		twitter: {
-			card: "summary_large_image",
-			title,
-			description,
-			images: ["https://www.limgx.com/images/webp-animation-preview.jpg"],
-			creator: "@limgx_official",
 		},
 		alternates: {
 			canonical: currentUrl,
@@ -178,7 +145,7 @@ export default async function RootLayout({
 						"@type": "WebApplication",
 						name: appName,
 						description: appDescription,
-						url: "https://www.limgx.com",
+						url: "https://limgx.com",
 						applicationCategory: "MultimediaApplication",
 						operatingSystem: "Web Browser",
 						inLanguage: locale,
@@ -189,12 +156,12 @@ export default async function RootLayout({
 						},
 						featureList: featureList,
 						screenshot:
-							"https://www.limgx.com/images/webp-animation-preview.jpg",
+							"https://limgx.com/images/webp-animation-preview.jpg",
 						softwareVersion: "1.0",
 						author: {
 							"@type": "Organization",
 							name: "limgx.com",
-							url: "https://www.limgx.com",
+							url: "https://limgx.com",
 						},
 						aggregateRating: {
 							"@type": "AggregateRating",

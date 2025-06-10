@@ -22,6 +22,12 @@
 		"Anpassbare Bildrate und Qualität",
 		"Echtzeit-Vorschau-Funktionalität"
 	],
+	"gradient_meta_title": "CSS-Gradient-Generator - LocalImage | Erstellen Sie schöne Farbverläufe",
+	"gradient_meta_description": "Kostenloser Online-CSS-Gradient-Generator mit Echtzeit-Vorschau, Tailwind CSS v3/v4-Unterstützung und kopierfertigen Code. Erstellen Sie schöne lineare und radiale Farbverläufe für Ihre Webprojekte mit Echtzeit-Bearbeitung.",
+	"gradient_meta_keywords": "CSS-Farbverlauf, Gradient-Generator, Tailwind-Farbverläufe, linearer Gradient, radialer Gradient, CSS-Tools, Hintergrund-Generator",
+	"compress_meta_title": "Bildkompressor - LocalImage | Reduzieren Sie die Bildgröße",
+	"compress_meta_description": "Kostenloses Online-Bildkomprimierungstool. Reduzieren Sie Bilddateigrößen ohne Qualitätsverlust. Unterstützt JPG, PNG, WebP-Formate mit lokaler Verarbeitung für Datenschutz.",
+	"compress_meta_keywords": "Bildkomprimierung, Bilder online komprimieren, Bildgröße reduzieren, JPG-Kompressor, PNG-Kompressor, Fotokomprimierungstool",
 	"advanceoption": {
 		"width": "Breite",
 		"height": "Höhe",

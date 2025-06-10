@@ -22,6 +22,12 @@
 		"Fréquence d'images et qualité personnalisables",
 		"Fonctionnalité d'aperçu en temps réel"
 	],
+	"gradient_meta_title": "Générateur de Dégradés CSS - LocalImage | Créez de Beaux Dégradés",
+	"gradient_meta_description": "Générateur gratuit de dégradés CSS en ligne avec aperçu en direct, support Tailwind CSS v3/v4 et code prêt à copier. Créez de beaux dégradés linéaires et radiaux pour vos projets web avec édition en temps réel.",
+	"gradient_meta_keywords": "dégradé CSS, générateur de dégradés, dégradés Tailwind, dégradé linéaire, dégradé radial, outils CSS, générateur d'arrière-plan",
+	"compress_meta_title": "Compresseur d'Images - LocalImage | Réduisez la Taille des Images",
+	"compress_meta_description": "Outil gratuit de compression d'images en ligne. Réduisez la taille des fichiers d'images sans perdre en qualité. Prend en charge les formats JPG, PNG, WebP avec traitement local pour la protection de la confidentialité.",
+	"compress_meta_keywords": "compression d'images, compresser images en ligne, réduire taille d'image, compresseur JPG, compresseur PNG, outil de compression de photos",
 	"advanceoption": {
 		"width": "Largeur",
 		"height": "Hauteur",

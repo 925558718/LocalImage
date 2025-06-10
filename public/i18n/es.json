@@ -22,6 +22,12 @@
 		"Velocidad de fotogramas y calidad personalizable",
 		"Funcionalidad de vista previa en tiempo real"
 	],
+	"gradient_meta_title": "Generador de Gradientes CSS - LocalImage | Crea Hermosos Gradientes",
+	"gradient_meta_description": "Generador gratuito de gradientes CSS en línea con vista previa en vivo, soporte para Tailwind CSS v3/v4 y código listo para copiar. Crea hermosos gradientes lineales y radiales para tus proyectos web con edición en tiempo real.",
+	"gradient_meta_keywords": "gradiente CSS, generador de gradientes, gradientes Tailwind, gradiente lineal, gradiente radial, herramientas CSS, generador de fondos",
+	"compress_meta_title": "Compresor de Imágenes - LocalImage | Reduce el Tamaño de Imágenes",
+	"compress_meta_description": "Herramienta gratuita de compresión de imágenes en línea. Reduce el tamaño de archivos de imagen sin perder calidad. Compatible con formatos JPG, PNG, WebP con procesamiento local para protección de privacidad.",
+	"compress_meta_keywords": "compresión de imágenes, comprimir imágenes en línea, reducir tamaño de imagen, compresor JPG, compresor PNG, herramienta de compresión de fotos",
 	"advanceoption": {
 		"width": "Ancho",
 		"height": "Alto",
