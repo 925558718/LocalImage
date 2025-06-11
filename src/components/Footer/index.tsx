@@ -8,7 +8,7 @@ function Footer() {
 		<footer className="w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-white/20 dark:border-slate-700/50 shadow-lg shadow-black/5">
 			<div className="max-w-7xl mx-auto px-4 py-16 relative">
 				{/* 微妙的背景纹理 */}
-				<div className="absolute inset-0 bg-gradient-to-br from-transparent via-slate-100/20 to-transparent dark:from-transparent dark:via-slate-800/20 dark:to-transparent pointer-events-none"></div>
+				<div className="absolute inset-0 bg-gradient-to-br from-transparent via-slate-100/20 to-transparent dark:from-transparent dark:via-slate-800/20 dark:to-transparent pointer-events-none"/>
 				<div className="relative z-10">
 					{/* 主要内容区域 */}
 					<div className="grid md:grid-cols-4 gap-8 mb-12">
@@ -37,27 +37,27 @@ function Footer() {
 							<h4 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">{t("core_features")}</h4>
 							<ul className="space-y-2 text-slate-600 dark:text-slate-300">
 								<li className="flex items-center">
-									<span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>
+									<span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"/>
 									WebP{t("animation_composer")}
 								</li>
 								<li className="flex items-center">
-									<span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>
+									<span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"/>
 									{t("gif_animation")}
 								</li>
 								<li className="flex items-center">
-									<span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>
+									<span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"/>
 									{t("image_format_conversion")}
 								</li>
 								<li className="flex items-center">
-									<span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>
+									<span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"/>
 									{t("nav_compress")}
 								</li>
 								<li className="flex items-center">
-									<span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>
+									<span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"/>
 									{t("batch_processing")}
 								</li>
 								<li className="flex items-center">
-									<span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>
+									<span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"/>
 									{t("nav_gradient_generator")}
 								</li>
 							</ul>
@@ -239,11 +239,11 @@ function Footer() {
 							</div>
 							<div className="flex items-center space-x-4">
 								<div className="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400">
-									<span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+									<span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"/>
 									<span>{t("footer_status_1")}</span>
 								</div>
 								<div className="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400">
-									<span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
+									<span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"/>
 									<span>{t("footer_status_2")}</span>
 								</div>
 							</div>
