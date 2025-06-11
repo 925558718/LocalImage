@@ -6,5 +6,6 @@ export const routing = defineRouting({
   locales: supportedLocales,
  
   // 使用默认语言
-  defaultLocale: defaultLocale
+  defaultLocale: defaultLocale,
+  localePrefix: 'as-needed',
 });
