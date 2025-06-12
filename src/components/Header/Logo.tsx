@@ -9,7 +9,7 @@ function Logo() {
 	const t = useTranslations();
 
 	return (
-		<Link href="/" className="flex items-center space-x-3 hover:opacity-90 transition-all duration-300 group">
+		<Link href="https://limgx.com" className="flex items-center space-x-3 hover:opacity-90 transition-all duration-300 group">
 			{/* Logo图标 - 现代化设计 */}
 			<div className="relative w-11 h-11 bg-gradient-to-br from-primary via-primary/90 to-primary/70 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 animate-glow">
 				{/* 背景光晕效果 */}
