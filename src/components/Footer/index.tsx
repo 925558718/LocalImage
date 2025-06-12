@@ -68,29 +68,19 @@ function Footer() {
 							<h4 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">{t("related_tools")}</h4>
 							<ul className="space-y-2">
 								<li>
-									<Link href="/" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+									<Link href="https://limgx.com" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
 										WebP{t("animation_composer")}
 									</Link>
 								</li>
 								<li>
-									<Link href="/compress" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+									<Link href="https://limgx.com/compress" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
 										{t("nav_compress")}
 									</Link>
 								</li>
 								<li>
-									<Link href="/dev/gradient" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+									<Link href="https://limgx.com/dev/gradient" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
 										{t("nav_gradient_generator")}
 									</Link>
-								</li>
-								<li>
-									<a href="https://converter.limgx.com" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener">
-										{t("image_converter_tool")}
-									</a>
-								</li>
-								<li>
-									<a href="https://editor.limgx.com" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener">
-										{t("online_image_editor")}
-									</a>
 								</li>
 							</ul>
 						</div>
@@ -138,88 +128,6 @@ function Footer() {
 									<strong className="text-slate-800 dark:text-slate-200">{t("education_training")}：</strong>
 									{t("education_desc")}
 								</p>
-							</div>
-						</div>
-					</div>
-
-					{/* 外部链接和合作伙伴 */}
-					<div className="pt-8 border-t border-slate-200 dark:border-slate-700 mb-8">
-						<h4 className="text-lg font-semibold text-slate-900 dark:text-white mb-6 text-center">{t("resources_and_tools")}</h4>
-						<div className="grid md:grid-cols-3 gap-6">
-							<div>
-								<h5 className="font-medium text-slate-800 dark:text-slate-200 mb-3">{t("image_tools_sites")}</h5>
-								<ul className="space-y-2 text-sm">
-									<li>
-										<a href="https://tinypng.com" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener nofollow">
-											{t("tinypng_desc")}
-										</a>
-									</li>
-									<li>
-										<a href="https://photopea.com" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener nofollow">
-											{t("photopea_desc")}
-										</a>
-									</li>
-									<li>
-										<a href="https://canva.com" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener nofollow">
-											{t("canva_desc")}
-										</a>
-									</li>
-									<li>
-										<a href="https://remove.bg" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener nofollow">
-											{t("removebg_desc")}
-										</a>
-									</li>
-								</ul>
-							</div>
-							<div>
-								<h5 className="font-medium text-slate-800 dark:text-slate-200 mb-3">{t("animation_resources")}</h5>
-								<ul className="space-y-2 text-sm">
-									<li>
-										<a href="https://lottiefiles.com" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener nofollow">
-											{t("lottiefiles_desc")}
-										</a>
-									</li>
-									<li>
-										<a href="https://giphy.com" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener nofollow">
-											{t("giphy_desc")}
-										</a>
-									</li>
-									<li>
-										<a href="https://ezgif.com" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener nofollow">
-											{t("ezgif_desc")}
-										</a>
-									</li>
-									<li>
-										<a href="https://animate.style" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener">
-											{t("animate_css_desc")}
-										</a>
-									</li>
-								</ul>
-							</div>
-							<div>
-								<h5 className="font-medium text-slate-800 dark:text-slate-200 mb-3">{t("developer_tools")}</h5>
-								<ul className="space-y-2 text-sm">
-									<li>
-										<a href="https://ffmpeg.org" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener">
-											{t("ffmpeg_desc")}
-										</a>
-									</li>
-									<li>
-										<a href="https://webassembly.org" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener">
-											{t("webassembly_desc")}
-										</a>
-									</li>
-									<li>
-										<a href="https://developers.google.com/speed/webp" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener">
-											{t("webp_docs_desc")}
-										</a>
-									</li>
-									<li>
-										<a href="https://caniuse.com/webp" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener">
-											{t("webp_support_desc")}
-										</a>
-									</li>
-								</ul>
 							</div>
 						</div>
 					</div>
