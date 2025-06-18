@@ -192,5 +192,8 @@
 	"drop_files_here": "Drop files here",
 	"drag_or_click_upload": "Drag images here or click to upload",
 	"select_files": "Select Files",
-	"supported_formats": "Supported formats"
+	"supported_formats": "Supported formats",
+	"low_quality": "Low Quality",
+	"high_quality": "High Quality",
+	"image_size": "Image Size"
 }

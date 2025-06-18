@@ -192,5 +192,8 @@
 	"drop_files_here": "Déposez les fichiers ici",
 	"drag_or_click_upload": "Faites glisser des images ici ou cliquez pour téléverser",
 	"select_files": "Sélectionner des fichiers",
-	"supported_formats": "Formats pris en charge"
+	"supported_formats": "Formats pris en charge",
+	"low_quality": "Qualité Basse",
+	"high_quality": "Haute Qualité",
+	"image_size": "Taille de l'Image"
 }

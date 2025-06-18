@@ -192,5 +192,8 @@
 	"drop_files_here": "拖放文件到这里",
 	"drag_or_click_upload": "拖拽图片到这里或点击上传",
 	"select_files": "选择文件",
-	"supported_formats": "支持的格式"
+	"supported_formats": "支持的格式",
+	"low_quality": "低质量",
+	"high_quality": "高质量",
+	"image_size": "图片大小"
 }

@@ -179,7 +179,6 @@
 	"animation_composer_subtitle": "Herramienta Profesional de Creación de Animaciones",
 	"realtime_preview_desc": "Vista previa de animación en tiempo real",
 	"images_count": "imágenes",
-	"high_quality": "Alta calidad",
 	"fast_processing": "Procesamiento rápido",
 	"output_format": "Formato de salida",
 	"select_format": "Seleccionar formato",
@@ -192,5 +191,8 @@
 	"drop_files_here": "Suelta archivos aquí",
 	"drag_or_click_upload": "Arrastra imágenes aquí o haz clic para subir",
 	"select_files": "Seleccionar archivos",
-	"supported_formats": "Formatos soportados"
+	"supported_formats": "Formatos soportados",
+	"low_quality": "Baja Calidad",
+	"high_quality": "Alta Calidad",
+	"image_size": "Tamaño de Imagen"
 }

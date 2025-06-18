@@ -192,5 +192,8 @@
 	"drop_files_here": "Dateien hier ablegen",
 	"drag_or_click_upload": "Bilder hierher ziehen oder zum Hochladen klicken",
 	"select_files": "Dateien auswählen",
-	"supported_formats": "Unterstützte Formate"
+	"supported_formats": "Unterstützte Formate",
+	"low_quality": "Niedrige Qualität",
+	"high_quality": "Hohe Qualität",
+	"image_size": "Bildgröße"
 }

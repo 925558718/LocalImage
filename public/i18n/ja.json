@@ -192,5 +192,8 @@
 	"drag_or_click_upload": "画像をここにドラッグするか、クリックしてアップロード",
 	"drop_files_here": "ファイルをここにドロップ",
 	"select_files": "ファイルを選択",
-	"supported_formats": "サポートされている形式"
+	"supported_formats": "サポートされている形式",
+	"low_quality": "低品質",
+	"high_quality": "高品質",
+	"image_size": "画像サイズ"
 }
