@@ -29,6 +29,9 @@
 	"compress_meta_description": "免费在线图片压缩与格式转换工具。减小图片大小或转换格式，隐私安全。",
 	"compress_meta_keywords": "图片压缩, 格式转换, 图片压缩转换, 在线压缩转换, JPG, PNG, WebP",
 	"advanceoption": {
+		"outputName": "输出文件名后缀",
+		"outputName_placeholder": "如 compressed，留空则无后缀",
+		"outputName_help": "将此后缀加在原文件名和扩展名之间，如 input_compressed.jpg。留空则直接用原文件名。",
 		"width": "宽度",
 		"height": "高度",
 		"quality": "质量"

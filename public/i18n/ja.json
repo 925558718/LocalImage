@@ -29,6 +29,9 @@
 	"compress_meta_description": "無料オンライン画像圧縮ツール。品質を損なわずに画像ファイルサイズを縮小。JPG、PNG、WebP形式に対応し、ローカル処理でプライバシーを保護。",
 	"compress_meta_keywords": "画像圧縮, 形式変換, 圧縮変換, JPG, PNG, WebP, オンラインツール",
 	"advanceoption": {
+		"outputName": "ファイル名サフィックス",
+		"outputName_placeholder": "例: compressed。空欄ならサフィックスなし",
+		"outputName_help": "このサフィックスは元のファイル名と拡張子の間に追加されます（例: input_compressed.jpg）。空欄の場合は元のファイル名のみ。",
 		"width": "幅",
 		"height": "高さ",
 		"quality": "品質"

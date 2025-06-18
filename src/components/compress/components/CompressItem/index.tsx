@@ -53,7 +53,7 @@ function CompressItem({
 		return 'text-emerald-500';               // 高压缩率
 	};
 	
-	const ratioColor = getRatioColor(parseFloat(compressionRatio));
+	const ratioColor = getRatioColor(Number.parseFloat(compressionRatio));
 	
 	// 批量下载功能
 	const handleDownloadAll = async () => {
@@ -85,7 +85,7 @@ function CompressItem({
 					if (item.blob) {
 						blob = item.blob;
 						console.log(`${t('using_cached_blob')}: ${item.name} (${blob.size} bytes)`);
-					} else if (item.url && item.url.startsWith('blob:')) {
+					} else if (item.url?.startsWith('blob:')) {
 						// 如果没有缓存的blob，尝试从URL获取
 						console.log(`${t('fetching_blob_from_url')}: ${item.name}`);
 						
@@ -120,8 +120,6 @@ function CompressItem({
 					
 				} catch (error) {
 					console.error(`${t('process_file_failed')} ${item.name}:`, error);
-					// 继续处理下一个文件而不是整体失败
-					continue;
 				}
 			}
 			
@@ -202,7 +200,7 @@ function CompressItem({
 					<div className="flex items-center gap-3">
 						<span className="font-medium">{name}</span>
 						<span className={`text-sm font-medium ${ratioColor}`}>
-							{compressionRatio}% {parseFloat(compressionRatio) >= 0 ? t('saved') : t('increased')}
+							{compressionRatio}% {Number.parseFloat(compressionRatio) >= 0 ? t('saved') : t('increased')}
 						</span>
 					</div>
 					{/* 批量下载按钮 */}
@@ -324,7 +322,7 @@ function CompressItem({
 					{formatFileSize(originalSize)} {t('arrow_symbol')} {formatFileSize(compressedSize)}
 				</span>
 				<span className={ratioColor}>
-					{compressionRatio}% {parseFloat(compressionRatio) >= 0 ? t('saved') : t('increased')}
+					{compressionRatio}% {Number.parseFloat(compressionRatio) >= 0 ? t('saved') : t('increased')}
 				</span>
 			</div>
 			
