@@ -810,23 +810,18 @@ class FFMPEG {
 					const outputName = `${cleanBaseName}_compressed.${format}`;
 
 					// 处理单个文件
-					let compressed: Uint8Array;
-					const actualFormat = format;
+					const compressed: Uint8Array = await instance.convertImage({
+						input: file.data,
+						outputName,
+						quality,
+						width,
+						height,
+					});
 
-					try {
-						compressed = await instance.convertImage({
-							input: file.data,
-							outputName,
-							quality,
-							width,
-							height,
-						});
-
-						// 验证压缩结果
-						if (!compressed || compressed.length === 0) {
-							throw new Error(`压缩失败：${file.name} 压缩结果为空`);
-						}
-					} catch (error) {}
+					// 验证压缩结果
+					if (!compressed || compressed.length === 0) {
+						throw new Error(`压缩失败：${file.name} 压缩结果为空`);
+					}
 
 					const mimeMap: Record<string, string> = {
 						webp: "image/webp",
@@ -837,7 +832,7 @@ class FFMPEG {
 					};
 
 					const blob = new Blob([compressed], {
-						type: mimeMap[actualFormat] || "application/octet-stream",
+						type: mimeMap[format] || "application/octet-stream",
 					});
 
 					// 验证Blob是否正确创建
@@ -866,7 +861,7 @@ class FFMPEG {
 						originalSize: file.originalSize,
 						compressedSize: blob.size,
 						processingTime: performance.now() - startTime,
-						format: actualFormat,
+						format,
 						quality,
 					};
 
