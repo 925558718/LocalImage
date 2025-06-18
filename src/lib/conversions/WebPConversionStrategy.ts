@@ -7,6 +7,7 @@ import { ConversionStrategy } from "./ConversionStrategy";
 export class WebPConversionStrategy implements ConversionStrategy {
 	getArgs(inputFileName: string, outputName: string, quality: number, width?: number, height?: number): string[] {
 		const args = ['-i', inputFileName];
+		const isGif = inputFileName.toLowerCase().endsWith('.gif');
 		
 		// 分辨率缩放
 		if (width || height) {
@@ -16,8 +17,8 @@ export class WebPConversionStrategy implements ConversionStrategy {
 			args.push('-vf', scaleArg);
 		}
 		
-		// 明确指定使用libwebp编码器，而不是libwebp_anim
-		args.push('-c:v', 'libwebp');
+		// 对于GIF使用libwebp_anim编码器，其他使用libwebp
+		args.push('-c:v', isGif ? 'libwebp_anim' : 'libwebp');
 		
 		// WebP质量控制（直接使用0-100的质量值）
 		args.push('-quality', String(quality));

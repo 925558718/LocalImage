@@ -54,8 +54,8 @@ export default function Compress() {
 
 	// 格式和高级配置
 	const [format, setFormat] = useState("webp");
-	const [advanced, setAdvanced] = useState({ width: "", height: "", quality: 85 });
-	
+	const [advanced, setAdvanced] = useState({ width: "", height: "", quality: 85, outputName: "" });
+
 	// 清理资源的通用函数
 	const cleanupResources = useCallback(async () => {
 		try {
@@ -75,37 +75,37 @@ export default function Compress() {
 			}
 		}
 	}, []);
-	
+
 	// 组件挂载时自动加载FFmpeg - 现在由useFFmpeg hook处理
 	useEffect(() => {
 		return () => {
 			cleanupResources();
 		};
 	}, [cleanupResources]);
-	
+
 	// 单独处理downloadList变化时的清理 - 确保URL被及时释放
 	useEffect(() => {
 		return () => {
 			revokeBlobUrls(downloadList);
 		};
 	}, [downloadList, revokeBlobUrls]);
-	
+
 	// 处理新文件添加
 	const handleFilesSelected = useCallback((newFiles: File[]) => {
 		setFiles(prevFiles => [...prevFiles, ...newFiles]);
 	}, []);
-	
+
 	// 处理删除单个文件
 	const handleRemoveFile = useCallback((index: number) => {
 		setFiles(prevFiles => prevFiles.filter((_, idx) => idx !== index));
 	}, []);
-	
+
 	// 清空已选择的文件
 	const handleClearFiles = useCallback(() => {
 		setFiles([]);
 		setShowDragDrop(true);
 	}, []);
-	
+
 	// 清空已压缩的文件列表
 	const handleClearDownloadList = useCallback(async () => {
 		revokeBlobUrls(downloadList);
@@ -124,7 +124,7 @@ export default function Compress() {
 	// 处理压缩
 	async function handleCompress() {
 		if (files.length === 0) return;
-		
+
 		// 验证FFmpeg状态
 		if (ffmpegLoading) return;
 		if (!ffmpegReady) {
@@ -135,21 +135,21 @@ export default function Compress() {
 			alert(`FFmpeg加载失败: ${ffmpegError}`);
 			return;
 		}
-		
+
 		// 初始化状态
 		setLoading(true);
 		setProgress(0);
 		setDownloadList([]);
 		setFileProgress({});
-		
+
 		// 开始处理前先彻底清理内存
 		await cleanupResources();
-		
+
 		// 大图片警告
 		const totalSize = files.reduce((sum, file) => sum + file.size, 0);
 		const largeImageWarningSize = 20 * 1024 * 1024; // 20MB
 		const maxBatchSize = 100 * 1024 * 1024; // 100MB
-		
+
 		if (totalSize > maxBatchSize) {
 			const confirmProcess = confirm(`警告：您选择的图片总大小超过 ${Math.round(maxBatchSize / 1024 / 1024)}MB，可能导致内存不足。建议您分批处理或选择较小的图片。是否继续？`);
 			if (!confirmProcess) {
@@ -159,25 +159,25 @@ export default function Compress() {
 		} else if (files.some(file => file.size > largeImageWarningSize)) {
 			console.warn(`检测到超过 ${Math.round(largeImageWarningSize / 1024 / 1024)}MB 的大图片，可能影响处理性能`);
 		}
-		
+
 		try {
-			
+
 			// 智能批处理：将大文件拆分处理，防止内存溢出
 			const fileGroups: File[][] = [];
 			let currentGroup: File[] = [];
 			let currentGroupSize = 0;
 			const maxGroupSize = 50 * 1024 * 1024; // 50MB
-			
+
 			// 首先处理大文件
 			const sortedFiles = [...files].sort((a, b) => b.size - a.size);
-			
+
 			for (const file of sortedFiles) {
 				// 特别大的文件单独处理
 				if (file.size > maxGroupSize / 2) {
 					fileGroups.push([file]);
 					continue;
 				}
-				
+
 				// 如果当前组加上这个文件会超过限制，创建新组
 				if (currentGroupSize + file.size > maxGroupSize && currentGroup.length > 0) {
 					fileGroups.push(currentGroup);
@@ -188,28 +188,28 @@ export default function Compress() {
 					currentGroupSize += file.size;
 				}
 			}
-			
+
 			// 添加最后一组（如果有）
 			if (currentGroup.length > 0) {
 				fileGroups.push(currentGroup);
 			}
-			
+
 			console.log(`智能批处理：将 ${files.length} 个文件分为 ${fileGroups.length} 批处理`);
-			
+
 			// 为批处理跟踪总进度
 			let processedFiles = 0;
 			const totalFiles = files.length;
-			
+
 			// 确保FFmpeg已加载
 			if (ffm_ins) {
 				await ffm_ins.load();
 			}
-			
+
 			// 按批次顺序处理文件
 			for (let groupIndex = 0; groupIndex < fileGroups.length; groupIndex++) {
 				const fileGroup = fileGroups[groupIndex];
 				console.log(`处理第 ${groupIndex + 1}/${fileGroups.length} 批，包含 ${fileGroup.length} 个文件`);
-				
+
 				// 并行读取当前批次的所有文件
 				const fileData = await Promise.all(
 					fileGroup.map(async (file) => {
@@ -217,7 +217,7 @@ export default function Compress() {
 							...prev,
 							[file.name]: { isProcessing: true, progress: 0 }
 						}));
-						
+
 						const arrayBuffer = await file.arrayBuffer();
 						return {
 							data: arrayBuffer,
@@ -226,7 +226,7 @@ export default function Compress() {
 						};
 					})
 				);
-				
+
 				// 使用串行压缩模式处理当前批次
 				await FFMPEG.convertImagesSerial({
 					files: fileData,
@@ -239,7 +239,7 @@ export default function Compress() {
 						// 计算当前批次的进度百分比
 						const batchProgress = ((completed - processedFiles) / fileData.length) * 100;
 						setProgress(Math.round(completed / totalFiles * 100));
-						
+
 						// 更新当前处理文件的进度
 						// 获取当前正在处理的文件在当前批次中的索引
 						const currentBatchIndex = completed - processedFiles - 1;
@@ -248,9 +248,9 @@ export default function Compress() {
 							if (currentFileName) {
 								setFileProgress(prev => ({
 									...prev,
-									[currentFileName]: { 
-										isProcessing: true, 
-										progress: Math.round(batchProgress) 
+									[currentFileName]: {
+										isProcessing: true,
+										progress: Math.round(batchProgress)
 									}
 								}));
 							}
@@ -258,19 +258,19 @@ export default function Compress() {
 					},
 					onFileComplete: (result: DownloadItem) => {
 						processedFiles++; // 增加已处理文件计数
-						
+
 						const originalFileName = fileData.find(
 							file => result.name.includes(file.name.replace(/\.[^.]+$/, ""))
 						)?.name || result.name;
-						
+
 						setFileProgress(prev => ({
 							...prev,
 							[originalFileName]: { isProcessing: false, progress: 100 }
 						}));
-						
+
 						setDownloadList(prev => {
 							const newList = [...prev, result];
-							
+
 							// 异步获取并缓存blob数据
 							setTimeout(async () => {
 								try {
@@ -279,8 +279,8 @@ export default function Compress() {
 										if (response.ok) {
 											const blob = await response.blob();
 											if (blob && blob.size > 0) {
-												setDownloadList(currentList => 
-													currentList.map(item => 
+												setDownloadList(currentList =>
+													currentList.map(item =>
 														item.url === result.url && item.name === result.name
 															? { ...item, blob }
 															: item
@@ -293,12 +293,12 @@ export default function Compress() {
 									console.warn(`[blob缓存] 缓存失败: ${result.name}`, error);
 								}
 							}, 0);
-							
+
 							return newList;
 						});
 					}
 				});
-				
+
 				// 批次处理完成后，强制清理内存
 				if (groupIndex < fileGroups.length - 1) {
 					console.log(`批次 ${groupIndex + 1} 完成，清理内存准备下一批`);
@@ -311,7 +311,7 @@ export default function Compress() {
 				setProgress(100);
 				setShowDragDrop(false);
 			}, 300);
-			
+
 		} catch (e) {
 			console.error("压缩失败", e);
 			setFileProgress({});
@@ -319,7 +319,7 @@ export default function Compress() {
 			setFiles([]);
 			setDownloadList([]);
 			setProgress(0);
-			
+
 			const errorMessage = e instanceof Error ? e.message : String(e);
 			// 处理内存超出边界错误
 			if (errorMessage.includes("RuntimeError: memory access out of bounds")) {
@@ -334,7 +334,7 @@ export default function Compress() {
 					duration: 3000,
 				});
 			}
-			
+
 			await cleanupResources();
 		} finally {
 			setLoading(false);
@@ -366,11 +366,11 @@ export default function Compress() {
 							</SelectContent>
 						</Select>
 					</div>
-					
+
 					<Advanced onChange={setAdvanced} />
-					
-					<Button 
-						onClick={handleCompress} 
+
+					<Button
+						onClick={handleCompress}
 						disabled={loading || ffmpegLoading || !ffmpegReady || files.length === 0}
 						className="px-8 h-[50px] w-48 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
@@ -400,15 +400,15 @@ export default function Compress() {
 									{progress}%
 								</span>
 							</div>
-							
+
 							<Progress value={progress} className="w-full h-3 mb-4" />
-							
+
 							{files.length > 1 && (
 								<div className="text-center mt-3 text-sm text-slate-600 dark:text-slate-400">
 									{Math.floor(progress / 100 * files.length)} / {files.length} {t("files_selected")}
 								</div>
 							)}
-							
+
 							{files.length > 3 && (
 								<div className="mt-4 p-4 bg-amber-50/80 dark:bg-amber-900/20 backdrop-blur-sm rounded-xl border border-amber-200/50 dark:border-amber-700/30">
 									<div className="text-sm text-amber-800 dark:text-amber-200">
@@ -439,7 +439,7 @@ export default function Compress() {
 						/>
 					</div>
 				)}
-				
+
 				{/* 压缩结果区域 */}
 				{downloadList.length > 0 && (
 					<div className="space-y-6">
@@ -458,7 +458,7 @@ export default function Compress() {
 							</div>
 							<div className="flex gap-2">
 								{!showDragDrop && (
-									<Button 
+									<Button
 										variant="outline"
 										size="sm"
 										onClick={handleShowDragDrop}
@@ -471,7 +471,7 @@ export default function Compress() {
 										{t('continue_compressing')}
 									</Button>
 								)}
-								<Button 
+								<Button
 									variant="outline"
 									size="sm"
 									onClick={handleClearDownloadList}
@@ -485,7 +485,7 @@ export default function Compress() {
 								</Button>
 							</div>
 						</div>
-						
+
 						{/* 总体统计信息 */}
 						{downloadList.length > 0 && (
 							<div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 backdrop-blur-sm rounded-2xl p-6 border border-green-200/50 dark:border-green-700/30">
@@ -496,7 +496,7 @@ export default function Compress() {
 									</svg>
 									{t('overall_stats')}
 								</h4>
-								<CompressItem 
+								<CompressItem
 									isOverallStats={true}
 									name={t('all_files')}
 									url=""
@@ -505,16 +505,16 @@ export default function Compress() {
 									processingTime={downloadList.reduce((sum, item) => sum + (item.processingTime || 0), 0)}
 									format={downloadList.length > 0 ? downloadList[downloadList.length - 1].format : format}
 									quality={downloadList.length > 0 ? downloadList[0].quality : undefined}
-									downloadItems={downloadList.map(item => ({ 
-										url: item.url, 
-										name: item.name, 
-										blob: item.blob 
+									downloadItems={downloadList.map(item => ({
+										url: item.url,
+										name: item.name,
+										blob: item.blob
 									}))}
 									key="overall-stats"
 								/>
 							</div>
 						)}
-						
+
 						{/* 单个文件列表 */}
 						<div className="space-y-3">
 							{downloadList.map((item) => {

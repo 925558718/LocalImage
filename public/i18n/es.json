@@ -1,7 +1,7 @@
 {
 	"load_ffmpeg": "Por favor espera, cargando el núcleo FFMPEG...",
 	"compress_btn": "Iniciar Compresión",
-	"compressing_btn": "Comprimiendo...",
+	"compressing_btn": "Comprimiendo/Convirtiendo...",
 	"name": "Local Image",
 	"desc": "Todo el procesamiento ocurre en tu dispositivo - nada se sube a internet",
 	"logo_subtitle": "Conversor de Imágenes",
@@ -25,8 +25,8 @@
 	"gradient_meta_title": "Generador de Gradientes CSS - LocalImage | Crea Hermosos Gradientes",
 	"gradient_meta_description": "Generador gratuito de gradientes CSS en línea con vista previa en vivo, soporte para Tailwind CSS v3/v4 y código listo para copiar. Crea hermosos gradientes lineales y radiales para tus proyectos web con edición en tiempo real.",
 	"gradient_meta_keywords": "gradiente CSS, generador de gradientes, gradientes Tailwind, gradiente lineal, gradiente radial, herramientas CSS, generador de fondos",
-	"compress_meta_title": "Compresor de Imágenes - LocalImage | Reduce el Tamaño de Imágenes",
-	"compress_meta_description": "Herramienta gratuita de compresión de imágenes en línea. Reduce el tamaño de archivos de imagen sin perder calidad. Compatible con formatos JPG, PNG, WebP con procesamiento local para protección de privacidad.",
+	"compress_meta_title": "Comprimir y Convertir",
+	"compress_meta_description": "Herramienta gratuita de compresión y conversión de imágenes en línea. Reduce el tamaño o convierte el formato, todo procesado localmente para privacidad.",
 	"compress_meta_keywords": "compresión de imágenes, comprimir imágenes en línea, reducir tamaño de imagen, compresor JPG, compresor PNG, herramienta de compresión de fotos",
 	"advanceoption": {
 		"width": "Ancho",
@@ -37,9 +37,9 @@
 	"drag_drop_or_click": "Suelta archivos aquí o haz clic para navegar",
 	"file_selected": "archivo",
 	"files_selected": "archivos",
-	"clear_files": "Borrar Archivos",
+	"clear_files": "Borrar Archivos para Comprimir/Convertir",
 	"uploaded_files": "Archivos para Procesar",
-	"compressed_files": "Resultados Procesados",
+	"compressed_files": "Resultados Comprimidos/Convertidos",
 	"clear_all": "Borrar Todo",
 	"continue_compressing": "Continuar Compresión",
 	"add_more": "Añadir Archivos",
@@ -72,7 +72,7 @@
 	"nav_animation": "Animación",
 	"nav_image_tools": "Herramientas de Imagen",
 	"image_tools_desc": "Herramientas potentes de procesamiento de imágenes local que protegen tu privacidad",
-	"compress_desc": "Comprime eficientemente imágenes para reducir el tamaño del archivo",
+	"compress_desc": "Comprime y convierte imágenes eficientemente para reducir el tamaño o cambiar el formato",
 	"nav_gradient_generator": "Generador de Gradientes",
 	"gradient_generator_desc": "Crear hermosos gradientes CSS con salida Tailwind",
 	"file_empty_skip": "El archivo está vacío, omitiendo",
@@ -179,7 +179,6 @@
 	"animation_composer_subtitle": "Herramienta Profesional de Creación de Animaciones",
 	"realtime_preview_desc": "Vista previa de animación en tiempo real",
 	"images_count": "imágenes",
-	"high_quality": "Alta calidad",
 	"fast_processing": "Procesamiento rápido",
 	"output_format": "Formato de salida",
 	"select_format": "Seleccionar formato",
@@ -192,5 +191,8 @@
 	"drop_files_here": "Suelta archivos aquí",
 	"drag_or_click_upload": "Arrastra imágenes aquí o haz clic para subir",
 	"select_files": "Seleccionar archivos",
-	"supported_formats": "Formatos soportados"
+	"supported_formats": "Formatos soportados",
+	"low_quality": "Baja Calidad",
+	"high_quality": "Alta Calidad",
+	"image_size": "Tamaño de Imagen"
 }

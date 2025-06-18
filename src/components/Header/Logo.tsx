@@ -27,6 +27,7 @@ function Logo() {
 						stroke="currentColor"
 						strokeWidth="2.5"
 					>
+						<title>LimgX Logo</title>
 						{/* 创意的图像处理图标 */}
 						<circle 
 							cx="12" 

@@ -1,7 +1,7 @@
 {
 	"load_ffmpeg": "FFMPEGコアを読み込み中です...",
 	"compress_btn": "圧縮を開始",
-	"compressing_btn": "圧縮中...",
+	"compressing_btn": "圧縮/変換中...",
 	"name": "ローカル画像処理",
 	"desc": "すべての処理はお使いのデバイス上で行われ、インターネットには何もアップロードされません",
 	"logo_subtitle": "画像コンバーター",
@@ -25,10 +25,13 @@
 	"gradient_meta_title": "CSSグラデーションジェネレーター - LocalImage | 美しいグラデーションを作成",
 	"gradient_meta_description": "リアルタイムプレビュー、Tailwind CSS v3/v4サポート、コピー可能なコード付きの無料オンラインCSSグラデーションジェネレーター。リアルタイム編集で美しい線形および放射状グラデーションをウェブプロジェクト用に作成。",
 	"gradient_meta_keywords": "CSSグラデーション, グラデーションジェネレーター, Tailwindグラデーション, 線形グラデーション, 放射状グラデーション, CSSツール, 背景ジェネレーター",
-	"compress_meta_title": "画像圧縮ツール - LocalImage | 画像サイズを縮小",
+	"compress_meta_title": "圧縮・変換ツール - LocalImage",
 	"compress_meta_description": "無料オンライン画像圧縮ツール。品質を損なわずに画像ファイルサイズを縮小。JPG、PNG、WebP形式に対応し、ローカル処理でプライバシーを保護。",
-	"compress_meta_keywords": "画像圧縮, オンライン画像圧縮, 画像サイズ縮小, JPG圧縮, PNG圧縮, 写真圧縮ツール",
+	"compress_meta_keywords": "画像圧縮, 形式変換, 圧縮変換, JPG, PNG, WebP, オンラインツール",
 	"advanceoption": {
+		"outputName": "ファイル名サフィックス",
+		"outputName_placeholder": "例: compressed。空欄ならサフィックスなし",
+		"outputName_help": "このサフィックスは元のファイル名と拡張子の間に追加されます（例: input_compressed.jpg）。空欄の場合は元のファイル名のみ。",
 		"width": "幅",
 		"height": "高さ",
 		"quality": "品質"
@@ -37,11 +40,11 @@
 	"drag_drop_or_click": "ファイルをここにドロップまたはクリックして参照",
 	"file_selected": "ファイル",
 	"files_selected": "ファイル",
-	"clear_files": "ファイルをクリア",
-	"uploaded_files": "処理するファイル",
+	"clear_files": "圧縮/変換ファイルをクリア",
+	"uploaded_files": "圧縮/変換するファイル",
 	"compressed_files": "処理結果",
 	"clear_all": "すべてクリア",
-	"continue_compressing": "圧縮を続ける",
+	"continue_compressing": "圧縮/変換を続ける",
 	"add_more": "ファイル追加",
 	"saved": "削減",
 	"increased": "増加",
@@ -192,5 +195,8 @@
 	"drag_or_click_upload": "画像をここにドラッグするか、クリックしてアップロード",
 	"drop_files_here": "ファイルをここにドロップ",
 	"select_files": "ファイルを選択",
-	"supported_formats": "サポートされている形式"
+	"supported_formats": "サポートされている形式",
+	"low_quality": "低品質",
+	"high_quality": "高品質",
+	"image_size": "画像サイズ"
 }
