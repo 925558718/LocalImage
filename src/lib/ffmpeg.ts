@@ -48,97 +48,6 @@ class FFMPEG {
 	}
 
 	/**
-	 * 清理FFmpeg内存中的临时文件
-	 * 在批量处理或处理大文件后调用，防止内存泄漏
-	 */
-	async cleanupMemory(): Promise<void> {
-		if (!this.ffmpeg || !this.isLoaded) return;
-
-		try {
-			// 获取当前文件系统中的所有文件
-			const files = await this.ffmpeg.listDir("/");
-
-			// 定义系统目录和文件，这些不应该被删除
-			const systemPaths = new Set([
-				"tmp",
-				"home",
-				"dev",
-				"proc",
-				"sys",
-				"etc",
-				"bin",
-				"usr",
-				"var",
-				".",
-				"..",
-				"ffmpeg-core.js",
-				"ffmpeg-core.wasm",
-			]);
-
-			// 只删除我们创建的临时文件 - 批量删除以提高性能
-			const filesToDelete = files.filter(
-				(file) =>
-					file?.name &&
-					!systemPaths.has(file.name) &&
-					!file.name.endsWith("/") &&
-					(file.name.includes("input_image") ||
-						file.name.includes("_compressed") ||
-						file.name.includes("frame_") ||
-						file.name.includes("palette") ||
-						file.name.match(/\.(png|jpg|jpeg|webp|avif|gif)$/i)),
-			);
-
-			// 批量删除文件，减少日志输出
-			if (filesToDelete.length > 0) {
-				// 串行删除文件，避免并发删除导致的FS错误
-				for (const file of filesToDelete) {
-					try {
-						await this.ffmpeg.deleteFile(file.name);
-					} catch (error) {
-						// 静默忽略删除失败的文件，避免过多警告信息
-						console.debug(`[ffmpeg] 删除文件 ${file.name} 失败:`, error);
-					}
-				}
-				console.log("[ffmpeg] 内存清理完成");
-			}
-
-			// 定期重置实例 - 检查是否已经处理了大量图片
-			const shouldResetInstance = this._shouldResetInstance();
-			if (shouldResetInstance) {
-				console.log("[ffmpeg] 检测到处理了大量图片，重置实例以释放内存");
-				await this.reset();
-				return;
-			}
-		} catch (error) {
-			console.warn("[ffmpeg] 内存清理失败:", error);
-			this.isLoaded = false;
-			this.loadingPromise = null;
-			await this.reset();
-		}
-	}
-
-	// 判断是否应该重置实例 - 根据处理的文件大小来决定
-	private _shouldResetInstance(): boolean {
-		// 每处理一张图片，增加计数（保留原有计数逻辑作为备用）
-		this._processCount++;
-
-		// 基于处理的文件总大小的阈值 (100MB)
-		const resetThresholdBytes = 100 * 1024 * 1024;
-
-		// 当处理超过阈值大小的文件时，重置实例
-		if (this._processedBytes >= resetThresholdBytes) {
-			console.log(
-				`[ffmpeg] 已处理 ${Math.round(this._processedBytes / (1024 * 1024))} MB 数据，重置实例以释放内存`,
-			);
-			this._processCount = 0; // 重置计数器
-			this._processedBytes = 0; // 重置字节计数器
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
 	 * 重置FFmpeg实例
 	 * 在遇到严重错误或需要完全清理时使用
 	 */
@@ -306,99 +215,6 @@ class FFMPEG {
 			}
 		}
 	}
-
-	/**
-	 * 创建GIF动画
-	 * @param framePattern 帧文件模式，如 "frame_%03d.png"
-	 * @param outputName 输出文件名
-	 * @param frameRate 帧率
-	 * @param loop 循环次数，0为无限循环
-	 * @deprecated 请使用 createAnimation 方法代替
-	 */
-	async createGifAnimation({
-		framePattern,
-		outputName,
-		frameRate = 10,
-		loop = 0,
-	}: {
-		framePattern: string;
-		outputName: string;
-		frameRate?: number;
-		loop?: number;
-	}): Promise<Uint8Array> {
-		console.warn(
-			"createGifAnimation 方法已弃用，请使用 createAnimation 方法代替",
-		);
-		await this.load();
-		if (!this.ffmpeg) throw new Error("ffmpeg 未初始化");
-
-		const strategy = new GifAnimationStrategy();
-		const result = await strategy.createAnimation(this.ffmpeg, {
-			inputPattern: framePattern,
-			outputName,
-			frameRate,
-			quality: 75, // GIF不使用质量参数，但需要传递
-		});
-
-		// 清理临时文件
-		try {
-			// 只删除我们明确创建的文件
-			await this.ffmpeg.deleteFile("palette.png");
-			await this.ffmpeg.deleteFile(outputName);
-		} catch (error) {
-			console.warn("[ffmpeg] GIF创建后清理临时文件失败:", error);
-		}
-
-		return result;
-	}
-
-	/**
-	 * 创建WebP动画
-	 * @param framePattern 帧文件模式，如 "frame_%03d.png"
-	 * @param outputName 输出文件名
-	 * @param frameRate 帧率
-	 * @param quality 质量
-	 * @param loop 循环次数，0为无限循环
-	 * @deprecated 请使用 createAnimation 方法代替
-	 */
-	async createWebPAnimation({
-		framePattern,
-		outputName,
-		frameRate = 10,
-		quality = 80,
-		loop = 0,
-	}: {
-		framePattern: string;
-		outputName: string;
-		frameRate?: number;
-		quality?: number;
-		loop?: number;
-	}): Promise<Uint8Array> {
-		console.warn(
-			"createWebPAnimation 方法已弃用，请使用 createAnimation 方法代替",
-		);
-		await this.load();
-		if (!this.ffmpeg) throw new Error("ffmpeg 未初始化");
-
-		const strategy = new WebPAnimationStrategy();
-		const result = await strategy.createAnimation(this.ffmpeg, {
-			inputPattern: framePattern,
-			outputName,
-			frameRate,
-			quality,
-		});
-
-		// 清理临时文件
-		try {
-			// 只删除我们明确创建的文件
-			await this.ffmpeg.deleteFile(outputName);
-		} catch (error) {
-			console.warn("[ffmpeg] WebP动画创建后清理临时文件失败:", error);
-		}
-
-		return result;
-	}
-
 	/**
 	 * 从多个图片创建动画 - 统一入口
 	 * @param images 图片文件数组
@@ -437,13 +253,6 @@ class FFMPEG {
 		// 验证格式支持
 		if (!["webp", "gif", "mp4"].includes(outputFormat)) {
 			throw new Error("不支持的格式。支持: WebP, GIF, MP4");
-		}
-
-		// 先清理文件系统，确保干净的环境
-		try {
-			await this.cleanupMemory();
-		} catch (error) {
-			console.warn("[动画合成] 预清理失败，继续执行:", error);
 		}
 
 		// 按文件名排序 - 提取文件名中的数字进行自然排序
@@ -880,9 +689,6 @@ class FFMPEG {
 					// 累加处理的文件大小
 					bytesProcessedSinceReset += file.data.byteLength;
 
-					// 每次处理完一个文件后清理内存，不管文件大小
-					await instance.cleanupMemory();
-
 					// 减少ArrayBuffer的引用，帮助垃圾回收
 					// @ts-ignore
 					file.data = null;
@@ -914,15 +720,6 @@ class FFMPEG {
 
 			return results;
 		} finally {
-			// 调用清理方法
-			try {
-				const instance = ffm_ins;
-				if (instance) {
-					await instance.cleanupMemory();
-				}
-			} catch (e) {
-				console.warn("[ffmpeg] 最终清理失败:", e);
-			}
 		}
 	}
 }

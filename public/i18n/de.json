@@ -22,12 +22,9 @@
 		"Anpassbare Bildrate und Qualität",
 		"Echtzeit-Vorschau-Funktionalität"
 	],
-	"gradient_meta_title": "CSS-Gradient-Generator - LocalImage | Erstellen Sie schöne Farbverläufe",
-	"gradient_meta_description": "Kostenloser Online-CSS-Gradient-Generator mit Echtzeit-Vorschau, Tailwind CSS v3/v4-Unterstützung und kopierfertigen Code. Erstellen Sie schöne lineare und radiale Farbverläufe für Ihre Webprojekte mit Echtzeit-Bearbeitung.",
-	"gradient_meta_keywords": "CSS-Farbverlauf, Gradient-Generator, Tailwind-Farbverläufe, linearer Gradient, radialer Gradient, CSS-Tools, Hintergrund-Generator",
-	"compress_meta_title": "Bilder komprimieren & konvertieren",
-	"compress_meta_description": "Kostenloses Online-Tool zum Komprimieren & Konvertieren von Bildern. Reduzieren Sie die Größe oder ändern Sie das Format, alles lokal verarbeitet für Datenschutz.",
-	"compress_meta_keywords": "Bildkomprimierung, Bilder online komprimieren, Bildgröße reduzieren, JPG-Kompressor, PNG-Kompressor, Fotokomprimierungstool",
+	"compress_meta_title": "Bildkomprimierung & Konvertierung - Lokale Verarbeitung Schützt Privatsphäre",
+	"compress_meta_description": "Kostenloses Online-Tool zur Bildkomprimierung und -konvertierung. Lokale Verarbeitung schützt Privatsphäre, unterstützt JPG, PNG, WebP Formatkonvertierung, kein Server-Upload erforderlich.",
+	"compress_meta_keywords": "Bildkomprimierung, Formatkonvertierung, lokale Verarbeitung, Privatsphäre-Schutz, Online-Komprimierung, JPG-Konvertierung, PNG-Konvertierung, WebP-Konvertierung",
 	"advanceoption": {
 		"width": "Breite",
 		"height": "Höhe",
@@ -73,8 +70,6 @@
 	"nav_image_tools": "Bildwerkzeuge",
 	"image_tools_desc": "Leistungsstarke lokale Bildverarbeitungstools, die Ihre Privatsphäre schützen",
 	"compress_desc": "Bilder effizient komprimieren & konvertieren, um die Dateigröße zu reduzieren oder das Format zu ändern",
-	"nav_gradient_generator": "Gradient Generator",
-	"gradient_generator_desc": "Schöne CSS-Gradienten mit Tailwind-Ausgabe erstellen",
 	"file_empty_skip": "Datei ist leer, wird übersprungen",
 	"file_added_to_zip": "Zu Zip hinzugefügt",
 	"process_file_failed": "Verarbeitung der Datei fehlgeschlagen",
@@ -194,6 +189,5 @@
 	"select_files": "Dateien auswählen",
 	"supported_formats": "Unterstützte Formate",
 	"low_quality": "Niedrige Qualität",
-	"high_quality": "Hohe Qualität",
 	"image_size": "Bildgröße"
 }

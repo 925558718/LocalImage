@@ -50,13 +50,13 @@ export async function generateMetadata({
 	// 加载对应语言的字典
 	const dictionary = await dictionaries[locale]();
 
-	// 标题和描述支持多语言
+	// 标题和描述支持多语言 - 更新为压缩功能的SEO
 	const title =
-		dictionary.meta_title ||
-		"WebP Animation Creator - LocalImage | Convert Images";
+		dictionary.compress_meta_title ||
+		"Compress & Convert Images - LocalImage | Free Online Image Compression";
 	const description =
-		dictionary.meta_description ||
-		"Free online WebP and GIF animation creator. Convert multiple images into high-quality animations with local processing. No uploads required, privacy protected.";
+		dictionary.compress_meta_description ||
+		"Free online image compression & conversion tool. Reduce size or convert formats, all processed locally for privacy.";
 
 	// 构建基础URL
 	const baseUrl = "https://limgx.com";
@@ -82,8 +82,8 @@ export async function generateMetadata({
 		title,
 		description,
 		keywords:
-			dictionary.meta_keywords ||
-			"WebP animation, GIF creator, animation creator, image to animation, online animation tool",
+			dictionary.compress_meta_keywords ||
+			"image compression, compress images online, reduce image size, JPG compressor, PNG compressor, photo compression tool, image conversion",
 		authors: [{ name: "limgx.com" }],
 		robots: {
 			index: true,
@@ -119,17 +119,17 @@ export default async function RootLayout({
 
 	// 动态生成结构化数据
 	const appName =
-		dictionary.structured_data_app_name || "LocalImage WebP Animation Creator";
+		dictionary.structured_data_app_name || "LocalImage Image Compression Tool";
 	const appDescription =
 		dictionary.structured_data_description ||
-		"Free online WebP animation creator. Convert multiple images into high-quality animations";
+		"Free online image compression and conversion tool. Reduce file size or change formats with local processing.";
 	const featureList = dictionary.structured_data_features || [
-		"WebP animation creation",
+		"Image compression and optimization",
 		"Multiple image format support",
 		"Local processing protects privacy",
 		"No server uploads required",
-		"Custom frame rate and quality",
-		"Real-time preview functionality",
+		"Custom quality settings",
+		"Batch processing functionality",
 	];
 
 	return (
@@ -156,7 +156,7 @@ export default async function RootLayout({
 						},
 						featureList: featureList,
 						screenshot:
-							"https://limgx.com/images/webp-animation-preview.jpg",
+							"https://limgx.com/images/image-compression-preview.jpg",
 						softwareVersion: "1.0",
 						author: {
 							"@type": "Organization",

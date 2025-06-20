@@ -56,10 +56,6 @@ function Footer() {
 									<span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"/>
 									{t("batch_processing")}
 								</li>
-								<li className="flex items-center">
-									<span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"/>
-									{t("nav_gradient_generator")}
-								</li>
 							</ul>
 						</div>
 
@@ -68,18 +64,13 @@ function Footer() {
 							<h4 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">{t("related_tools")}</h4>
 							<ul className="space-y-2">
 								<li>
-									<Link href="https://limgx.com" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+									<Link href="https://limgx.com/animation" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
 										WebP{t("animation_composer")}
 									</Link>
 								</li>
 								<li>
-									<Link href="https://limgx.com/compress" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+									<Link href="https://limgx.com" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
 										{t("nav_compress")}
-									</Link>
-								</li>
-								<li>
-									<Link href="https://limgx.com/dev/gradient" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-										{t("nav_gradient_generator")}
 									</Link>
 								</li>
 							</ul>

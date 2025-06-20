@@ -22,12 +22,9 @@
 		"カスタムフレームレートと品質",
 		"リアルタイムプレビュー機能"
 	],
-	"gradient_meta_title": "CSSグラデーションジェネレーター - LocalImage | 美しいグラデーションを作成",
-	"gradient_meta_description": "リアルタイムプレビュー、Tailwind CSS v3/v4サポート、コピー可能なコード付きの無料オンラインCSSグラデーションジェネレーター。リアルタイム編集で美しい線形および放射状グラデーションをウェブプロジェクト用に作成。",
-	"gradient_meta_keywords": "CSSグラデーション, グラデーションジェネレーター, Tailwindグラデーション, 線形グラデーション, 放射状グラデーション, CSSツール, 背景ジェネレーター",
-	"compress_meta_title": "圧縮・変換ツール - LocalImage",
-	"compress_meta_description": "無料オンライン画像圧縮ツール。品質を損なわずに画像ファイルサイズを縮小。JPG、PNG、WebP形式に対応し、ローカル処理でプライバシーを保護。",
-	"compress_meta_keywords": "画像圧縮, 形式変換, 圧縮変換, JPG, PNG, WebP, オンラインツール",
+	"compress_meta_title": "画像圧縮変換ツール - ローカル処理でプライバシー保護",
+	"compress_meta_description": "無料オンライン画像圧縮・変換ツール。ローカル処理でプライバシーを保護、JPG、PNG、WebP形式変換に対応、サーバーアップロード不要。",
+	"compress_meta_keywords": "画像圧縮, 形式変換, ローカル処理, プライバシー保護, オンライン圧縮, JPG変換, PNG変換, WebP変換",
 	"advanceoption": {
 		"outputName": "ファイル名サフィックス",
 		"outputName_placeholder": "例: compressed。空欄ならサフィックスなし",
@@ -76,8 +73,6 @@
 	"nav_image_tools": "画像ツール",
 	"image_tools_desc": "プライバシーを保護する強力なローカル画像処理ツール",
 	"compress_desc": "画像を効率的に圧縮してファイルサイズを削減",
-	"nav_gradient_generator": "グラデーションジェネレーター",
-	"gradient_generator_desc": "Tailwind出力対応の美しいCSSグラデーションを作成",
 	"file_empty_skip": "ファイルが空です、スキップします",
 	"file_added_to_zip": "zipに追加されました",
 	"process_file_failed": "ファイルの処理に失敗しました",
@@ -197,6 +192,5 @@
 	"select_files": "ファイルを選択",
 	"supported_formats": "サポートされている形式",
 	"low_quality": "低品質",
-	"high_quality": "高品質",
 	"image_size": "画像サイズ"
 }

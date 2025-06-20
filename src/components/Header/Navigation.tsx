@@ -20,19 +20,6 @@ function Navigation() {
 	const imageTools: NavigationItem[] = [
 		{
 			href: "/",
-			labelKey: "nav_animation",
-			description: "animation_desc",
-			icon: (
-				<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-					<circle cx="8" cy="12" r="1" fill="currentColor" />
-					<circle cx="12" cy="10" r="1" fill="currentColor" />
-					<circle cx="12" cy="14" r="1" fill="currentColor" />
-				</svg>
-			),
-		},
-		{
-			href: "/compress",
 			labelKey: "nav_compress",
 			description: "compress_desc",
 			icon: (
@@ -44,22 +31,15 @@ function Navigation() {
 			),
 		},
 		{
-			href: "/dev/gradient",
-			labelKey: "nav_gradient_generator",
-			description: "gradient_generator_desc",
+			href: "/animation",
+			labelKey: "nav_animation",
+			description: "animation_desc",
 			icon: (
 				<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-					<defs>
-						<linearGradient id="gradientIcon" x1="0%" y1="0%" x2="100%" y2="100%">
-							<stop offset="0%" stopColor="#3b82f6" />
-							<stop offset="50%" stopColor="#8b5cf6" />
-							<stop offset="100%" stopColor="#06b6d4" />
-						</linearGradient>
-					</defs>
-					<rect x="4" y="4" width="16" height="16" rx="2" fill="url(#gradientIcon)" fillOpacity="0.3" stroke="currentColor" strokeWidth={1.5} />
-					<circle cx="8" cy="8" r="1.5" fill="currentColor" />
-					<circle cx="16" cy="16" r="1.5" fill="currentColor" />
-					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 8L16 16" strokeDasharray="2 2" />
+					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+					<circle cx="8" cy="12" r="1" fill="currentColor" />
+					<circle cx="12" cy="10" r="1" fill="currentColor" />
+					<circle cx="12" cy="14" r="1" fill="currentColor" />
 				</svg>
 			),
 		},
