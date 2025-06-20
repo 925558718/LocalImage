@@ -36,7 +36,6 @@ const SUPPORTED_FORMATS = [
 	{ value: ImageFormat.WEBP, label: ".webp" },
 	{ value: ImageFormat.PNG, label: ".png" },
 	{ value: ImageFormat.JPG, label: ".jpg" },
-	{ value: ImageFormat.AVIF, label: ".avif" },
 
 	// 其他常见格式
 	{ value: ImageFormat.JPEG, label: ".jpeg" },
@@ -60,9 +59,6 @@ const SUPPORTED_FORMATS = [
 	{ value: ImageFormat.TGA, label: ".tga" },
 	{ value: ImageFormat.XBM, label: ".xbm" },
 	{ value: ImageFormat.XPM, label: ".xpm" },
-
-	{ value: ImageFormat.PSD, label: ".psd" },
-	{ value: ImageFormat.HDR, label: ".hdr" },
 ];
 
 // 类型定义

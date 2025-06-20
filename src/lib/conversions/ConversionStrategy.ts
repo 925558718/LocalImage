@@ -22,7 +22,6 @@ export enum ImageFormat {
 	JPG = 'jpg',
 	JPEG = 'jpeg',
 	WEBP = 'webp',
-	AVIF = 'avif',
 	GIF = 'gif',
 	BMP = 'bmp',
 	TIFF = 'tiff',
@@ -40,8 +39,6 @@ export enum ImageFormat {
 	TGA = 'tga',
 	XBM = 'xbm',
 	XPM = 'xpm',
-	PSD = 'psd',
-	HDR = 'hdr'
 }
 
 // 从枚举创建类型

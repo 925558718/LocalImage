@@ -1,7 +1,6 @@
 import { ConversionStrategy, FORMAT_CONVERSION_MAP, ImageFormat, ImageFormatType } from "./ConversionStrategy";
 import { DefaultConversionStrategy } from "./DefaultConversionStrategy";
 import { WebPConversionStrategy } from "./WebPConversionStrategy";
-import { AvifConversionStrategy } from "./AvifConversionStrategy";
 
 /**
  * 图像转换策略工厂
@@ -11,7 +10,6 @@ import { AvifConversionStrategy } from "./AvifConversionStrategy";
 export namespace ConversionStrategyFactory {
 	const strategies: Partial<Record<ImageFormatType, ConversionStrategy>> & { default: ConversionStrategy } = {
 		"webp": new WebPConversionStrategy(),
-		"avif": new AvifConversionStrategy(),
 		default: new DefaultConversionStrategy()
 	};
 
