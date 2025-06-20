@@ -8,7 +8,7 @@ function Page() {
 	return (
 		<>
 			<PageTitle
-				title={t("nav_compress")}
+				title={t("nav_convert")}
 				description={t("compress_desc")}
 				features={[
 					{ text: t("high_quality"), color: "blue" },

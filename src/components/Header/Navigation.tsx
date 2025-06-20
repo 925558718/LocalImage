@@ -20,7 +20,7 @@ function Navigation() {
 	const imageTools: NavigationItem[] = [
 		{
 			href: "/",
-			labelKey: "nav_compress",
+			labelKey: "nav_convert",
 			description: "compress_desc",
 			icon: (
 				<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

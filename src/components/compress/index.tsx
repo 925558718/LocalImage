@@ -58,9 +58,7 @@ const SUPPORTED_FORMATS = [
 	{ value: ImageFormat.PAM, label: ".pam" },
 
 	{ value: ImageFormat.SGI, label: ".sgi" },
-	{ value: ImageFormat.TGA, label: ".tga" },
 	{ value: ImageFormat.XBM, label: ".xbm" },
-	{ value: ImageFormat.XPM, label: ".xpm" },
 ];
 
 // 类型定义

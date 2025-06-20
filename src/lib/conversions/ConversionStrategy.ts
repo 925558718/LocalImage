@@ -36,9 +36,7 @@ export enum ImageFormat {
 	PBM = 'pbm',
 	PAM = 'pam',
 	SGI = 'sgi',
-	TGA = 'tga',
 	XBM = 'xbm',
-	XPM = 'xpm',
 }
 
 // 从枚举创建类型
