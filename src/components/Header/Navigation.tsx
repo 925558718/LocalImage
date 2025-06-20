@@ -47,7 +47,7 @@ function Navigation() {
 
 	return (
 		<nav className="flex items-center">
-			<div className="flex items-center bg-white/20 dark:bg-slate-800/20 backdrop-blur-sm rounded-full p-1 border border-white/10 dark:border-slate-700/20">
+			<div className="flex items-center bg-card/20 backdrop-blur-sm rounded-full p-1 border border-border/10">
 				{imageTools.map((item) => {
 					const isActive = pathname === item.href;
 					
@@ -58,16 +58,16 @@ function Navigation() {
 							className={cn(
 								"relative flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ease-out",
 								isActive
-									? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
-									: "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/30 dark:hover:bg-slate-700/30"
+									? "bg-card text-card-foreground shadow-sm"
+									: "text-muted-foreground hover:text-foreground hover:bg-card/30"
 							)}
 						>
 							{/* 图标 */}
 							<div className={cn(
 								"transition-colors duration-200",
 								isActive 
-									? "text-blue-600 dark:text-blue-400" 
-									: "text-slate-500 dark:text-slate-400"
+									? "text-primary" 
+									: "text-muted-foreground"
 							)}>
 								{item.icon}
 							</div>

@@ -50,7 +50,7 @@ export default function EzoicAd({
   }, [t, isDev, slotId]);
 
   return (
-    <div className={`relative overflow-hidden my-4 mx-auto rounded-lg border bg-card text-card-foreground transition-all hover:shadow-md ${className}`}>
+    <div className={`relative overflow-hidden my-4 mx-auto rounded-lg border border-border bg-card text-card-foreground transition-all hover:shadow-md ${className}`}>
       {showLabel && (
         <div className="absolute top-0 right-0 px-2 py-0.5 text-xs bg-background/80 rounded-bl-lg text-muted-foreground backdrop-blur-sm z-10">
           {adLabel}

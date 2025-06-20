@@ -20,7 +20,7 @@ export default function AnimationControls({
     <>
       {/* Frame Rate */}
       <div className="flex items-center gap-3">
-        <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <Label className="text-sm font-medium text-foreground">
           {t("frame_rate")}
         </Label>
         <div className="flex items-center gap-2">
@@ -31,10 +31,10 @@ export default function AnimationControls({
               min={1}
               max={60}
               step={1}
-              className="[&_[role=slider]]:bg-blue-500 [&_[role=slider]]:border-blue-500"
+              className="[&_[role=slider]]:bg-primary [&_[role=slider]]:border-primary"
             />
           </div>
-          <span className="text-sm font-mono w-12 text-slate-600 dark:text-slate-400">
+          <span className="text-sm font-mono w-12 text-muted-foreground">
             {frameRate[0]}fps
           </span>
         </div>
@@ -42,7 +42,7 @@ export default function AnimationControls({
 
       {/* Quality */}
       <div className="flex items-center gap-3">
-        <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <Label className="text-sm font-medium text-foreground">
           {t("quality")}
         </Label>
         <div className="flex items-center gap-2">
@@ -53,10 +53,10 @@ export default function AnimationControls({
               min={10}
               max={100}
               step={5}
-              className="[&_[role=slider]]:bg-green-500 [&_[role=slider]]:border-green-500"
+              className="[&_[role=slider]]:bg-primary [&_[role=slider]]:border-primary"
             />
           </div>
-          <span className="text-sm font-mono w-12 text-slate-600 dark:text-slate-400">
+          <span className="text-sm font-mono w-12 text-muted-foreground">
             {quality[0]}%
           </span>
         </div>

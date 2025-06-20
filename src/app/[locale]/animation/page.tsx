@@ -1,19 +1,14 @@
 "use client";
 
 import AnimationComposer from "@/components/animation";
-import styles from '@/components/animation/animation.module.scss';
+import styles from "@/components/animation/animation.module.scss";
 
 function AnimationPage() {
 	return (
 		<>
-			<main className="w-full min-h-screen flex items-center justify-center p-4">
-				{/* 内容区域 */}
-				<div className="w-full max-w-7xl mx-auto">
-					<AnimationComposer />
-				</div>
-			</main>
+			<AnimationComposer />
 		</>
 	);
 }
 
-export default AnimationPage; 
+export default AnimationPage;

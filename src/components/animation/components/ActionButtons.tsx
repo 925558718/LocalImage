@@ -30,7 +30,7 @@ export default function ActionButtons({
         disabled={filesCount < 2}
         variant="outline"
         size="sm"
-        className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600"
+        className="bg-card border-border"
       >
         {isPlaying ? (
           <Pause className="w-4 h-4 mr-2" />
@@ -44,7 +44,7 @@ export default function ActionButtons({
         onClick={onCreateAnimation}
         disabled={loading || ffmpegLoading || !ffmpegReady || filesCount < 2}
         size="sm"
-        className="w-40 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg disabled:opacity-50"
+        className="w-40 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg disabled:opacity-50"
       >
         {ffmpegLoading || !ffmpegReady || loading ? (
           <Loader2 className="w-4 h-4 animate-spin" />

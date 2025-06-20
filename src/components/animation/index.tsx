@@ -18,6 +18,7 @@ import {
   ResultArea,
   FileDropzone
 } from './components';
+import PageTitle from "@/components/PageTitle";
 
 function AnimationComposer() {
   const [loading, setLoading] = useState(false);
@@ -128,7 +129,7 @@ function AnimationComposer() {
         setCurrentFrame((prev) => (prev + 1) % sortedFiles.length);
       }, 1000 / frameRate[0]);
     }
-  }, [frameRate[0]]); // 只监听帧率变化
+  }, [frameRate[0], isPlaying, files, getSortedFiles]); // 添加缺失的依赖项
 
   // 组件卸载时清理定时器
   useEffect(() => {
@@ -240,39 +241,24 @@ function AnimationComposer() {
     <>
       <div className="w-full max-w-6xl mx-auto space-y-8">
         {/* Hero Title Section with Animation */}
-        <div className="text-center space-y-6">
-          <h1 className={`${styles['animation-title']} mb-3 text-center`}>
-            {t("animation_composer")}
-          </h1>
-          <p className="font-OS text-lg opacity-80 text-center max-w-2xl mx-auto leading-relaxed">
-            {t("animation_desc")}
-          </p>
-
-          {/* Feature highlights */}
-          <div className="flex flex-wrap justify-center gap-3">
-            <div className="flex items-center gap-2 bg-white/20 dark:bg-black/20 px-4 py-2 rounded-full text-sm backdrop-blur-sm">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"/>
-              <span>WebP & GIF</span>
-            </div>
-            <div className="flex items-center gap-2 bg-white/20 dark:bg-black/20 px-4 py-2 rounded-full text-sm backdrop-blur-sm">
-              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"/>
-              <span>{t("local_processing")}</span>
-            </div>
-            <div className="flex items-center gap-2 bg-white/20 dark:bg-black/20 px-4 py-2 rounded-full text-sm backdrop-blur-sm">
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"/>
-              <span>{t("real_time_preview")}</span>
-            </div>
-          </div>
-        </div>
+        <PageTitle
+          title={t("animation_composer")}
+          description={t("animation_desc")}
+          features={[
+            { text: "WebP & GIF", color: "green" },
+            { text: t("local_processing"), color: "blue" },
+            { text: t("real_time_preview"), color: "purple" }
+          ]}
+        />
 
         {/* Modern Container with Glass Effect */}
-        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden relative">
+        <div className="bg-background/70 backdrop-blur-xl border border-border/30 rounded-2xl shadow-2xl overflow-hidden relative">
           {/* Loading 状态指示器 - 绝对定位在容器外部顶部 */}
           {(ffmpegLoading || !ffmpegReady || loading) && (
-            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-10 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 backdrop-blur-sm rounded-2xl p-3 border border-purple-200/50 dark:border-purple-700/30 shadow-lg">
+            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-10 bg-gradient-to-r from-primary/10 to-primary/5 backdrop-blur-sm rounded-2xl p-3 border border-primary/20 shadow-lg">
               <div className="flex items-center gap-3">
-                <Loader2 className="w-4 h-4 text-purple-600 dark:text-purple-400 animate-spin" />
-                <span className="text-purple-700 dark:text-purple-300 font-medium text-sm">
+                <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                <span className="text-primary font-medium text-sm">
                   {ffmpegLoading || !ffmpegReady
                     ? t("load_ffmpeg")
                     : t("creating_animation")}
@@ -282,12 +268,12 @@ function AnimationComposer() {
           )}
 
           {/* Header Section */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 px-8 py-6 border-b border-slate-200/50 dark:border-slate-600/50">
+          <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-8 py-6 border-b border-border/50">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-r from-primary to-primary/80 rounded-xl flex items-center justify-center">
                   <svg
-                    className="w-6 h-6 text-white"
+                    className="w-6 h-6 text-primary-foreground"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -302,10 +288,10 @@ function AnimationComposer() {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                  <h2 className="text-xl font-bold text-foreground">
                     {t("animation_composer")}
                   </h2>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <p className="text-sm text-muted-foreground">
                     {t("animation_composer_subtitle")}
                   </p>
                 </div>
@@ -314,15 +300,15 @@ function AnimationComposer() {
               {/* Quick Stats */}
               {files.length > 0 && (
                 <div className="flex items-center gap-4 text-sm">
-                  <div className="flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/50 rounded-full">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full"/>
-                    <span className="text-blue-700 dark:text-blue-300">
+                  <div className="flex items-center gap-1 px-3 py-1 bg-primary/10 rounded-full">
+                    <span className="w-2 h-2 bg-primary rounded-full"/>
+                    <span className="text-primary">
                       {files.length} {t("images_count")}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/50 rounded-full">
-                    <span className="w-2 h-2 bg-green-500 rounded-full"/>
-                    <span className="text-green-700 dark:text-green-300">
+                  <div className="flex items-center gap-1 px-3 py-1 bg-accent/10 rounded-full">
+                    <span className="w-2 h-2 bg-accent rounded-full"/>
+                    <span className="text-accent-foreground">
                       {frameRate[0]} FPS
                     </span>
                   </div>
@@ -332,7 +318,7 @@ function AnimationComposer() {
           </div>
 
           {/* Control Panel */}
-          <div className="px-8 py-6 bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-200/50 dark:border-slate-600/50">
+          <div className="px-8 py-6 bg-muted/50 border-b border-border/50">
             <div className="flex flex-wrap items-center justify-center gap-6">
               {/* Format Selection */}
               <FormatSelector 
@@ -363,18 +349,18 @@ function AnimationComposer() {
 
           {/* Progress Bar */}
           {loading && (
-            <div className="px-8 py-4 bg-blue-50/50 dark:bg-blue-900/20 border-b border-blue-200/50 dark:border-blue-800/50">
+            <div className="px-8 py-4 bg-primary/10 border-b border-primary/20">
               <div className="flex justify-between items-center text-sm mb-2">
-                <span className="text-blue-700 dark:text-blue-300 font-medium">
+                <span className="text-primary font-medium">
                   {currentFileName || t("creating_animation")}
                 </span>
-                <span className="text-blue-700 dark:text-blue-300 font-bold">
+                <span className="text-primary font-bold">
                   {progress}%
                 </span>
               </div>
               <Progress
                 value={progress}
-                className="w-full h-2 bg-blue-100 dark:bg-blue-900/50 [&>div]:bg-blue-500"
+                className="w-full h-2 bg-primary/20 [&>div]:bg-primary"
               />
             </div>
           )}
