@@ -12,6 +12,7 @@ import {
 	SelectValue,
 	Button,
 	Progress,
+	Slider,
 } from "@/components/shadcn";
 import { toast } from "sonner";
 import Advanced from "./components/Advanced";
@@ -24,6 +25,7 @@ import {
 	Plus,
 	Trash2,
 	ChartArea,
+	BicepsFlexed,
 } from "lucide-react";
 
 // 导入FFMPEG类用于静态方法调用
@@ -98,10 +100,10 @@ export default function Compress() {
 
 	// 格式和高级配置
 	const [format, setFormat] = useState("webp");
+	const [quality, setQuality] = useState(85);
 	const [advanced, setAdvanced] = useState({
 		width: "",
 		height: "",
-		quality: 85,
 		outputName: "",
 	});
 
@@ -267,7 +269,7 @@ export default function Compress() {
 				await FFMPEG.convertImagesSerial({
 					files: fileData,
 					format,
-					quality: advanced.quality,
+					quality: quality,
 					width: advanced.width ? Number.parseInt(advanced.width) : undefined,
 					height: advanced.height
 						? Number.parseInt(advanced.height)
@@ -380,34 +382,64 @@ export default function Compress() {
 			{/* 主容器 */}
 			<div className="bg-background/70 backdrop-blur-xl rounded-3xl p-8 border border-border/20 shadow-xl relative">
 				{/* 操作栏 */}
-				<div className="flex gap-4 justify-center mb-8 flex-wrap">
-					{/* 格式选择器 */}
-					<div className="flex items-center gap-3 px-6 bg-card/50 backdrop-blur-sm rounded-2xl border border-border/30">
-						<div className="flex items-center gap-2">
-							<FileType className="w-5 h-5 text-primary" />
-							<span className="text-sm font-medium text-foreground">
-								{t("output_format")}
-							</span>
+				<div className="flex gap-4 justify-center mb-8 flex-nowrap">
+					{/* 格式和质量设置 */}
+					<div className="flex items-center gap-6 px-6 py-3 bg-card/50 backdrop-blur-sm rounded-2xl border border-border/30">
+						{/* 格式选择器 */}
+						<div className="flex items-center gap-3">
+							<div className="flex items-center gap-2">
+								<FileType className="w-5 h-5 text-primary" />
+								<span className="text-sm font-medium text-foreground text-nowrap">
+									{t("output_format")}
+								</span>
+							</div>
+							<div className="relative">
+								<Select value={format} onValueChange={setFormat}>
+									<SelectTrigger className="w-32 h-8 bg-card/70 border-border/40">
+										<SelectValue placeholder="Format" />
+									</SelectTrigger>
+									<SelectContent className="w-96 max-h-80">
+										<div className="grid grid-cols-4 gap-1 p-2">
+											{SUPPORTED_FORMATS.map((formatOption) => (
+												<SelectItem
+													key={formatOption.value}
+													value={formatOption.value}
+													className="flex flex-col items-center justify-center p-2 h-16 text-xs hover:bg-accent/50 rounded-md transition-colors"
+												>
+													<div className="font-medium">{formatOption.label}</div>
+												</SelectItem>
+											))}
+										</div>
+									</SelectContent>
+								</Select>
+							</div>
 						</div>
-						<div className="relative">
-							<Select value={format} onValueChange={setFormat}>
-								<SelectTrigger className="w-32 h-8 bg-card/70 border-border/40">
-									<SelectValue placeholder="Format" />
-								</SelectTrigger>
-								<SelectContent className="w-96 max-h-80">
-									<div className="grid grid-cols-4 gap-1 p-2">
-										{SUPPORTED_FORMATS.map((formatOption) => (
-											<SelectItem
-												key={formatOption.value}
-												value={formatOption.value}
-												className="flex flex-col items-center justify-center p-2 h-16 text-xs hover:bg-accent/50 rounded-md transition-colors"
-											>
-												<div className="font-medium">{formatOption.label}</div>
-											</SelectItem>
-										))}
-									</div>
-								</SelectContent>
-							</Select>
+
+						{/* 分隔线 */}
+						<div className="w-px h-8 bg-border/50" />
+
+						{/* 质量设置 */}
+						<div className="flex items-center gap-3">
+							<div className="flex items-center gap-2">
+								<BicepsFlexed className="w-5 h-5 text-primary" />
+								<span className="text-sm font-medium text-foreground">
+									{t("advanceoption.quality")}
+								</span>
+							</div>
+							<div className="flex items-center gap-3">
+								<div className="w-32">
+									<Slider
+										value={[quality]}
+										onValueChange={(v) => setQuality(v[0])}
+										max={100}
+										step={1}
+										className="w-full"
+									/>
+								</div>
+								<span className="text-sm font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg min-w-[3rem] text-center">
+									{quality}%
+								</span>
+							</div>
 						</div>
 					</div>
 
@@ -418,7 +450,7 @@ export default function Compress() {
 						disabled={
 							loading || ffmpegLoading || !ffmpegReady || files.length === 0
 						}
-						className="px-8 h-[50px] w-48 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+						className="!px-6 !py-3 w-48 !h-[62px] bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{ffmpegLoading || !ffmpegReady || loading ? (
 							<Loader2 className="w-5 h-5 animate-spin" />
