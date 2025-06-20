@@ -138,7 +138,6 @@ export interface Dictionary {
   name: string;
   desc: string;
   logo_subtitle: string;
-  nav_compress: string;
   download: string;
   download_all: string;
   advance: string;
