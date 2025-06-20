@@ -1,6 +1,5 @@
 import { ConversionStrategy, FORMAT_CONVERSION_MAP, ImageFormat } from "./ConversionStrategy";
 import { DefaultConversionStrategy } from "./DefaultConversionStrategy";
-import { JpegConversionStrategy } from "./JpegConversionStrategy";
 import { WebPConversionStrategy } from "./WebPConversionStrategy";
 import { AvifConversionStrategy } from "./AvifConversionStrategy";
 
@@ -8,13 +7,12 @@ import { AvifConversionStrategy } from "./AvifConversionStrategy";
  * 图像转换策略工厂
  * 根据输出格式创建相应的转换策略实例
  */
-export class ConversionStrategyFactory {
-	private static strategies: Record<string, ConversionStrategy> = {
-		jpg: new JpegConversionStrategy(),
-		jpeg: new JpegConversionStrategy(),
+// 使用命名空间和函数替代静态类
+export namespace ConversionStrategyFactory {
+	const strategies: Record<string, ConversionStrategy> = {
 		webp: new WebPConversionStrategy(),
 		avif: new AvifConversionStrategy(),
-		png: new DefaultConversionStrategy()
+		default: new DefaultConversionStrategy()
 	};
 
 	/**
@@ -22,8 +20,8 @@ export class ConversionStrategyFactory {
 	 * @param format 输出格式 (png/jpg/jpeg/webp/avif)
 	 * @returns 对应的转换策略实现
 	 */
-	static getStrategy(format: string): ConversionStrategy {
-		return this.strategies[format.toLowerCase()] || new DefaultConversionStrategy();
+	export function getStrategy(format: string): ConversionStrategy {
+		return strategies[format.toLowerCase()] || strategies.default;
 	}
 
 	/**
@@ -32,7 +30,7 @@ export class ConversionStrategyFactory {
 	 * @param targetFormat 目标格式
 	 * @returns 是否支持转换
 	 */
-	static canConvert(sourceFormat: string, targetFormat: string): boolean {
+	export function canConvert(sourceFormat: string, targetFormat: string): boolean {
 		return FORMAT_CONVERSION_MAP[sourceFormat as ImageFormat]?.includes(targetFormat as ImageFormat) || false;
 	}
-} 
+}

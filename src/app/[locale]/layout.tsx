@@ -81,9 +81,6 @@ export async function generateMetadata({
 	return {
 		title,
 		description,
-		keywords:
-			dictionary.compress_meta_keywords ||
-			"image compression, compress images online, reduce image size, JPG compressor, PNG compressor, photo compression tool, image conversion",
 		authors: [{ name: "limgx.com" }],
 		robots: {
 			index: true,

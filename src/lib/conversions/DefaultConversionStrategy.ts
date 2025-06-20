@@ -16,6 +16,11 @@ export class DefaultConversionStrategy implements ConversionStrategy {
 			args.push('-vf', scaleArg);
 		}
 		
+		// JPEG质量控制
+		// FFMPEG的q:v参数范围是0-31，其中0是最高质量，31是最低质量
+		// 我们将0-100的quality参数映射到31-0
+		args.push('-q:v', String(Math.round((100 - quality) * 0.19 + 12))); 
+		
 		args.push(outputName);
 		return args;
 	}
