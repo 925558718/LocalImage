@@ -16,17 +16,11 @@ export class AvifConversionStrategy implements ConversionStrategy {
 			args.push('-vf', scaleArg);
 		}
 		
-		// 使用AV1编码器
-		args.push('-c:v', 'libaom-av1');
-		args.push('-strict', 'experimental');
-		
 		// AVIF质量控制
 		// AV1的CRF范围是0-63，其中0是无损，63是最低质量
 		// 将0-100的quality映射到63-0
 		args.push('-crf', String(Math.round((100 - quality) * 0.63)));
 		
-		// 使用CRF控制质量而非比特率
-		args.push('-b:v', '0');
 		
 		args.push(outputName);
 		return args;
