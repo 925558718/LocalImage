@@ -48,9 +48,9 @@ function CompressItem({
 	// 确定压缩率显示的颜色
 	const getRatioColor = (ratio: number): string => {
 		if (ratio < 0) return 'text-destructive'; // 如果体积变大了
-		if (ratio < 20) return 'text-amber-500'; // 压缩率较低
-		if (ratio < 50) return 'text-lime-500';  // 中等压缩率
-		return 'text-emerald-500';               // 高压缩率
+		if (ratio < 20) return 'text-accent';     // 压缩率较低
+		if (ratio < 50) return 'text-secondary';  // 中等压缩率
+		return 'text-primary';                    // 高压缩率
 	};
 	
 	const ratioColor = getRatioColor(Number.parseFloat(compressionRatio));

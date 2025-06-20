@@ -16,7 +16,7 @@ import {
 import { toast } from "sonner";
 import Advanced from "./components/Advanced";
 import { DropzoneWithPreview } from "./components/DropzoneWithPreview";
-import { Loader2, Upload, FileType } from "lucide-react";
+import { Loader2, Upload, FileType, ShieldCheck, Plus, Trash2, ChartArea } from "lucide-react";
 
 // 导入FFMPEG类用于静态方法调用
 import { FFMPEG } from "@/lib/ffmpeg";
@@ -56,16 +56,6 @@ export default function Compress() {
 	const [format, setFormat] = useState("webp");
 	const [advanced, setAdvanced] = useState({ width: "", height: "", quality: 85, outputName: "" });
 
-	// 清理资源的通用函数
-	const cleanupResources = useCallback(async () => {
-		try {
-			if (ffm_ins) {
-				await ffm_ins.cleanupMemory();
-			}
-		} catch (error) {
-			console.warn('清理FFmpeg资源失败:', error);
-		}
-	}, []);
 
 	// 释放blob URL
 	const revokeBlobUrls = useCallback((items: DownloadItem[]) => {
@@ -75,13 +65,6 @@ export default function Compress() {
 			}
 		}
 	}, []);
-
-	// 组件挂载时自动加载FFmpeg - 现在由useFFmpeg hook处理
-	useEffect(() => {
-		return () => {
-			cleanupResources();
-		};
-	}, [cleanupResources]);
 
 	// 单独处理downloadList变化时的清理 - 确保URL被及时释放
 	useEffect(() => {
@@ -112,8 +95,7 @@ export default function Compress() {
 		setDownloadList([]);
 		setShowDragDrop(true);
 		setFiles([]);
-		await cleanupResources();
-	}, [downloadList, cleanupResources, revokeBlobUrls]);
+	}, [downloadList, revokeBlobUrls]);
 
 	// 重新显示拖拽区域
 	const handleShowDragDrop = useCallback(() => {
@@ -141,9 +123,6 @@ export default function Compress() {
 		setProgress(0);
 		setDownloadList([]);
 		setFileProgress({});
-
-		// 开始处理前先彻底清理内存
-		await cleanupResources();
 
 		// 大图片警告
 		const totalSize = files.reduce((sum, file) => sum + file.size, 0);
@@ -298,12 +277,6 @@ export default function Compress() {
 						});
 					}
 				});
-
-				// 批次处理完成后，强制清理内存
-				if (groupIndex < fileGroups.length - 1) {
-					console.log(`批次 ${groupIndex + 1} 完成，清理内存准备下一批`);
-					await cleanupResources();
-				}
 			}
 
 			// 完成所有文件处理
@@ -334,8 +307,6 @@ export default function Compress() {
 					duration: 3000,
 				});
 			}
-
-			await cleanupResources();
 		} finally {
 			setLoading(false);
 			setProgress(0);
@@ -346,17 +317,17 @@ export default function Compress() {
 	return (
 		<div className="w-full max-w-6xl mx-auto">
 			{/* 主容器 */}
-			<div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl p-8 border border-white/20 dark:border-slate-700/20 shadow-xl relative">
+			<div className="bg-background/70 backdrop-blur-xl rounded-3xl p-8 border border-border/20 shadow-xl relative">
 				{/* 操作栏 */}
 				<div className="flex gap-4 justify-center mb-8 flex-wrap">
 					{/* 格式选择器 */}
-					<div className="flex items-center gap-3 px-6 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-white/30 dark:border-slate-700/30">
+					<div className="flex items-center gap-3 px-6 bg-card/50 backdrop-blur-sm rounded-2xl border border-border/30">
 						<div className="flex items-center gap-2">
-							<FileType className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-							<span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t("output_format")}</span>
+							<FileType className="w-5 h-5 text-primary" />
+							<span className="text-sm font-medium text-foreground">{t("output_format")}</span>
 						</div>
 						<Select value={format} onValueChange={setFormat}>
-							<SelectTrigger className="w-24 h-8 bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-600/40">
+							<SelectTrigger className="w-24 h-8 bg-card/70 border-border/40">
 								<SelectValue placeholder="Format" />
 							</SelectTrigger>
 							<SelectContent>
@@ -372,7 +343,7 @@ export default function Compress() {
 					<Button
 						onClick={handleCompress}
 						disabled={loading || ffmpegLoading || !ffmpegReady || files.length === 0}
-						className="px-8 h-[50px] w-48 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+						className="px-8 h-[50px] w-48 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{ffmpegLoading || !ffmpegReady || loading ? (
 							<Loader2 className="w-5 h-5 animate-spin" />
@@ -388,15 +359,15 @@ export default function Compress() {
 				{/* 进度条区域 */}
 				{loading && (
 					<div className="mb-8">
-						<div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800/50 dark:to-slate-700/50 backdrop-blur-sm rounded-2xl p-6 border border-blue-200/50 dark:border-slate-600/30">
+						<div className="bg-gradient-to-r from-primary/10 to-primary/5 backdrop-blur-sm rounded-2xl p-6 border border-primary/20">
 							<div className="flex justify-between items-center mb-4">
 								<div className="flex items-center gap-2">
-									<div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
-									<span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+									<div className="w-3 h-3 bg-primary rounded-full animate-pulse" />
+									<span className="text-sm font-semibold text-foreground">
 										{t("processing_progress")}
 									</span>
 								</div>
-								<span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+								<span className="text-lg font-bold text-primary">
 									{progress}%
 								</span>
 							</div>
@@ -404,14 +375,14 @@ export default function Compress() {
 							<Progress value={progress} className="w-full h-3 mb-4" />
 
 							{files.length > 1 && (
-								<div className="text-center mt-3 text-sm text-slate-600 dark:text-slate-400">
+								<div className="text-center mt-3 text-sm text-muted-foreground">
 									{Math.floor(progress / 100 * files.length)} / {files.length} {t("files_selected")}
 								</div>
 							)}
 
 							{files.length > 3 && (
-								<div className="mt-4 p-4 bg-amber-50/80 dark:bg-amber-900/20 backdrop-blur-sm rounded-xl border border-amber-200/50 dark:border-amber-700/30">
-									<div className="text-sm text-amber-800 dark:text-amber-200">
+								<div className="mt-4 p-4 bg-accent/10 backdrop-blur-sm rounded-xl border border-accent/20">
+									<div className="text-sm text-accent-foreground">
 										<div className="flex items-center gap-2 mb-2">
 											<span>💡</span>
 											<span className="font-medium">{t("performance_tips")}</span>
@@ -446,13 +417,10 @@ export default function Compress() {
 						{/* 结果区域标题 */}
 						<div className="flex justify-between items-center">
 							<div className="flex items-center gap-3">
-								<div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-									<svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-										<title>已完成</title>
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-									</svg>
+								<div className="w-8 h-8 bg-gradient-to-r from-primary to-primary/80 rounded-full flex items-center justify-center">
+									<ShieldCheck className="w-4 h-4 text-primary-foreground" />
 								</div>
-								<h3 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
+								<h3 className="text-xl font-semibold text-foreground">
 									{t('compressed_files')} ({downloadList.length})
 								</h3>
 							</div>
@@ -462,12 +430,9 @@ export default function Compress() {
 										variant="outline"
 										size="sm"
 										onClick={handleShowDragDrop}
-										className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+										className="bg-card/50 backdrop-blur-sm border-primary/20 text-primary hover:bg-primary/10"
 									>
-										<svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-											<title>继续压缩</title>
-											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-										</svg>
+										<Plus className="w-4 h-4" />
 										{t('continue_compressing')}
 									</Button>
 								)}
@@ -475,12 +440,9 @@ export default function Compress() {
 									variant="outline"
 									size="sm"
 									onClick={handleClearDownloadList}
-									className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+									className="bg-card/50 backdrop-blur-sm border-destructive/20 text-destructive hover:bg-destructive/10"
 								>
-									<svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-										<title>清除全部</title>
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-									</svg>
+									<Trash2 className="w-4 h-4" />
 									{t('clear_all')}
 								</Button>
 							</div>
@@ -488,12 +450,9 @@ export default function Compress() {
 
 						{/* 总体统计信息 */}
 						{downloadList.length > 0 && (
-							<div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 backdrop-blur-sm rounded-2xl p-6 border border-green-200/50 dark:border-green-700/30">
-								<h4 className="text-lg font-semibold text-green-800 dark:text-green-200 mb-4 flex items-center gap-2">
-									<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-										<title>统计数据</title>
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-									</svg>
+							<div className="bg-gradient-to-r from-primary/10 to-primary/5 backdrop-blur-sm rounded-2xl p-6 border border-primary/20">
+								<h4 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
+									<ChartArea className="w-4 h-4" />
 									{t('overall_stats')}
 								</h4>
 								<CompressItem
@@ -520,7 +479,7 @@ export default function Compress() {
 							{downloadList.map((item) => {
 								const currentProgress = fileProgress[item.name];
 								return (
-									<div key={item.name + item.url} className="bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm rounded-2xl border border-white/30 dark:border-slate-700/30">
+									<div key={item.name + item.url} className="bg-card/40 backdrop-blur-sm rounded-2xl border border-border/30">
 										<CompressItem
 											name={item.name}
 											url={item.url}

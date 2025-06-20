@@ -22,12 +22,9 @@
 		"Custom frame rate and quality",
 		"Real-time preview functionality"
 	],
-	"gradient_meta_title": "CSS Gradient Generator - LocalImage | Create Beautiful Gradients",
-	"gradient_meta_description": "Free online CSS gradient generator with live preview, Tailwind CSS v3/v4 support, and copy-ready code. Create beautiful linear and radial gradients for your web projects with real-time editing.",
-	"gradient_meta_keywords": "css gradient, gradient generator, tailwind gradients, linear gradient, radial gradient, css tools, background generator",
-	"compress_meta_title": "Compress & Convert Images",
-	"compress_meta_description": "Free online image compression & conversion tool. Reduce size or convert formats, all processed locally for privacy.",
-	"compress_meta_keywords": "image compression, compress images online, reduce image size, JPG compressor, PNG compressor, photo compression tool, image conversion",
+	"compress_meta_title": "Image Compression & Conversion Tool - Local Processing Privacy Protected",
+	"compress_meta_description": "Free online image compression & conversion tool. Local processing protects privacy, supports JPG, PNG, WebP format conversion, no server upload required.",
+	"compress_meta_keywords": "image compression, format conversion, local processing, privacy protection, online compression, JPG conversion, PNG conversion, WebP conversion",
 	"advanceoption": {
 		"width": "Width",
 		"height": "Height",
@@ -73,8 +70,6 @@
 	"nav_image_tools": "Image Tools",
 	"image_tools_desc": "Powerful local image processing tools that protect your privacy",
 	"compress_desc": "Efficiently compress & convert images to reduce file size or change format",
-	"nav_gradient_generator": "Gradient Generator",
-	"gradient_generator_desc": "Create beautiful CSS gradients with Tailwind output",
 	"file_empty_skip": "File is empty, skipping",
 	"file_added_to_zip": "Added to zip",
 	"process_file_failed": "Failed to process file",
@@ -194,6 +189,5 @@
 	"select_files": "Select Files",
 	"supported_formats": "Supported formats",
 	"low_quality": "Low Quality",
-	"high_quality": "High Quality",
 	"image_size": "Image Size"
 }

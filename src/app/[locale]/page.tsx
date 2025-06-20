@@ -1,17 +1,29 @@
 "use client";
 
-import AnimationComposer from "@/components/animation";
-import styles from '@/components/animation/animation.module.scss';
+import Compress from "@/components/compress";
+import { useTranslations } from 'next-intl';
+import PageTitle from "@/components/PageTitle";
 
 function Page() {
+	const t = useTranslations();
+	
 	return (
 		<>
-			<main className="w-full min-h-screen flex items-center justify-center p-4">
-				{/* 内容区域 */}
-				<div className="w-full max-w-7xl mx-auto">
-					<AnimationComposer />
-				</div>
-			</main>
+			<PageTitle
+				title={t("nav_compress")}
+				description={t("compress_desc")}
+				features={[
+					{ text: t("high_quality"), color: "blue" },
+					{ text: t("fast_processing"), color: "green" },
+					{ text: t("privacy_protection"), color: "purple" }
+				]}
+				className="mb-12"
+			/>
+
+			{/* 内容区域 */}
+			<div className="w-full max-w-6xl">
+				<Compress />
+			</div>
 		</>
 	);
 }

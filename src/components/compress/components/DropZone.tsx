@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useTranslations } from 'next-intl';
+import { UploadIcon } from "lucide-react";
 
 interface DropZoneProps {
   onFilesSelected: (files: File[]) => void;
@@ -67,9 +68,7 @@ export function DropZone({ onFilesSelected, filesCount }: DropZoneProps) {
       />
       
       <div className="w-full h-full flex flex-col items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-        </svg>
+        <UploadIcon className="h-12 w-12 text-gray-400" />
         <p className="mt-2 text-sm text-gray-600">{t('drag_drop_or_click')}</p>
         {filesCount > 0 && (
           <p className="mt-2 text-sm text-primary">

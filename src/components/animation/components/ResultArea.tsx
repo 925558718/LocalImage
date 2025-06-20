@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/shadcn";
 import Image from "next/image";
-import { Download } from "lucide-react";
+import { Download, DownloadIcon, CheckCircle, X } from "lucide-react";
 
 interface AnimationResult {
   url: string;
@@ -19,83 +19,70 @@ interface ResultAreaProps {
 export default function ResultArea({ result, onDownload, onClear }: ResultAreaProps) {
   const t = useTranslations();
   
+  // 格式化文件大小
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+  
   if (!result) return null;
   
   return (
-    <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-800/50 shadow-sm p-6 flex flex-col h-full">
-      <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <svg
-            className="w-8 h-8 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
-        </div>
-        <h3 className="text-xl font-bold text-green-800 dark:text-green-200 mb-2">
-          {t("animation_result")}
-        </h3>
-        <div className="text-green-700 dark:text-green-300 space-y-1">
-          <div className="font-semibold">
-            {result.name}
-          </div>
-          <div className="text-sm">
-            {(result.size / 1024 / 1024).toFixed(2)} MB
-            • {result.format.toUpperCase()}
-          </div>
-        </div>
+    <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/20 shadow-sm p-6 flex flex-col h-full">
+      <div className="w-16 h-16 bg-gradient-to-r from-primary to-primary/80 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <CheckCircle className="w-8 h-8 text-primary-foreground" />
       </div>
-
-      <div className="flex-1 flex items-center justify-center mb-6">
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-green-200 dark:border-green-800/50">
-          {result.format === "mp4" ? (
-            // 视频播放器
-            <video
-              src={result.url}
-              controls
-              autoPlay
-              loop
-              className="w-auto h-auto max-w-full max-h-48 mx-auto rounded-lg"
-              style={{ maxWidth: "100%", maxHeight: "12rem" }}
-            />
-          ) : (
-            // 图片展示
-            <Image
-              src={result.url}
-              alt="Generated Animation"
-              width={0}
-              height={0}
-              className="w-auto h-auto max-w-full max-h-48 mx-auto rounded-lg"
-              style={{ maxWidth: "100%", maxHeight: "12rem" }}
-              unoptimized // 由于是blob URL，需要禁用优化
-              sizes="100vw"
-            />
-          )}
-        </div>
+      
+      <h3 className="text-xl font-bold text-primary mb-2">
+        {t("animation_result")}
+      </h3>
+      
+      <div className="text-primary/80 space-y-1">
+        <p className="text-sm">
+          <span className="font-medium">{t("format")}:</span> {result.format.toUpperCase()}
+        </p>
+        <p className="text-sm">
+          <span className="font-medium">{t("image_size")}:</span> {formatFileSize(result.size)}
+        </p>
+        <p className="text-sm">
+          <span className="font-medium">{result.name}</span>
+        </p>
       </div>
-
-      <div className="flex justify-center gap-3">
+      
+      <div className="bg-card rounded-xl p-4 shadow-sm border border-primary/20 mt-4 flex-1 flex items-center justify-center">
+        {["gif", "webp"].includes(result.format.toLowerCase()) ? (
+          <img 
+            src={result.url} 
+            alt={result.name}
+            className="max-w-full h-64 object-contain rounded-lg"
+          />
+        ) : (
+          <video 
+            src={result.url} 
+            controls
+            className="max-w-full h-64 object-contain rounded-lg"
+            autoPlay
+            muted
+            loop
+          />
+        )}
+      </div>
+      
+      <div className="flex gap-3 mt-6">
         <Button
           onClick={onDownload}
-          size="sm"
-          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg"
+          className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg"
         >
           <Download className="w-4 h-4 mr-2" />
           {t("download")}
         </Button>
         <Button
           variant="outline"
-          size="sm"
           onClick={onClear}
-          className="bg-white dark:bg-slate-800 border-green-300 dark:border-green-700"
+          className="bg-card border-primary/30"
         >
+          <X className="w-4 h-4 mr-2" />
           {t("clear_result")}
         </Button>
       </div>

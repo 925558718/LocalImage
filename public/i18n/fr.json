@@ -22,12 +22,9 @@
 		"Fréquence d'images et qualité personnalisables",
 		"Fonctionnalité d'aperçu en temps réel"
 	],
-	"gradient_meta_title": "Générateur de Dégradés CSS - LocalImage | Créez de Beaux Dégradés",
-	"gradient_meta_description": "Générateur gratuit de dégradés CSS en ligne avec aperçu en direct, support Tailwind CSS v3/v4 et code prêt à copier. Créez de beaux dégradés linéaires et radiaux pour vos projets web avec édition en temps réel.",
-	"gradient_meta_keywords": "dégradé CSS, générateur de dégradés, dégradés Tailwind, dégradé linéaire, dégradé radial, outils CSS, générateur d'arrière-plan",
-	"compress_meta_title": "Compresser & Convertir Images - LocalImage",
-	"compress_meta_description": "Outil gratuit de compression & conversion d'images en ligne. Réduisez la taille ou convertissez le format, traitement local pour la confidentialité.",
-	"compress_meta_keywords": "compression d'images, compresser images en ligne, réduire taille d'image, compresseur JPG, compresseur PNG, outil de compression de photos",
+	"compress_meta_title": "Outil de Compression et Conversion - Traitement Local Protège Confidentialité",
+	"compress_meta_description": "Outil gratuit de compression et conversion d'images en ligne. Traitement local protège confidentialité, supporte conversion formats JPG, PNG, WebP, aucun téléversement serveur requis.",
+	"compress_meta_keywords": "compression d'images, conversion de format, traitement local, protection confidentialité, compression en ligne, conversion JPG, conversion PNG, conversion WebP",
 	"advanceoption": {
 		"width": "Largeur",
 		"height": "Hauteur",
@@ -73,8 +70,6 @@
 	"nav_image_tools": "Outils d'Images",
 	"image_tools_desc": "Outils puissants de traitement d'images local qui protègent votre confidentialité",
 	"compress_desc": "Compresser & convertir efficacement les images pour réduire la taille ou changer le format",
-	"nav_gradient_generator": "Générateur de Dégradé",
-	"gradient_generator_desc": "Créer de beaux dégradés CSS avec sortie Tailwind",
 	"file_empty_skip": "Le fichier est vide, ignoré",
 	"file_added_to_zip": "Ajouté au zip",
 	"process_file_failed": "Échec du traitement du fichier",
@@ -194,6 +189,5 @@
 	"select_files": "Sélectionner des fichiers",
 	"supported_formats": "Formats pris en charge",
 	"low_quality": "Qualité Basse",
-	"high_quality": "Haute Qualité",
 	"image_size": "Taille de l'Image"
 }

@@ -50,13 +50,13 @@ export async function generateMetadata({
 	// 加载对应语言的字典
 	const dictionary = await dictionaries[locale]();
 
-	// 标题和描述支持多语言
+	// 标题和描述支持多语言 - 更新为压缩功能的SEO
 	const title =
-		dictionary.meta_title ||
-		"WebP Animation Creator - LocalImage | Convert Images";
+		dictionary.compress_meta_title ||
+		"Compress & Convert Images - LocalImage | Free Online Image Compression";
 	const description =
-		dictionary.meta_description ||
-		"Free online WebP and GIF animation creator. Convert multiple images into high-quality animations with local processing. No uploads required, privacy protected.";
+		dictionary.compress_meta_description ||
+		"Free online image compression & conversion tool. Reduce size or convert formats, all processed locally for privacy.";
 
 	// 构建基础URL
 	const baseUrl = "https://limgx.com";
@@ -82,8 +82,8 @@ export async function generateMetadata({
 		title,
 		description,
 		keywords:
-			dictionary.meta_keywords ||
-			"WebP animation, GIF creator, animation creator, image to animation, online animation tool",
+			dictionary.compress_meta_keywords ||
+			"image compression, compress images online, reduce image size, JPG compressor, PNG compressor, photo compression tool, image conversion",
 		authors: [{ name: "limgx.com" }],
 		robots: {
 			index: true,
@@ -119,17 +119,17 @@ export default async function RootLayout({
 
 	// 动态生成结构化数据
 	const appName =
-		dictionary.structured_data_app_name || "LocalImage WebP Animation Creator";
+		dictionary.structured_data_app_name || "LocalImage Image Compression Tool";
 	const appDescription =
 		dictionary.structured_data_description ||
-		"Free online WebP animation creator. Convert multiple images into high-quality animations";
+		"Free online image compression and conversion tool. Reduce file size or change formats with local processing.";
 	const featureList = dictionary.structured_data_features || [
-		"WebP animation creation",
+		"Image compression and optimization",
 		"Multiple image format support",
 		"Local processing protects privacy",
 		"No server uploads required",
-		"Custom frame rate and quality",
-		"Real-time preview functionality",
+		"Custom quality settings",
+		"Batch processing functionality",
 	];
 
 	return (
@@ -156,7 +156,7 @@ export default async function RootLayout({
 						},
 						featureList: featureList,
 						screenshot:
-							"https://limgx.com/images/webp-animation-preview.jpg",
+							"https://limgx.com/images/image-compression-preview.jpg",
 						softwareVersion: "1.0",
 						author: {
 							"@type": "Organization",
@@ -195,19 +195,19 @@ export default async function RootLayout({
 								<Header />
 								<div className="relative min-h-screen w-full overflow-hidden">
 									{/* 共享的装饰性背景 */}
-									<div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-slate-900 dark:via-slate-800/50 dark:to-slate-900" />
+									<div className="absolute inset-0 bg-gradient-to-br from-background via-primary/5 to-primary/10" />
 									
 									{/* 装饰性背景元素 */}
 									<div className="absolute inset-0 overflow-hidden">
-										<div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl" />
-										<div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-pink-400/20 rounded-full blur-3xl" />
-										<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-cyan-400/10 to-blue-400/10 rounded-full blur-3xl" />
+										<div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full blur-3xl" />
+										<div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-primary/15 to-primary/5 rounded-full blur-3xl" />
+										<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full blur-3xl" />
 									</div>
 									
 									{/* 内容区域 */}
-									<div className="relative z-10">
+									<main className="w-full min-h-screen flex flex-col items-center p-4">
 										{children}
-									</div>
+									</main>
 								</div>
 								<Footer />
 								<Toaster />
