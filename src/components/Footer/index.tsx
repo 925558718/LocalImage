@@ -16,7 +16,7 @@ function Footer() {
 						<div className="md:col-span-2">
 							<h3 className="text-xl font-bold text-foreground mb-4 flex items-center">
 								<span className="w-8 h-8 bg-gradient-to-r from-primary to-primary/80 rounded-lg flex items-center justify-center text-primary-foreground text-sm font-bold mr-3">L</span>
-								LocalImage {t("nav_compress")}
+								LocalImage {t("nav_convert")}
 							</h3>
 							<p className="text-muted-foreground mb-4 leading-relaxed">
 								{t("compress_desc")}
@@ -37,7 +37,7 @@ function Footer() {
 							<ul className="space-y-2 text-muted-foreground">
 								<li className="flex items-center">
 									<span className="w-1.5 h-1.5 bg-primary rounded-full mr-2"/>
-									{t("nav_compress")}
+									{t("nav_convert")}
 								</li>
 								<li className="flex items-center">
 									<span className="w-1.5 h-1.5 bg-primary rounded-full mr-2"/>
@@ -64,7 +64,7 @@ function Footer() {
 							<ul className="space-y-2">
 								<li>
 									<Link href="https://limgx.com" className="text-muted-foreground hover:text-primary transition-colors">
-										{t("nav_compress")}
+										{t("nav_convert")}
 									</Link>
 								</li>
 								<li>
