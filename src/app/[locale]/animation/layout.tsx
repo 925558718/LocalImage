@@ -19,7 +19,6 @@ export async function generateMetadata({
 	// 标题和描述支持多语言 - 动画功能
 	const title = dictionary.meta_title;
 	const description = dictionary.meta_description;
-	const keywords = dictionary.meta_keywords;
 
 	// 构建基础URL
 	const baseUrl = "https://limgx.com";
@@ -46,7 +45,6 @@ export async function generateMetadata({
 	return {
 		title,
 		description,
-		keywords,
 		authors: [{ name: "limgx.com" }],
 		robots: {
 			index: true,

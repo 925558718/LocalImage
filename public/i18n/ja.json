@@ -11,7 +11,6 @@
 	"advance": "詳細設定",
 	"meta_title": "WebPアニメーション作成ツール - LocalImage | 画像をアニメーションに変換",
 	"meta_description": "無料オンラインWebPおよびGIFアニメーション作成ツール。複数の画像を高品質アニメーションに変換、ローカル処理でアップロード不要、プライバシー保護。",
-	"meta_keywords": "WebPアニメーション, GIF作成ツール, アニメーション作成, 画像からアニメーション, オンラインアニメーションツール, WebP変換, 無料アニメーション作成",
 	"structured_data_app_name": "LocalImage WebPアニメーション作成ツール",
 	"structured_data_description": "無料オンラインWebPアニメーション作成ツール。複数の画像を高品質アニメーションに変換、ローカル処理でプライバシー保護。",
 	"structured_data_features": [
@@ -24,7 +23,6 @@
 	],
 	"compress_meta_title": "画像圧縮変換ツール - ローカル処理でプライバシー保護",
 	"compress_meta_description": "無料オンライン画像圧縮・変換ツール。ローカル処理でプライバシーを保護、JPG、PNG、WebP形式変換に対応、サーバーアップロード不要。",
-	"compress_meta_keywords": "画像圧縮, 形式変換, ローカル処理, プライバシー保護, オンライン圧縮, JPG変換, PNG変換, WebP変換",
 	"advanceoption": {
 		"outputName": "ファイル名サフィックス",
 		"outputName_placeholder": "例: compressed。空欄ならサフィックスなし",

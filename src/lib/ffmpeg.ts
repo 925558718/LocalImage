@@ -1,12 +1,22 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
-import { isBrowser } from "./utils";
+import { getType, isBrowser } from "./utils";
 import {
 	AnimationStrategyFactory,
 	GifAnimationStrategy,
 	WebPAnimationStrategy,
 } from "./animations";
-import { ConversionStrategyFactory, ImageFormat } from "./conversions";
+import {
+	ConversionStrategyFactory,
+	ImageFormat,
+	ImageFormatType,
+} from "./conversions";
+import {
+	CompressionResult,
+	FileInput,
+	CompressionOptions,
+	ProgressCallbacks,
+} from "./types";
 
 // 注意：原来这里有window.gc的声明，但实际上这是非标准API，已移除
 
@@ -106,24 +116,18 @@ class FFMPEG {
 		width,
 		height,
 	}: {
-		input: string | Uint8Array | ArrayBuffer;
+		input: FileInput;
 		outputName: string;
 		quality?: number;
 		width?: number;
 		height?: number;
 	}): Promise<Uint8Array> {
 		await this.load();
-
 		// 获取源格式，确保是有效的字符串
-		const sourceExt = (
-			typeof input === "string" && input.includes(".")
-				? input.split(".").pop()?.toLowerCase()
-				: "jpg"
-		) as ImageFormat;
+		const sourceExt = getType(input.name);
 
 		// 获取目标格式，确保是有效的字符串
-		const targetExt = (outputName.split(".").pop()?.toLowerCase() ||
-			"jpg") as ImageFormat;
+		const targetExt = getType(outputName);
 
 		// 验证格式转换是否支持
 		if (!ConversionStrategyFactory.canConvert(sourceExt, targetExt)) {
@@ -131,41 +135,10 @@ class FFMPEG {
 		}
 
 		// 自动判断输入格式
-		let inputFileName = `input_image.${sourceExt}`;
-		if (
-			typeof input === "string" &&
-			(input.endsWith(".png") ||
-				input.endsWith(".jpg") ||
-				input.endsWith(".jpeg") ||
-				input.endsWith(".webp") ||
-				input.endsWith(".avif"))
-		) {
-			inputFileName = `input_image.${input.split(".").pop()}`;
-		} else if (typeof input === "string") {
-			inputFileName = "input_image.jpg";
-		}
+		const inputFileName = `input_image.${sourceExt}`;
 
 		// 写入输入文件
-		let fileData: Uint8Array;
-		if (
-			typeof input === "string" &&
-			(input.startsWith("http://") || input.startsWith("https://"))
-		) {
-			fileData = await fetchFile(input);
-		} else if (typeof input === "string") {
-			// 字符串类型但不是URL，当作文件路径处理
-			fileData = await fetchFile(input);
-		} else {
-			// 检查ArrayBuffer是否已被分离
-			if (input instanceof ArrayBuffer) {
-				if (input.byteLength === 0) {
-					throw new Error("ArrayBuffer已被分离，无法处理");
-				}
-				fileData = new Uint8Array(input);
-			} else {
-				fileData = input instanceof Uint8Array ? input : new Uint8Array(input);
-			}
-		}
+		const fileData = new Uint8Array(input.data);
 		if (!this.ffmpeg) throw new Error("ffmpeg 未初始化");
 		await this.ffmpeg.writeFile(inputFileName, fileData);
 
@@ -179,6 +152,7 @@ class FFMPEG {
 				width,
 				height,
 			);
+			console.info("args", args);
 
 			await this.ffmpeg.exec(args);
 			const result = (await this.ffmpeg.readFile(outputName)) as Uint8Array;
@@ -189,6 +163,9 @@ class FFMPEG {
 			}
 
 			return result;
+		} catch (error) {
+			console.error("压缩失败:", error);
+			throw error;
 		} finally {
 			// 更新处理计数
 			this._processCount++;
@@ -540,48 +517,18 @@ class FFMPEG {
 		onFileComplete,
 		processedCount = 0, // 添加一个参数来跟踪已处理的文件数，不受实例重置影响
 	}: {
-		files: { data: ArrayBuffer; name: string; originalSize: number }[];
+		files: FileInput[];
 		format: string;
 		quality?: number;
 		width?: number;
 		height?: number;
 		onProgress?: (completed: number, total: number) => void;
-		onFileComplete?: (result: {
-			url: string;
-			name: string;
-			originalSize: number;
-			compressedSize: number;
-			processingTime: number;
-			format: string;
-			quality: number;
-		}) => void;
+		onFileComplete?: (result: CompressionResult) => void;
 		processedCount?: number; // 已处理的文件数，用于保持进度准确
-	}): Promise<
-		{
-			url: string;
-			name: string;
-			originalSize: number;
-			compressedSize: number;
-			processingTime: number;
-			format: string;
-			quality: number;
-		}[]
-	> {
-		const results: {
-			url: string;
-			name: string;
-			originalSize: number;
-			compressedSize: number;
-			processingTime: number;
-			format: string;
-			quality: number;
-		}[] = [];
+	}): Promise<CompressionResult[]> {
+		const results: CompressionResult[] = [];
 
 		try {
-			console.log("[ffmpeg] 开始串行处理模式 - 稳定且内存高效");
-
-			// 使用主实例进行处理
-
 			const instance = ffm_ins;
 			await instance?.reset();
 			if (!instance) {
@@ -594,10 +541,6 @@ class FFMPEG {
 			// 设置重置阈值为100MB
 			const resetThresholdBytes = 100 * 1024 * 1024;
 
-			console.log(
-				`[ffmpeg] 设置实例重置阈值: 处理 ${Math.round(resetThresholdBytes / (1024 * 1024))} MB 数据后重置`,
-			);
-
 			for (let i = 0; i < files.length; i++) {
 				const file = files[i];
 				const startTime = performance.now();
@@ -605,9 +548,6 @@ class FFMPEG {
 				try {
 					// 检查是否需要重置实例 - 基于处理的文件大小
 					if (bytesProcessedSinceReset >= resetThresholdBytes) {
-						console.log(
-							`[ffmpeg] 已处理 ${Math.round(bytesProcessedSinceReset / (1024 * 1024))} MB 数据，重置实例以释放内存`,
-						);
 						await instance.reset();
 						await instance.load(); // 重新加载
 						bytesProcessedSinceReset = 0; // 重置字节计数器
@@ -620,7 +560,7 @@ class FFMPEG {
 
 					// 处理单个文件
 					const compressed: Uint8Array = await instance.convertImage({
-						input: file.data,
+						input: file,
 						outputName,
 						quality,
 						width,
@@ -631,17 +571,8 @@ class FFMPEG {
 					if (!compressed || compressed.length === 0) {
 						throw new Error(`压缩失败：${file.name} 压缩结果为空`);
 					}
-
-					const mimeMap: Record<string, string> = {
-						webp: "image/webp",
-						png: "image/png",
-						jpg: "image/jpeg",
-						jpeg: "image/jpeg",
-						avif: "image/avif",
-					};
-
 					const blob = new Blob([compressed], {
-						type: mimeMap[format] || "application/octet-stream",
+						type: `image/${format}`,
 					});
 
 					// 验证Blob是否正确创建
@@ -656,11 +587,7 @@ class FFMPEG {
 					let blobUrl: string;
 					try {
 						blobUrl = URL.createObjectURL(blob);
-						console.log(
-							`[ffmpeg] 创建Blob URL成功: ${blobUrl.substring(0, 50)}...`,
-						);
 					} catch (error) {
-						console.error("[ffmpeg] 创建Blob URL失败:", error);
 						throw new Error("下载链接创建失败");
 					}
 
@@ -673,10 +600,6 @@ class FFMPEG {
 						format,
 						quality,
 					};
-
-					console.log(
-						`[ffmpeg] 文件处理完成: ${file.name}, 原始: ${(result.originalSize / 1024).toFixed(1)} KB, 压缩后: ${(result.compressedSize / 1024).toFixed(1)} KB, 压缩率: ${(((result.originalSize - result.compressedSize) / result.originalSize) * 100).toFixed(1)}%`,
-					);
 
 					results.push(result);
 					onFileComplete?.(result);

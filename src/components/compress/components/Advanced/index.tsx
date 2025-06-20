@@ -5,7 +5,6 @@ import {
 	Button,
 	Input,
 	Label,
-	Slider,
 } from "@/components/shadcn";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -13,13 +12,12 @@ import {
 	Settings2,
 	ChevronRight,
 	RulerDimensionLine,
-	BicepsFlexed,
 } from "lucide-react";
+
 interface AdvancedProps {
 	onChange?: (v: {
 		width: string;
 		height: string;
-		quality: number;
 		outputName: string;
 	}) => void;
 }
@@ -28,25 +26,22 @@ function Advanced({ onChange }: AdvancedProps) {
 	const t = useTranslations();
 	const [width, setWidth] = useState("");
 	const [height, setHeight] = useState("");
-	const [quality, setQuality] = useState(85);
 	const [outputName, setOutputName] = useState("");
+
 	function handleChange(
 		next: Partial<{
 			width: string;
 			height: string;
-			quality: number;
 			outputName: string;
 		}>,
 	) {
 		const newVal = {
 			width: next.width ?? width,
 			height: next.height ?? height,
-			quality: next.quality ?? quality,
 			outputName: next.outputName ?? "",
 		};
 		setWidth(newVal.width);
 		setHeight(newVal.height);
-		setQuality(newVal.quality);
 		setOutputName(newVal.outputName);
 		onChange?.(newVal);
 	}
@@ -57,7 +52,7 @@ function Advanced({ onChange }: AdvancedProps) {
 				<div className="flex items-center gap-3 px-6 py-3 bg-card/50 backdrop-blur-sm rounded-2xl border border-border/30 hover:bg-card/60 transition-all duration-200 cursor-pointer">
 					<div className="flex items-center gap-2">
 						<Settings2 color="#C3B588" size={16} />
-						<span className="text-sm font-medium text-foreground">
+						<span className="text-sm font-medium text-foreground text-nowrap">
 							{t("advance")}
 						</span>
 					</div>
@@ -115,32 +110,6 @@ function Advanced({ onChange }: AdvancedProps) {
 										className="h-9 bg-background/60 backdrop-blur-sm border-border/40 rounded-xl text-sm"
 									/>
 								</div>
-							</div>
-						</div>
-
-						{/* 质量设置 */}
-						<div className="space-y-3">
-							<div className="flex items-center justify-between">
-								<h5 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-									<BicepsFlexed size={16} />
-									{t("advanceoption.quality")}
-								</h5>
-								<span className="text-sm font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg">
-									{quality}%
-								</span>
-							</div>
-							<div className="px-2">
-								<Slider
-									value={[quality]}
-									onValueChange={(v) => handleChange({ quality: v[0] })}
-									max={100}
-									step={1}
-									className="w-full"
-								/>
-							</div>
-							<div className="flex justify-between text-xs text-muted-foreground px-2">
-								<span>{t("low_quality")}</span>
-								<span>{t("high_quality")}</span>
 							</div>
 						</div>
 					</div>

@@ -15,14 +15,41 @@ export interface ConversionStrategy {
 	getArgs(inputFileName: string, outputName: string, quality: number, width?: number, height?: number): string[];
 }
 
-// 导出支持的图片格式类型
-export type ImageFormat = 'png' | 'jpg' | 'jpeg' | 'webp' | 'avif';
+// 支持的图片格式枚举
+export enum ImageFormat {
+	// 常见格式
+	PNG = 'png',
+	JPG = 'jpg',
+	JPEG = 'jpeg',
+	WEBP = 'webp',
+	GIF = 'gif',
+	BMP = 'bmp',
+	TIFF = 'tiff',
+	TIF = 'tif',
+	ICO = 'ico',
+	
+	// 专业格式
+	DPX = 'dpx',
+	EXR = 'exr',
+	PPM = 'ppm',
+	PGM = 'pgm',
+	PBM = 'pbm',
+	PAM = 'pam',
+	SGI = 'sgi',
+	TGA = 'tga',
+	XBM = 'xbm',
+	XPM = 'xpm',
+}
 
-// 格式转换映射表
-export const FORMAT_CONVERSION_MAP: Record<ImageFormat, ImageFormat[]> = {
-	png: ['png', 'jpg', 'webp', 'avif'],
-	jpg: ['jpg', 'png', 'webp', 'avif'],
-	jpeg: ['jpeg', 'png', 'webp', 'avif'],
-	webp: ['webp', 'png', 'jpg', 'avif'],
-	avif: ['avif', 'png', 'jpg', 'webp']
+// 从枚举创建类型
+export type ImageFormatType = `${ImageFormat}`;
+
+// 不可转换的格式映射表（只记录不支持转换的映射）
+// 格式：{ 源格式: [不可转换的目标格式数组] }
+// 只记录有特殊限制的格式，没有记录的格式默认支持所有转换
+export const FORMAT_CONVERSION_MAP: Partial<Record<ImageFormatType, ImageFormatType[]>> = {
+	// 示例：某些格式可能不支持转换为特定格式
+	// [ImageFormat.GIF]: [ImageFormat.AVIF], // GIF不支持转换为AVIF
+	// [ImageFormat.ICO]: [ImageFormat.TIFF, ImageFormat.EXR], // ICO不支持转换为TIFF和EXR
+	// [ImageFormat.BMP]: [ImageFormat.WEBP], // BMP不支持转换为WebP
 }; 

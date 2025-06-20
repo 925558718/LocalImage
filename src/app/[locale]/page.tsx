@@ -3,10 +3,8 @@
 import Compress from "@/components/compress";
 import { useTranslations } from 'next-intl';
 import PageTitle from "@/components/PageTitle";
-
 function Page() {
 	const t = useTranslations();
-	
 	return (
 		<>
 			<PageTitle
