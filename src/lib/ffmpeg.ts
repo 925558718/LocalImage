@@ -6,7 +6,7 @@ import {
 	GifAnimationStrategy,
 	WebPAnimationStrategy,
 } from "./animations";
-import { ConversionStrategyFactory, ImageFormat } from "./conversions";
+import { ConversionStrategyFactory, ImageFormat, ImageFormatType } from "./conversions";
 
 // 注意：原来这里有window.gc的声明，但实际上这是非标准API，已移除
 
@@ -118,12 +118,12 @@ class FFMPEG {
 		const sourceExt = (
 			typeof input === "string" && input.includes(".")
 				? input.split(".").pop()?.toLowerCase()
-				: "jpg"
-		) as ImageFormat;
+				: ImageFormat.JPG
+		) as ImageFormatType;
 
 		// 获取目标格式，确保是有效的字符串
 		const targetExt = (outputName.split(".").pop()?.toLowerCase() ||
-			"jpg") as ImageFormat;
+			ImageFormat.JPG) as ImageFormatType;
 
 		// 验证格式转换是否支持
 		if (!ConversionStrategyFactory.canConvert(sourceExt, targetExt)) {

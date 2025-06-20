@@ -1,4 +1,4 @@
-import { ConversionStrategy, FORMAT_CONVERSION_MAP, ImageFormat } from "./ConversionStrategy";
+import { ConversionStrategy, FORMAT_CONVERSION_MAP, ImageFormat, ImageFormatType } from "./ConversionStrategy";
 import { DefaultConversionStrategy } from "./DefaultConversionStrategy";
 import { WebPConversionStrategy } from "./WebPConversionStrategy";
 import { AvifConversionStrategy } from "./AvifConversionStrategy";
@@ -9,19 +9,19 @@ import { AvifConversionStrategy } from "./AvifConversionStrategy";
  */
 // 使用命名空间和函数替代静态类
 export namespace ConversionStrategyFactory {
-	const strategies: Record<string, ConversionStrategy> = {
-		webp: new WebPConversionStrategy(),
-		avif: new AvifConversionStrategy(),
+	const strategies: Partial<Record<ImageFormatType, ConversionStrategy>> & { default: ConversionStrategy } = {
+		"webp": new WebPConversionStrategy(),
+		"avif": new AvifConversionStrategy(),
 		default: new DefaultConversionStrategy()
 	};
 
 	/**
 	 * 获取适合指定格式的转换策略
-	 * @param format 输出格式 (png/jpg/jpeg/webp/avif)
+	 * @param format 输出格式
 	 * @returns 对应的转换策略实现
 	 */
-	export function getStrategy(format: string): ConversionStrategy {
-		return strategies[format.toLowerCase()] || strategies.default;
+	export function getStrategy(format: ImageFormatType): ConversionStrategy {
+		return strategies[format] || strategies.default;
 	}
 
 	/**
@@ -31,6 +31,24 @@ export namespace ConversionStrategyFactory {
 	 * @returns 是否支持转换
 	 */
 	export function canConvert(sourceFormat: string, targetFormat: string): boolean {
-		return FORMAT_CONVERSION_MAP[sourceFormat as ImageFormat]?.includes(targetFormat as ImageFormat) || false;
+		const source = sourceFormat.toLowerCase() as ImageFormatType;
+		const target = targetFormat.toLowerCase() as ImageFormatType;
+		
+		// 检查是否在不可转换映射中
+		const unsupportedTargets = FORMAT_CONVERSION_MAP[source];
+		if (unsupportedTargets?.includes(target)) {
+			return false;
+		}
+		
+		// 如果没有记录在不可转换映射中，则默认支持转换
+		return true;
+	}
+
+	/**
+	 * 获取所有支持的格式
+	 * @returns 所有支持的格式数组
+	 */
+	export function getSupportedFormats(): ImageFormatType[] {
+		return Object.values(ImageFormat);
 	}
 }
