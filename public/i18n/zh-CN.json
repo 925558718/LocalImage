@@ -190,5 +190,8 @@
 	"select_files": "选择文件",
 	"supported_formats": "支持的格式",
 	"low_quality": "低质量",
-	"image_size": "图片大小"
+	"image_size": "图片大小",
+	"failed_files": "个失败",
+	"processing_failed": "处理失败",
+	"reset_settings": "重置设置"
 }

@@ -190,5 +190,8 @@
 	"select_files": "Select Files",
 	"supported_formats": "Supported formats",
 	"low_quality": "Low Quality",
-	"image_size": "Image Size"
+	"image_size": "Image Size",
+	"failed_files": "failed",
+	"processing_failed": "Processing Failed",
+	"reset_settings": "Reset Settings"
 }

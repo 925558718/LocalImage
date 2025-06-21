@@ -7,6 +7,7 @@ import {
 
 import { WebPConversionStrategy, DefaultConversionStrategy } from "./index";
 import { PngConversionStrategy } from "./PngConversionStrategy";
+import { IcoConversionStrategy } from "./IcoConversionStrategy";
 
 /**
  * 图像转换策略工厂
@@ -19,6 +20,7 @@ export namespace ConversionStrategyFactory {
 	} = {
 		webp: new WebPConversionStrategy(),
 		png: new PngConversionStrategy(),
+		ico: new IcoConversionStrategy(),
 		default: new DefaultConversionStrategy(),
 	};
 

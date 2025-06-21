@@ -95,25 +95,28 @@ class FFMPEG {
 	 * @param height Optional output height
 	 * @param onProgress Progress callback for batch processing
 	 * @param onFileComplete File completion callback for batch processing
+	 * @param onFileError File error callback for batch processing
 	 */
 	async convertImages({
 		input,
 		format,
-		outputName,
+		outputSuffixName,
 		quality = 75,
 		width,
 		height,
 		onProgress,
 		onFileComplete,
+		onFileError,
 	}: {
 		input: FileInput[];
 		format: string;
-		outputName?: string;
+		outputSuffixName?: string;
 		quality?: number;
 		width?: number;
 		height?: number;
 		onProgress?: (completed: number, total: number) => void;
 		onFileComplete?: (result: CompressionResult) => void;
+		onFileError?: (fileName: string, error: Error) => void;
 	}): Promise<CompressionResult[]> {
 		await this.load();
 
@@ -141,9 +144,8 @@ class FFMPEG {
 					// Generate output filename
 					const baseName = file.name.replace(/\.[^.]+$/, "");
 					const cleanBaseName = baseName.replace(/[<>:"/\\|?*]/g, "_");
-					
 					// Use custom output name or default to source filename
-					const finalOutputName = outputName || `${cleanBaseName}_compressed`;
+					const finalOutputName = `${cleanBaseName}${outputSuffixName ? `_${outputSuffixName}` : ""}`;
 					const sourceExt = getType(file.name);
 					const targetExt = format.toLowerCase() as ImageFormatType;
 					const singleOutputName = `${finalOutputName}.${targetExt}`;
@@ -226,6 +228,10 @@ class FFMPEG {
 						await new Promise((resolve) => setTimeout(resolve, 50));
 					}
 				} catch (error) {
+					// 调用失败回调
+					const errorMessage = error instanceof Error ? error.message : String(error);
+					onFileError?.(file.name, new Error(errorMessage));
+					
 					// Reset instance and continue or throw
 					try {
 						await this.reset();

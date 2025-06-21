@@ -48,8 +48,9 @@ export type ImageFormatType = `${ImageFormat}`;
 export const FORMAT_CONVERSION_MAP: Partial<Record<ImageFormatType, ImageFormatType[]>> = {
 	// WebP格式不能转换到任何其他格式（包括自身）
 	[ImageFormat.WEBP]: Object.values(ImageFormat) as ImageFormatType[],
+	// ICO格式限制：不支持转换为某些专业格式
+	[ImageFormat.ICO]: [ImageFormat.DPX, ImageFormat.EXR, ImageFormat.PPM, ImageFormat.PGM, ImageFormat.PBM, ImageFormat.PAM, ImageFormat.SGI, ImageFormat.XBM],
 	// 示例：某些格式可能不支持转换为特定格式
 	// [ImageFormat.GIF]: [ImageFormat.AVIF], // GIF不支持转换为AVIF
-	// [ImageFormat.ICO]: [ImageFormat.TIFF, ImageFormat.EXR], // ICO不支持转换为TIFF和EXR
 	// [ImageFormat.BMP]: [ImageFormat.WEBP], // BMP不支持转换为WebP
 }; 
