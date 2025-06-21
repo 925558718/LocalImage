@@ -187,5 +187,8 @@
 	"supported_formats": "Formatos soportados",
 	"low_quality": "Baja Calidad",
 	"high_quality": "Alta Calidad",
-	"image_size": "Tamaño de Imagen"
+	"image_size": "Tamaño de Imagen",
+	"failed_files": "fallidos",
+	"processing_failed": "Procesamiento Falló",
+	"reset_settings": "Restablecer Configuración"
 }

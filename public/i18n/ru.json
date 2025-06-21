@@ -193,5 +193,8 @@
 	"supported_formats": "Поддерживаемые форматы",
 	"low_quality": "Низкое качество",
 	"high_quality": "Высокое качество",
-	"image_size": "Размер изображения"
+	"image_size": "Размер изображения",
+	"failed_files": "неудачных",
+	"processing_failed": "Обработка не удалась",
+	"reset_settings": "Сбросить настройки"
 } 

@@ -30,7 +30,7 @@ import {
 
 // 导入FFMPEG类用于静态方法调用
 import { FFMPEG } from "@/lib/ffmpeg";
-import { ImageFormat } from "@/lib/conversions/ConversionStrategy";
+import { ImageFormat, ImageFormatType } from "@/lib/conversions/ConversionStrategy";
 
 // 支持的图片格式配置 - 按常用程度排序
 const SUPPORTED_FORMATS = [
@@ -71,14 +71,31 @@ type DownloadItem = {
 	format?: string;
 	quality?: number;
 	blob?: Blob;
+	failed?: boolean; // 标记是否为失败的文件
 };
 
 type FileProgressMap = {
 	[key: string]: {
 		isProcessing: boolean;
 		progress: number;
+		failed?: boolean; // 标记文件是否处理失败
 	};
 };
+
+const NO_SUPPORT_QUALITY_SETTING_FORMATS: ImageFormatType[] = [
+	ImageFormat.BMP,
+	ImageFormat.GIF,
+	ImageFormat.TIFF,
+	ImageFormat.TIF,
+	ImageFormat.DPX,
+	ImageFormat.EXR,
+	ImageFormat.PPM,
+	ImageFormat.PGM,
+	ImageFormat.PBM,
+	ImageFormat.PAM,
+	ImageFormat.SGI,
+	ImageFormat.XBM,
+];
 
 export default function Compress() {
 	const t = useTranslations();
@@ -95,6 +112,7 @@ export default function Compress() {
 	const [downloadList, setDownloadList] = useState<DownloadItem[]>([]);
 	const [fileProgress, setFileProgress] = useState<FileProgressMap>({});
 	const [showDragDrop, setShowDragDrop] = useState(true);
+	const [failedCount, setFailedCount] = useState(0); // 跟踪失败的文件数量
 
 	// 格式和高级配置
 	const [format, setFormat] = useState("webp");
@@ -102,8 +120,13 @@ export default function Compress() {
 	const [advanced, setAdvanced] = useState({
 		width: "",
 		height: "",
-		outputName: "",
+		outputSuffixName: "",
 	});
+
+	// 判断格式是否需要质量设置
+	const needsQualitySetting = (format: ImageFormatType): boolean => {
+		return !NO_SUPPORT_QUALITY_SETTING_FORMATS.includes(format);
+	};
 
 	// 释放blob URL
 	const revokeBlobUrls = useCallback((items: DownloadItem[]) => {
@@ -143,6 +166,7 @@ export default function Compress() {
 		setDownloadList([]);
 		setShowDragDrop(true);
 		setFiles([]);
+		setFailedCount(0); // 重置失败计数
 	}, [downloadList, revokeBlobUrls]);
 
 	// 重新显示拖拽区域
@@ -170,6 +194,7 @@ export default function Compress() {
 		setProgress(0);
 		setDownloadList([]);
 		setFileProgress({});
+		setFailedCount(0); // 重置失败计数
 
 		// 大图片警告
 		const totalSize = files.reduce((sum, file) => sum + file.size, 0);
@@ -254,37 +279,49 @@ export default function Compress() {
 							[file.name]: { isProcessing: true, progress: 0 },
 						}));
 
-						const arrayBuffer = await file.arrayBuffer();
-						return {
-							data: arrayBuffer,
-							name: file.name,
-							originalSize: file.size,
-						};
+						try {
+							const arrayBuffer = await file.arrayBuffer();
+							return {
+								data: arrayBuffer,
+								name: file.name,
+								originalSize: file.size,
+							};
+						} catch (error) {
+							// 记录文件读取失败
+							console.error(`文件读取失败: ${file.name}`, error);
+							setFileProgress((prev) => ({
+								...prev,
+								[file.name]: { isProcessing: false, progress: 0, failed: true },
+							}));
+							setFailedCount((prev) => prev + 1);
+							
+							// 返回一个标记为失败的数据结构
+							return {
+								data: new ArrayBuffer(0),
+								name: file.name,
+								originalSize: file.size,
+								failed: true,
+							};
+						}
 					}),
 				);
-
 				// 使用串行压缩模式处理当前批次
-				await FFMPEG.convertImagesSerial({
-					files: fileData,
-					format,
+				await ffm_ins?.convertImages({
+					input: fileData,
+					format: format,
+					outputSuffixName: advanced.outputSuffixName,
 					quality: quality,
 					width: advanced.width ? Number.parseInt(advanced.width) : undefined,
 					height: advanced.height
 						? Number.parseInt(advanced.height)
 						: undefined,
-					processedCount: processedFiles,
-					onProgress: (completed, total) => {
-						// 计算当前批次的进度百分比
-						const batchProgress =
-							((completed - processedFiles) / fileData.length) * 100;
-						setProgress(Math.round((completed / totalFiles) * 100));
-
-						// 更新当前处理文件的进度
-						// 获取当前正在处理的文件在当前批次中的索引
-						const currentBatchIndex = completed - processedFiles - 1;
+					onProgress: (completed: number, total: number) => {
+						// Only update individual file progress, not overall progress
+						const currentBatchIndex = completed - 1;
 						if (currentBatchIndex >= 0 && currentBatchIndex < fileData.length) {
 							const currentFileName = fileData[currentBatchIndex]?.name;
 							if (currentFileName) {
+								const batchProgress = (completed / fileData.length) * 100;
 								setFileProgress((prev) => ({
 									...prev,
 									[currentFileName]: {
@@ -297,6 +334,9 @@ export default function Compress() {
 					},
 					onFileComplete: (result: DownloadItem) => {
 						processedFiles++; // 增加已处理文件计数
+						
+						// Update overall progress based on completed files
+						setProgress(Math.round((processedFiles / totalFiles) * 100));
 
 						const originalFileName =
 							fileData.find((file) =>
@@ -310,7 +350,6 @@ export default function Compress() {
 
 						setDownloadList((prev) => {
 							const newList = [...prev, result];
-
 							// 异步获取并缓存blob数据
 							setTimeout(async () => {
 								try {
@@ -330,12 +369,35 @@ export default function Compress() {
 										}
 									}
 								} catch (error) {
-									console.warn(`[blob缓存] 缓存失败: ${result.name}`, error);
+									console.warn(`[blob cache] Cache failed: ${result.name}`, error);
 								}
 							}, 0);
 
 							return newList;
 						});
+					},
+					onFileError: (fileName: string, error: Error) => {
+						// 处理文件处理失败
+						console.error(`文件处理失败: ${fileName}`, error);
+						setFileProgress((prev) => ({
+							...prev,
+							[fileName]: { isProcessing: false, progress: 0, failed: true },
+						}));
+						setFailedCount((prev) => prev + 1);
+						
+						// 创建一个失败的项目记录
+						const failedItem: DownloadItem = {
+							url: "",
+							name: fileName,
+							originalSize: fileData.find(f => f.name === fileName)?.originalSize || 0,
+							compressedSize: 0,
+							processingTime: 0,
+							format: format,
+							quality: quality,
+							failed: true,
+						};
+						
+						setDownloadList((prev) => [...prev, failedItem]);
 					},
 				});
 			}
@@ -346,27 +408,24 @@ export default function Compress() {
 				setShowDragDrop(false);
 			}, 300);
 		} catch (e) {
-			console.error("压缩失败", e);
+
 			setFileProgress({});
 			setShowDragDrop(true);
 			setFiles([]);
 			setDownloadList([]);
 			setProgress(0);
+			setFailedCount(0); // 重置失败计数
 
 			const errorMessage = e instanceof Error ? e.message : String(e);
-			// 处理内存超出边界错误
+			// Handle memory out of bounds error
 			if (errorMessage.includes("RuntimeError: memory access out of bounds")) {
-				toast.error("内存超出限制", {
+				toast.error("Memory Limit Exceeded", {
 					description:
-						"处理图片时内存不足，请尝试压缩更小的图片或减少批量处理数量。",
+						"Insufficient memory when processing images. Please try compressing smaller images or reducing batch size.",
 					duration: 5000,
 				});
 			} else {
-				// 其他错误使用常规提示
-				toast.error("图片压缩失败", {
-					description: "请重试或尝试压缩更小的图片。",
-					duration: 3000,
-				});
+				toast.error(errorMessage);
 			}
 		} finally {
 			setLoading(false);
@@ -413,32 +472,36 @@ export default function Compress() {
 							</div>
 						</div>
 
-						{/* 分隔线 */}
-						<div className="w-px h-8 bg-border/50" />
+						{/* 分隔线 - 只有当质量设置显示时才显示 */}
+						{needsQualitySetting(format as ImageFormatType) && (
+							<div className="w-px h-8 bg-border/50" />
+						)}
 
 						{/* 质量设置 */}
-						<div className="flex items-center gap-3">
-							<div className="flex items-center gap-2">
-								<BicepsFlexed className="w-5 h-5 text-primary" />
-								<span className="text-sm font-medium text-foreground">
-									{t("advanceoption.quality")}
-								</span>
-							</div>
+						{needsQualitySetting(format as ImageFormatType) && (
 							<div className="flex items-center gap-3">
-								<div className="w-32">
-									<Slider
-										value={[quality]}
-										onValueChange={(v) => setQuality(v[0])}
-										max={100}
-										step={1}
-										className="w-full"
-									/>
+								<div className="flex items-center gap-2">
+									<BicepsFlexed className="w-5 h-5 text-primary" />
+									<span className="text-sm font-medium text-foreground">
+										{t("advanceoption.quality")}
+									</span>
 								</div>
-								<span className="text-sm font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg min-w-[3rem] text-center">
-									{quality}%
-								</span>
+								<div className="flex items-center gap-3">
+									<div className="w-32">
+										<Slider
+											value={[quality]}
+											onValueChange={(v) => setQuality(v[0])}
+											max={100}
+											step={1}
+											className="w-full"
+										/>
+									</div>
+									<span className="text-sm font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg min-w-[3rem] text-center">
+										{quality}%
+									</span>
+								</div>
 							</div>
-						</div>
+						)}
 					</div>
 
 					<Advanced onChange={setAdvanced} />
@@ -564,7 +627,6 @@ export default function Compress() {
 									{t("overall_stats")}
 								</h4>
 								<CompressItem
-									isOverallStats={true}
 									name={t("all_files")}
 									url=""
 									originalSize={downloadList.reduce(
@@ -594,36 +656,11 @@ export default function Compress() {
 										name: item.name,
 										blob: item.blob,
 									}))}
+									failedCount={failedCount}
 									key="overall-stats"
 								/>
 							</div>
 						)}
-
-						{/* 单个文件列表 */}
-						<div className="space-y-3">
-							{downloadList.map((item) => {
-								const currentProgress = fileProgress[item.name];
-								return (
-									<div
-										key={item.name + item.url}
-										className="bg-card/40 backdrop-blur-sm rounded-2xl border border-border/30"
-									>
-										<CompressItem
-											name={item.name}
-											url={item.url}
-											originalSize={item.originalSize}
-											compressedSize={item.compressedSize}
-											processingTime={item.processingTime}
-											format={item.format}
-											quality={item.quality}
-											isProcessing={currentProgress?.isProcessing || false}
-											progress={currentProgress?.progress || 0}
-											blob={item.blob}
-										/>
-									</div>
-								);
-							})}
-						</div>
 					</div>
 				)}
 			</div>

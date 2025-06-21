@@ -187,5 +187,8 @@
 	"select_files": "Dateien auswählen",
 	"supported_formats": "Unterstützte Formate",
 	"low_quality": "Niedrige Qualität",
-	"image_size": "Bildgröße"
+	"image_size": "Bildgröße",
+	"failed_files": "fehlgeschlagen",
+	"processing_failed": "Verarbeitung Fehlgeschlagen",
+	"reset_settings": "Einstellungen Zurücksetzen"
 }

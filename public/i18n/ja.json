@@ -190,5 +190,8 @@
 	"select_files": "ファイルを選択",
 	"supported_formats": "サポートされている形式",
 	"low_quality": "低品質",
-	"image_size": "画像サイズ"
+	"image_size": "画像サイズ",
+	"failed_files": "失敗",
+	"processing_failed": "処理失敗",
+	"reset_settings": "設定をリセット"
 }

@@ -5,3 +5,5 @@ export { FORMAT_CONVERSION_MAP } from './ConversionStrategy';
 export { DefaultConversionStrategy } from './DefaultConversionStrategy';
 export { WebPConversionStrategy } from './WebPConversionStrategy';
 export { ConversionStrategyFactory } from './ConversionStrategyFactory'; 
+export { PngConversionStrategy } from './PngConversionStrategy';
+export { IcoConversionStrategy } from './IcoConversionStrategy';

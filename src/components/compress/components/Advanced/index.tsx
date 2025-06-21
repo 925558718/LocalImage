@@ -12,13 +12,14 @@ import {
 	Settings2,
 	ChevronRight,
 	RulerDimensionLine,
+	RotateCcw,
 } from "lucide-react";
 
 interface AdvancedProps {
 	onChange?: (v: {
 		width: string;
 		height: string;
-		outputName: string;
+		outputSuffixName: string;
 	}) => void;
 }
 
@@ -26,24 +27,37 @@ function Advanced({ onChange }: AdvancedProps) {
 	const t = useTranslations();
 	const [width, setWidth] = useState("");
 	const [height, setHeight] = useState("");
-	const [outputName, setOutputName] = useState("");
+	const [outputSuffixName, setOutputSuffixName] = useState("");
 
 	function handleChange(
 		next: Partial<{
 			width: string;
 			height: string;
-			outputName: string;
+			outputSuffixName: string;
 		}>,
 	) {
 		const newVal = {
 			width: next.width ?? width,
 			height: next.height ?? height,
-			outputName: next.outputName ?? "",
+			outputSuffixName: next.outputSuffixName ?? "",
 		};
 		setWidth(newVal.width);
 		setHeight(newVal.height);
-		setOutputName(newVal.outputName);
+		setOutputSuffixName(newVal.outputSuffixName);
 		onChange?.(newVal);
+	}
+
+	// 重置所有设置
+	function handleReset() {
+		const resetVal = {
+			width: "",
+			height: "",
+			outputSuffixName: "",
+		};
+		setWidth("");
+		setHeight("");
+		setOutputSuffixName("");
+		onChange?.(resetVal);
 	}
 
 	return (
@@ -111,6 +125,38 @@ function Advanced({ onChange }: AdvancedProps) {
 									/>
 								</div>
 							</div>
+						</div>
+
+						{/* 输出文件名后缀设置 */}
+						<div className="space-y-4">
+							<h5 className="text-sm font-medium text-muted-foreground">
+								{t("advanceoption.outputName")}
+							</h5>
+							<div className="space-y-2">
+								<Input
+									id="outputSuffixName"
+									value={outputSuffixName}
+									onChange={(e) => handleChange({ outputSuffixName: e.target.value })}
+									placeholder={t("advanceoption.outputName_placeholder")}
+									className="h-9 bg-background/60 backdrop-blur-sm border-border/40 rounded-xl text-sm"
+								/>
+								<p className="text-xs text-muted-foreground">
+									{t("advanceoption.outputName_help")}
+								</p>
+							</div>
+						</div>
+
+						{/* 重置按钮 */}
+						<div className="pt-2 border-t border-border/30">
+							<Button
+								onClick={handleReset}
+								variant="outline"
+								size="sm"
+								className="w-full h-9 bg-background/60 backdrop-blur-sm border-border/40 text-muted-foreground hover:text-foreground hover:bg-background/80 transition-all duration-200"
+							>
+								<RotateCcw size={14} className="mr-2" />
+								{t("reset_settings")}
+							</Button>
 						</div>
 					</div>
 				</div>
