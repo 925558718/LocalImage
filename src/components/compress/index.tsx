@@ -362,11 +362,7 @@ export default function Compress() {
 					duration: 5000,
 				});
 			} else {
-				// 其他错误使用常规提示
-				toast.error("图片压缩失败", {
-					description: "请重试或尝试压缩更小的图片。",
-					duration: 3000,
-				});
+				toast.error(errorMessage);
 			}
 		} finally {
 			setLoading(false);

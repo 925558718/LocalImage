@@ -1,6 +1,12 @@
-import { ConversionStrategy, FORMAT_CONVERSION_MAP, ImageFormat, ImageFormatType } from "./ConversionStrategy";
-import { DefaultConversionStrategy } from "./DefaultConversionStrategy";
-import { WebPConversionStrategy } from "./WebPConversionStrategy";
+import {
+	ConversionStrategy,
+	FORMAT_CONVERSION_MAP,
+	ImageFormat,
+	ImageFormatType,
+} from "./ConversionStrategy";
+
+import { WebPConversionStrategy, DefaultConversionStrategy } from "./index";
+import { PngConversionStrategy } from "./PngConversionStrategy";
 
 /**
  * 图像转换策略工厂
@@ -8,9 +14,12 @@ import { WebPConversionStrategy } from "./WebPConversionStrategy";
  */
 // 使用命名空间和函数替代静态类
 export namespace ConversionStrategyFactory {
-	const strategies: Partial<Record<ImageFormatType, ConversionStrategy>> & { default: ConversionStrategy } = {
-		"webp": new WebPConversionStrategy(),
-		default: new DefaultConversionStrategy()
+	const strategies: Partial<Record<ImageFormatType, ConversionStrategy>> & {
+		default: ConversionStrategy;
+	} = {
+		webp: new WebPConversionStrategy(),
+		png: new PngConversionStrategy(),
+		default: new DefaultConversionStrategy(),
 	};
 
 	/**
@@ -28,16 +37,19 @@ export namespace ConversionStrategyFactory {
 	 * @param targetFormat 目标格式
 	 * @returns 是否支持转换
 	 */
-	export function canConvert(sourceFormat: string, targetFormat: string): boolean {
+	export function canConvert(
+		sourceFormat: string,
+		targetFormat: string,
+	): boolean {
 		const source = sourceFormat.toLowerCase() as ImageFormatType;
 		const target = targetFormat.toLowerCase() as ImageFormatType;
-		
+
 		// 检查是否在不可转换映射中
 		const unsupportedTargets = FORMAT_CONVERSION_MAP[source];
 		if (unsupportedTargets?.includes(target)) {
 			return false;
 		}
-		
+
 		// 如果没有记录在不可转换映射中，则默认支持转换
 		return true;
 	}

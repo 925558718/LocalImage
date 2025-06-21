@@ -46,6 +46,8 @@ export type ImageFormatType = `${ImageFormat}`;
 // 格式：{ 源格式: [不可转换的目标格式数组] }
 // 只记录有特殊限制的格式，没有记录的格式默认支持所有转换
 export const FORMAT_CONVERSION_MAP: Partial<Record<ImageFormatType, ImageFormatType[]>> = {
+	// WebP格式不能转换到任何其他格式（包括自身）
+	[ImageFormat.WEBP]: Object.values(ImageFormat) as ImageFormatType[],
 	// 示例：某些格式可能不支持转换为特定格式
 	// [ImageFormat.GIF]: [ImageFormat.AVIF], // GIF不支持转换为AVIF
 	// [ImageFormat.ICO]: [ImageFormat.TIFF, ImageFormat.EXR], // ICO不支持转换为TIFF和EXR
