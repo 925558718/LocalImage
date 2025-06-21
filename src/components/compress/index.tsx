@@ -262,29 +262,22 @@ export default function Compress() {
 						};
 					}),
 				);
-
 				// 使用串行压缩模式处理当前批次
-				await FFMPEG.convertImagesSerial({
-					files: fileData,
-					format,
+				await ffm_ins?.convertImages({
+					input: fileData,
+					format: format,
 					quality: quality,
 					width: advanced.width ? Number.parseInt(advanced.width) : undefined,
 					height: advanced.height
 						? Number.parseInt(advanced.height)
 						: undefined,
-					processedCount: processedFiles,
-					onProgress: (completed, total) => {
-						// 计算当前批次的进度百分比
-						const batchProgress =
-							((completed - processedFiles) / fileData.length) * 100;
-						setProgress(Math.round((completed / totalFiles) * 100));
-
-						// 更新当前处理文件的进度
-						// 获取当前正在处理的文件在当前批次中的索引
-						const currentBatchIndex = completed - processedFiles - 1;
+					onProgress: (completed: number, total: number) => {
+						// Only update individual file progress, not overall progress
+						const currentBatchIndex = completed - 1;
 						if (currentBatchIndex >= 0 && currentBatchIndex < fileData.length) {
 							const currentFileName = fileData[currentBatchIndex]?.name;
 							if (currentFileName) {
+								const batchProgress = (completed / fileData.length) * 100;
 								setFileProgress((prev) => ({
 									...prev,
 									[currentFileName]: {
@@ -297,6 +290,9 @@ export default function Compress() {
 					},
 					onFileComplete: (result: DownloadItem) => {
 						processedFiles++; // 增加已处理文件计数
+						
+						// Update overall progress based on completed files
+						setProgress(Math.round((processedFiles / totalFiles) * 100));
 
 						const originalFileName =
 							fileData.find((file) =>
@@ -330,7 +326,7 @@ export default function Compress() {
 										}
 									}
 								} catch (error) {
-									console.warn(`[blob缓存] 缓存失败: ${result.name}`, error);
+									console.warn(`[blob cache] Cache failed: ${result.name}`, error);
 								}
 							}, 0);
 
@@ -346,7 +342,6 @@ export default function Compress() {
 				setShowDragDrop(false);
 			}, 300);
 		} catch (e) {
-			console.error("压缩失败", e);
 			setFileProgress({});
 			setShowDragDrop(true);
 			setFiles([]);
@@ -354,11 +349,11 @@ export default function Compress() {
 			setProgress(0);
 
 			const errorMessage = e instanceof Error ? e.message : String(e);
-			// 处理内存超出边界错误
+			// Handle memory out of bounds error
 			if (errorMessage.includes("RuntimeError: memory access out of bounds")) {
-				toast.error("内存超出限制", {
+				toast.error("Memory Limit Exceeded", {
 					description:
-						"处理图片时内存不足，请尝试压缩更小的图片或减少批量处理数量。",
+						"Insufficient memory when processing images. Please try compressing smaller images or reducing batch size.",
 					duration: 5000,
 				});
 			} else {
