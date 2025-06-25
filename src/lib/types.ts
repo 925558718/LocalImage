@@ -28,4 +28,4 @@ export interface CompressionOptions {
 export interface ProgressCallbacks {
 	onProgress?: (completed: number, total: number) => void;
 	onFileComplete?: (result: CompressionResult) => void;
-} 
+}

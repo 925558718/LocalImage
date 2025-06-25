@@ -1,8 +1,7 @@
-import { Button } from "@/components/shadcn/button";
-import { useTranslations } from "next-intl";
-import { Download } from "lucide-react";
-import { Progress } from "@/components/shadcn";
 import JSZip from "jszip";
+import { Download } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/shadcn/button";
 
 interface CompressItemProps {
 	url: string;
@@ -22,7 +21,6 @@ interface CompressItemProps {
 }
 
 function CompressItem({
-	url,
 	name,
 	originalSize,
 	compressedSize,
@@ -30,10 +28,6 @@ function CompressItem({
 	format,
 	quality,
 	downloadItems = [],
-	isProcessing = false,
-	progress = 0,
-	blob,
-	failed,
 	failedCount,
 }: CompressItemProps) {
 	const t = useTranslations();
@@ -158,7 +152,7 @@ function CompressItem({
 			const downloadUrl = URL.createObjectURL(content);
 			const a = document.createElement("a");
 			a.href = downloadUrl;
-			a.download = `compressed_images_${new Date().getTime()}.zip`;
+			a.download = `compressed_images_${Date.now()}.zip`;
 
 			// 添加到DOM，触发下载，然后清理
 			document.body.appendChild(a);

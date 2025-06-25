@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import {
-	getNormalizedLocale,
-	dictionaries,
 	defaultLocale,
+	dictionaries,
+	getNormalizedLocale,
 	supportedLocales,
 } from "@/i18n/langMap";
 
 export async function generateMetadata({
 	params,
-}: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+}: {
+	params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
 	// 等待参数解析并标准化语言代码
 	const resolvedParams = await params;
 	const locale = getNormalizedLocale(resolvedParams.locale || defaultLocale);

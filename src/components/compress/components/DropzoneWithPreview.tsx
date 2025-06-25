@@ -1,10 +1,9 @@
-import { useRef, useState, useMemo, useEffect } from "react";
+import { ImageIcon, Plus, Trash2, UploadIcon } from "lucide-react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/shadcn/button";
 import { Label } from "@/components/shadcn/label";
-import Image from "next/image";
-import React from "react";
-import { ImageIcon, Plus, Trash2, UploadIcon } from "lucide-react";
 
 interface DropzoneWithPreviewProps {
 	onFilesSelected: (files: File[]) => void;
@@ -50,7 +49,8 @@ export const DropzoneWithPreview = React.memo(function DropzoneWithPreview({
 	// 拖拽区域的渲染函数 - 移除了拖拽相关事件，因为现在在容器级别处理
 	const renderDropzone = () => {
 		return (
-			<div
+			<button
+				type="button"
 				className={`flex flex-col items-center justify-center border-2 border-dashed ${isDragging ? "border-primary bg-primary/10" : "border-border"} rounded-lg p-6 cursor-pointer hover:border-primary transition-colors min-h-[250px] w-full`}
 				onClick={handleClickUpload}
 			>
@@ -66,7 +66,7 @@ export const DropzoneWithPreview = React.memo(function DropzoneWithPreview({
 						</p>
 					)}
 				</div>
-			</div>
+			</button>
 		);
 	};
 
@@ -119,18 +119,21 @@ export const DropzoneWithPreview = React.memo(function DropzoneWithPreview({
 						{t("uploaded_files")} ({files.length})
 					</Label>
 					<div className="flex space-x-2">
-						<Button
+						<button
+							type="button"
 							onClick={handleClickUpload}
-							variant="outline"
-							size="sm"
-							className="flex items-center gap-1"
+							className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium border border-border rounded-md bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
 						>
 							<Plus className="w-4 h-4" />
 							{t("add_more")}
-						</Button>
-						<Button onClick={onClearAllFiles} variant="destructive" size="sm">
+						</button>
+						<button
+							type="button"
+							onClick={onClearAllFiles}
+							className="inline-flex items-center px-3 py-1.5 text-sm font-medium border border-destructive rounded-md bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+						>
 							{t("clear_all")}
-						</Button>
+						</button>
 					</div>
 				</div>
 			)}
@@ -173,7 +176,7 @@ export const DropzoneWithPreview = React.memo(function DropzoneWithPreview({
 													className="object-cover w-full h-full"
 													unoptimized // 由于是blob URL，需要禁用优化
 												/>
-											) : ( 
+											) : (
 												<ImageIcon className="h-12 w-12 text-muted-foreground" />
 											)}
 										</div>

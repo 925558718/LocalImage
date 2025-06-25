@@ -1,10 +1,11 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { toBlobURL } from "@ffmpeg/util";
-import { getType, isBrowser } from "./utils";
 import { AnimationStrategyFactory } from "./animations";
-import { ConversionStrategyFactory } from "./conversions";
-import { CompressionResult, FileInput } from "./types";
 import { ImageFormatType } from "./conversions/ConversionStrategy";
+import { ConversionStrategyFactory } from "./conversions/ConversionStrategyFactory";
+import { CompressionResult, FileInput } from "./types";
+import { getType, isBrowser } from "./utils";
+
 // Note: Originally there was a window.gc declaration here, but this is a non-standard API and has been removed
 
 class FFMPEG {
@@ -63,16 +64,16 @@ class FFMPEG {
 						) {
 							try {
 								await this.ffmpeg.deleteFile(file.name);
-							} catch (e) {
+							} catch (_) {
 								// Ignore errors
 							}
 						}
 					}
-				} catch (e) {
+				} catch (_) {
 					// Ignore errors
 				}
 			}
-		} catch (error) {
+		} catch (_) {
 		} finally {
 			// Recreate FFmpeg instance
 			if (isBrowser()) {
@@ -136,7 +137,8 @@ class FFMPEG {
 
 				try {
 					// Reset instance if needed based on processed bytes
-					if (this._processedBytes >= 100 * 1024 * 1024) { // 100MB
+					if (this._processedBytes >= 100 * 1024 * 1024) {
+						// 100MB
 						await this.reset();
 						await this.load();
 					}
@@ -157,19 +159,29 @@ class FFMPEG {
 
 					const inputFileName = `input_image.${sourceExt}`;
 					const fileData = new Uint8Array(file.data);
-					
+
 					await this.ffmpeg.writeFile(inputFileName, fileData);
 
 					try {
 						const strategy = ConversionStrategyFactory.getStrategy(targetExt);
-						const args = strategy.getArgs(inputFileName, singleOutputName, quality, width, height);
+						const args = strategy.getArgs(
+							inputFileName,
+							singleOutputName,
+							quality,
+							width,
+							height,
+						);
 						console.log("[ffmpeg] args", args);
 
 						await this.ffmpeg.exec(args);
-						const compressed = (await this.ffmpeg.readFile(singleOutputName)) as Uint8Array;
+						const compressed = (await this.ffmpeg.readFile(
+							singleOutputName,
+						)) as Uint8Array;
 
 						if (!compressed || compressed.length === 0) {
-							throw new Error("Compression failed: compression result is empty");
+							throw new Error(
+								"Compression failed: compression result is empty",
+							);
 						}
 
 						// Create result
@@ -199,7 +211,7 @@ class FFMPEG {
 						// Update instance counters
 						this._processCount++;
 						this._processedBytes += file.data.byteLength;
-						
+
 						// Reduce ArrayBuffer reference to help garbage collection
 						// @ts-ignore
 						file.data = null;
@@ -208,7 +220,6 @@ class FFMPEG {
 						if (this._processCount % 3 === 0) {
 							await new Promise((resolve) => setTimeout(resolve, 50));
 						}
-
 					} finally {
 						// Clean up temporary files
 						try {
@@ -218,7 +229,7 @@ class FFMPEG {
 							if (singleOutputName) {
 								await this.ffmpeg.deleteFile(singleOutputName);
 							}
-						} catch (error) {
+						} catch (_) {
 							// Ignore cleanup errors
 						}
 					}
@@ -229,9 +240,10 @@ class FFMPEG {
 					}
 				} catch (error) {
 					// 调用失败回调
-					const errorMessage = error instanceof Error ? error.message : String(error);
+					const errorMessage =
+						error instanceof Error ? error.message : String(error);
 					onFileError?.(file.name, new Error(errorMessage));
-					
+
 					// Reset instance and continue or throw
 					try {
 						await this.reset();
@@ -240,7 +252,7 @@ class FFMPEG {
 						if (i === input.length - 1) {
 							throw error;
 						}
-					} catch (resetError) {
+					} catch (_) {
 						throw error;
 					}
 				}
@@ -330,7 +342,7 @@ class FFMPEG {
 					if (existingFiles.some((f) => f.name === fileName)) {
 						await this.ffmpeg.deleteFile(fileName);
 					}
-				} catch (error) {
+				} catch (_) {
 					// Ignore cleanup errors
 				}
 
@@ -342,9 +354,11 @@ class FFMPEG {
 			quality = Math.max(1, Math.min(100, quality || 75));
 
 			// Check if formats are consistent, convert to PNG if not
-			const fileExtensions = createdFiles.map(f => f.split('.').pop() || 'png');
+			const fileExtensions = createdFiles.map(
+				(f) => f.split(".").pop() || "png",
+			);
 			const uniqueExts = [...new Set(fileExtensions)];
-			
+
 			if (uniqueExts.length > 1) {
 				// Convert all to PNG for consistency
 				for (let i = 0; i < createdFiles.length; i++) {
@@ -365,14 +379,17 @@ class FFMPEG {
 				if (existingFiles.some((f) => f && f.name === outputName)) {
 					await this.ffmpeg.deleteFile(outputName);
 				}
-			} catch (error) {
+			} catch (_) {
 				// Ignore cleanup errors
 			}
 
 			// Create animation using strategy pattern
 			const strategy = AnimationStrategyFactory.getStrategy(outputFormat);
-			const inputPattern = uniqueExts.length > 1 ? "frame_%03d.png" : `frame_%03d.${uniqueExts[0]}`;
-			
+			const inputPattern =
+				uniqueExts.length > 1
+					? "frame_%03d.png"
+					: `frame_%03d.${uniqueExts[0]}`;
+
 			const result = await strategy.createAnimation(this.ffmpeg, {
 				inputPattern,
 				outputName,
@@ -393,7 +410,7 @@ class FFMPEG {
 				for (const fileName of createdFiles) {
 					try {
 						await this.ffmpeg.deleteFile(fileName);
-					} catch (e) {
+					} catch (_) {
 						// Ignore individual file deletion failures
 					}
 				}
@@ -401,7 +418,7 @@ class FFMPEG {
 				// Delete output file
 				try {
 					await this.ffmpeg.deleteFile(outputName);
-				} catch (e) {
+				} catch (_) {
 					// Ignore output file deletion failures
 				}
 
@@ -409,20 +426,17 @@ class FFMPEG {
 				if (outputFormat === "gif") {
 					try {
 						await this.ffmpeg.deleteFile("palette.png");
-					} catch (e) {
+					} catch (_) {
 						// Ignore palette file deletion failures
 					}
 				}
-			} catch (cleanupError) {
+			} catch (_) {
 				// Ignore cleanup errors
 			}
 		}
 	}
-
 }
-
-// Only create instance in browser environment to avoid errors in Node.js test environment
-const ffm_ins = isBrowser() && !process.env.VITEST ? new FFMPEG() : null;
+const ffm_ins = new FFMPEG();
 
 export default ffm_ins;
 export { FFMPEG };

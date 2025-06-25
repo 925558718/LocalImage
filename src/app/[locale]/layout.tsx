@@ -1,20 +1,20 @@
 import type { Metadata } from "next";
 import "../globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { Open_Sans, Inter } from "next/font/google";
 import clsx from "clsx";
-import { Toaster } from "@/components/shadcn/sonner";
 import { Provider as JotaiProvider } from "jotai";
+import { Inter, Open_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
+import BugsnagErrorBoundary from "@/components/Bugsnap";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+import { Toaster } from "@/components/shadcn/sonner";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import {
-	getNormalizedLocale,
-	dictionaries,
 	defaultLocale,
+	dictionaries,
+	getNormalizedLocale,
 	supportedLocales,
 } from "@/i18n/langMap";
-import BugsnagErrorBoundary from "@/components/Bugsnap";
 
 const Opensans = Open_Sans({
 	subsets: ["latin"],
@@ -30,7 +30,9 @@ const inter = Inter({
 // 动态生成元数据
 export async function generateMetadata({
 	params,
-}: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+}: {
+	params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
 	// 等待参数解析并标准化语言代码
 	const resolvedParams = await params;
 	const locale = getNormalizedLocale(resolvedParams.locale || defaultLocale);
@@ -102,8 +104,6 @@ export default async function RootLayout({
 	// 加载当前语言的字典
 	const dictionary = await dictionaries[locale]();
 
-
-
 	return (
 		<html lang={locale} suppressHydrationWarning>
 			<head>
@@ -130,14 +130,14 @@ export default async function RootLayout({
 								<div className="relative min-h-screen w-full overflow-hidden">
 									{/* 共享的装饰性背景 */}
 									<div className="absolute inset-0 bg-gradient-to-br from-background via-primary/5 to-primary/10" />
-									
+
 									{/* 装饰性背景元素 */}
 									<div className="absolute inset-0 overflow-hidden">
 										<div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full blur-3xl" />
 										<div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-primary/15 to-primary/5 rounded-full blur-3xl" />
 										<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full blur-3xl" />
 									</div>
-									
+
 									{/* 内容区域 */}
 									<main className="w-full min-h-screen flex flex-col items-center p-4">
 										{children}

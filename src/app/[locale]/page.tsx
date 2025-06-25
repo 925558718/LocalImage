@@ -1,8 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Compress from "@/components/compress";
-import { useTranslations } from 'next-intl';
 import PageTitle from "@/components/PageTitle";
+
 function Page() {
 	const t = useTranslations();
 	return (
@@ -13,7 +14,7 @@ function Page() {
 				features={[
 					{ text: t("high_quality"), color: "blue" },
 					{ text: t("fast_processing"), color: "green" },
-					{ text: t("privacy_protection"), color: "purple" }
+					{ text: t("privacy_protection"), color: "purple" },
 				]}
 				className="mb-12"
 			/>

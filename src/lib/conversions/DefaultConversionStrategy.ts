@@ -1,8 +1,4 @@
-import {
-	ConversionStrategy,
-	ImageFormat,
-	ImageFormatType,
-} from "./ConversionStrategy";
+import { ConversionStrategy } from "./ConversionStrategy";
 
 /**
  * 默认转换策略 - 主要用于PNG格式的转换
@@ -27,12 +23,12 @@ export class DefaultConversionStrategy implements ConversionStrategy {
 		}
 
 		// 获取输出格式
-		const format = outputName
-			.split(".")
-			.pop()
-			?.toLowerCase() as ImageFormatType;
+		// const format = outputName
+		// 	.split(".")
+		// 	.pop()
+		// 	?.toLowerCase() as ImageFormatType;
 
-		const qualityParam = getQuality(quality, format);
+		const qualityParam = getQuality(quality);
 		const [paramName, paramValue] = qualityParam.split(" ");
 		args.push(paramName, paramValue);
 
@@ -47,9 +43,6 @@ export class DefaultConversionStrategy implements ConversionStrategy {
  * @param format 图像格式
  * @returns 格式化的质量参数字符串 "参数名 参数值"
  */
-export const getQuality = (
-	quality: number,
-	format: ImageFormatType,
-): string => {
+export const getQuality = (quality: number): string => {
 	return `-q:v ${Math.round((100 - quality) * 0.19 + 12)}`;
 };

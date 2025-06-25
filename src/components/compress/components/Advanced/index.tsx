@@ -1,19 +1,19 @@
 import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
+	ChevronRight,
+	RotateCcw,
+	RulerDimensionLine,
+	Settings2,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useId, useState } from "react";
+import {
 	Button,
 	Input,
 	Label,
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
 } from "@/components/shadcn";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
-import {
-	Settings2,
-	ChevronRight,
-	RulerDimensionLine,
-	RotateCcw,
-} from "lucide-react";
 
 interface AdvancedProps {
 	onChange?: (v: {
@@ -80,9 +80,7 @@ function Advanced({ onChange }: AdvancedProps) {
 						<div className="w-8 h-8 bg-gradient-to-r from-primary to-primary/80 rounded-full flex items-center justify-center">
 							<Settings2 color="#C3B588" size={16} />
 						</div>
-						<h4 className="font-semibold text-foreground">
-							{t("advance")}
-						</h4>
+						<h4 className="font-semibold text-foreground">{t("advance")}</h4>
 					</div>
 
 					{/* 设置区域 */}
@@ -102,7 +100,7 @@ function Advanced({ onChange }: AdvancedProps) {
 										{t("advanceoption.width")}
 									</Label>
 									<Input
-										id="width"
+										id={useId()}
 										value={width}
 										onChange={(e) => handleChange({ width: e.target.value })}
 										placeholder="auto"
@@ -117,7 +115,7 @@ function Advanced({ onChange }: AdvancedProps) {
 										{t("advanceoption.height")}
 									</Label>
 									<Input
-										id="height"
+										id={useId()}
 										value={height}
 										onChange={(e) => handleChange({ height: e.target.value })}
 										placeholder="auto"
@@ -134,9 +132,11 @@ function Advanced({ onChange }: AdvancedProps) {
 							</h5>
 							<div className="space-y-2">
 								<Input
-									id="outputSuffixName"
+									id={useId()}
 									value={outputSuffixName}
-									onChange={(e) => handleChange({ outputSuffixName: e.target.value })}
+									onChange={(e) =>
+										handleChange({ outputSuffixName: e.target.value })
+									}
 									placeholder={t("advanceoption.outputName_placeholder")}
 									className="h-9 bg-background/60 backdrop-blur-sm border-border/40 rounded-xl text-sm"
 								/>
