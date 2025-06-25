@@ -3,7 +3,6 @@ import "../globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { GoogleAnalytics } from "@next/third-parties/google";
 import { Open_Sans, Inter } from "next/font/google";
 import clsx from "clsx";
 import { Toaster } from "@/components/shadcn/sonner";
@@ -16,17 +15,6 @@ import {
 	supportedLocales,
 } from "@/i18n/langMap";
 import BugsnagErrorBoundary from "@/components/Bugsnap";
-// import Bugsnag from "@bugsnag/js";
-// import BugsnagPluginReact from "@bugsnag/plugin-react";
-// import BugsnagPerformance from "@bugsnag/browser-performance";
-// import React from "react";
-// Bugsnag.start({
-// 	apiKey: "841d9857e90394f3e59323ad57e3795c",
-// 	plugins: [new BugsnagPluginReact()],
-// });
-// BugsnagPerformance.start({ apiKey: "841d9857e90394f3e59323ad57e3795c" });
-
-// const ErrorBoundary = Bugsnag?.getPlugin("react")?.createErrorBoundary(React);
 
 const Opensans = Open_Sans({
 	subsets: ["latin"],
@@ -114,64 +102,13 @@ export default async function RootLayout({
 	// 加载当前语言的字典
 	const dictionary = await dictionaries[locale]();
 
-	// 动态生成结构化数据
-	const appName =
-		dictionary.structured_data_app_name || "LocalImage Image Compression Tool";
-	const appDescription =
-		dictionary.structured_data_description ||
-		"Free online image compression and conversion tool. Reduce file size or change formats with local processing.";
-	const featureList = dictionary.structured_data_features || [
-		"Image compression and optimization",
-		"Multiple image format support",
-		"Local processing protects privacy",
-		"No server uploads required",
-		"Custom quality settings",
-		"Batch processing functionality",
-	];
+
 
 	return (
 		<html lang={locale} suppressHydrationWarning>
 			<head>
 				{/* 多语言SEO优化 */}
 				<meta httpEquiv="content-language" content={locale} />
-
-				{/* 结构化数据 - WebP动画合成器 */}
-				<script type="application/ld+json">
-					{JSON.stringify({
-						"@context": "https://schema.org",
-						"@type": "WebApplication",
-						name: appName,
-						description: appDescription,
-						url: "https://limgx.com",
-						applicationCategory: "MultimediaApplication",
-						operatingSystem: "Web Browser",
-						inLanguage: locale,
-						offers: {
-							"@type": "Offer",
-							price: "0",
-							priceCurrency: "USD",
-						},
-						featureList: featureList,
-						screenshot:
-							"https://limgx.com/images/image-compression-preview.jpg",
-						softwareVersion: "1.0",
-						author: {
-							"@type": "Organization",
-							name: "limgx.com",
-							url: "https://limgx.com",
-						},
-						aggregateRating: {
-							"@type": "AggregateRating",
-							ratingValue: "4.8",
-							ratingCount: "1250",
-						},
-					})}
-				</script>
-				<script
-					src="https://analytics.ahrefs.com/analytics.js"
-					data-key="fAy0GhLZ8HwbJfkrQ3zMOw"
-					async
-				/>
 			</head>
 			<body
 				className={clsx(
@@ -212,7 +149,6 @@ export default async function RootLayout({
 						</NextIntlClientProvider>
 					</ThemeProvider>
 				</BugsnagErrorBoundary>
-				<GoogleAnalytics gaId="G-89618T8EX2" />
 			</body>
 		</html>
 	);
