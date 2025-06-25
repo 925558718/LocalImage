@@ -12,31 +12,37 @@ export interface ConversionStrategy {
 	 * @param height 可选的输出高度
 	 * @returns FFmpeg命令行参数数组
 	 */
-	getArgs(inputFileName: string, outputName: string, quality: number, width?: number, height?: number): string[];
+	getArgs(
+		inputFileName: string,
+		outputName: string,
+		quality: number,
+		width?: number,
+		height?: number,
+	): string[];
 }
 
 // 支持的图片格式枚举
 export enum ImageFormat {
 	// 常见格式
-	PNG = 'png',
-	JPG = 'jpg',
-	JPEG = 'jpeg',
-	WEBP = 'webp',
-	GIF = 'gif',
-	BMP = 'bmp',
-	TIFF = 'tiff',
-	TIF = 'tif',
-	ICO = 'ico',
-	
+	PNG = "png",
+	JPG = "jpg",
+	JPEG = "jpeg",
+	WEBP = "webp",
+	GIF = "gif",
+	BMP = "bmp",
+	TIFF = "tiff",
+	TIF = "tif",
+	ICO = "ico",
+
 	// 专业格式
-	DPX = 'dpx',
-	EXR = 'exr',
-	PPM = 'ppm',
-	PGM = 'pgm',
-	PBM = 'pbm',
-	PAM = 'pam',
-	SGI = 'sgi',
-	XBM = 'xbm',
+	DPX = "dpx",
+	EXR = "exr",
+	PPM = "ppm",
+	PGM = "pgm",
+	PBM = "pbm",
+	PAM = "pam",
+	SGI = "sgi",
+	XBM = "xbm",
 }
 
 // 从枚举创建类型
@@ -45,12 +51,23 @@ export type ImageFormatType = `${ImageFormat}`;
 // 不可转换的格式映射表（只记录不支持转换的映射）
 // 格式：{ 源格式: [不可转换的目标格式数组] }
 // 只记录有特殊限制的格式，没有记录的格式默认支持所有转换
-export const FORMAT_CONVERSION_MAP: Partial<Record<ImageFormatType, ImageFormatType[]>> = {
+export const FORMAT_CONVERSION_MAP: Partial<
+	Record<ImageFormatType, ImageFormatType[]>
+> = {
 	// WebP格式不能转换到任何其他格式（包括自身）
 	[ImageFormat.WEBP]: Object.values(ImageFormat) as ImageFormatType[],
 	// ICO格式限制：不支持转换为某些专业格式
-	[ImageFormat.ICO]: [ImageFormat.DPX, ImageFormat.EXR, ImageFormat.PPM, ImageFormat.PGM, ImageFormat.PBM, ImageFormat.PAM, ImageFormat.SGI, ImageFormat.XBM],
+	[ImageFormat.ICO]: [
+		ImageFormat.DPX,
+		ImageFormat.EXR,
+		ImageFormat.PPM,
+		ImageFormat.PGM,
+		ImageFormat.PBM,
+		ImageFormat.PAM,
+		ImageFormat.SGI,
+		ImageFormat.XBM,
+	],
 	// 示例：某些格式可能不支持转换为特定格式
 	// [ImageFormat.GIF]: [ImageFormat.AVIF], // GIF不支持转换为AVIF
 	// [ImageFormat.BMP]: [ImageFormat.WEBP], // BMP不支持转换为WebP
-}; 
+};

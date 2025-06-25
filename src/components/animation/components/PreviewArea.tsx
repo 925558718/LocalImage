@@ -1,6 +1,6 @@
 import { View } from "lucide-react";
-import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 interface PreviewAreaProps {
 	files: File[];

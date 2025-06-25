@@ -68,8 +68,32 @@
 ```bash
 git clone https://github.com/925558718/LocalImage.git
 cd LocalImage
-pnpm install
-pnpm dev
+bun install
+bun dev
+```
+
+### Git Hooks (Husky)
+
+本项目使用 Husky 来管理 Git hooks，确保代码质量。安装依赖后 Husky 会自动设置：
+
+```bash
+bun install  # Husky 会自动在 postinstall 时设置
+```
+
+已配置的 hooks：
+
+- **pre-commit**: 自动运行 Biome format 和 lint，保持代码格式一致
+- **pre-push**: 运行 Biome lint 和 Next.js 构建检查，确保代码质量
+
+如需跳过检查，可使用 `--no-verify` 参数：
+```bash
+git commit --no-verify -m "message"
+git push --no-verify
+```
+
+查看配置的 hooks：
+```bash
+ls -la .husky/
 ```
 
 ## 🤝 Contributing

@@ -3,18 +3,24 @@
 export { Button, buttonVariants } from "./button";
 export { Input } from "./input";
 export { Label } from "./label";
-export { Textarea } from "./textarea";
-export { Slider } from "./slider";
-export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
-export { Progress } from "./progress";
-export { Skeleton } from "./skeleton";
-export { Toaster } from "./sonner";
 export {
 	Popover,
-	PopoverTrigger,
-	PopoverContent,
 	PopoverAnchor,
+	PopoverContent,
+	PopoverTrigger,
 } from "./popover";
+export { Progress } from "./progress";
+export {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "./select";
+export { Skeleton } from "./skeleton";
+export { Slider } from "./slider";
+export { Toaster } from "./sonner";
+export { Textarea } from "./textarea";
 
 // NavigationMenu组件暂时不需要导出，因为我们改用了简单的nav结构
 // export {
@@ -27,4 +33,4 @@ export {
 // 	NavigationMenuIndicator,
 // 	NavigationMenuViewport,
 // 	navigationMenuTriggerStyle,
-// } from "./navigation-menu"; 
+// } from "./navigation-menu";

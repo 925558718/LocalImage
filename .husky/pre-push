@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 执行 pre-push 检查..."
+
+# 运行 Biome lint
+echo "🔍 运行 Biome lint..."
+if ! bunx @biomejs/biome lint .; then
+    echo "❌ Biome lint 检查失败，请修复代码问题后再推送"
+    exit 1
+fi
+
+# 运行构建检查
+echo "🏗️ 运行 Next.js 构建检查..."
+if ! bunx next build; then
+    echo "❌ Next.js 构建失败，请修复构建问题后再推送"
+    exit 1
+fi
+
+echo "✅ 所有检查通过，可以推送"

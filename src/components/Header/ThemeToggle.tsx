@@ -2,8 +2,8 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Button } from "@/components/shadcn";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/shadcn";
 
 function ThemeToggle() {
 	const { setTheme, theme } = useTheme();
@@ -31,4 +31,4 @@ function ThemeToggle() {
 	);
 }
 
-export default ThemeToggle; 
+export default ThemeToggle;

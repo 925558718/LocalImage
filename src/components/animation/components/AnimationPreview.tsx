@@ -1,5 +1,5 @@
-import { useTranslations } from 'next-intl';
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 interface AnimationPreviewProps {
 	url: string;
@@ -9,7 +9,13 @@ interface AnimationPreviewProps {
 	frameRate: number;
 }
 
-function AnimationPreview({ url, format, size, frameCount, frameRate }: AnimationPreviewProps) {
+function AnimationPreview({
+	url,
+	format,
+	size,
+	frameCount,
+	frameRate,
+}: AnimationPreviewProps) {
 	const t = useTranslations();
 
 	return (
@@ -49,7 +55,9 @@ function AnimationPreview({ url, format, size, frameCount, frameRate }: Animatio
 				</div>
 				<div className="flex justify-between">
 					<span className="text-muted-foreground">{t("file_size")}:</span>
-					<span className="font-medium">{(size / 1024 / 1024).toFixed(2)} MB</span>
+					<span className="font-medium">
+						{(size / 1024 / 1024).toFixed(2)} MB
+					</span>
 				</div>
 				<div className="flex justify-between">
 					<span className="text-muted-foreground">{t("frame_count")}:</span>

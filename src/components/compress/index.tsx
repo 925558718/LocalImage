@@ -1,36 +1,37 @@
 "use client";
-import ffm_ins from "@/lib/ffmpeg";
-import { useState, useRef, useEffect, useCallback } from "react";
-import { useTranslations } from "next-intl";
-import { useFFmpeg } from "@/hooks/useFFmpeg";
-import CompressItem from "./components/CompressItem";
 import {
+	BicepsFlexed,
+	ChartArea,
+	FileType,
+	Loader2,
+	Plus,
+	ShieldCheck,
+	Trash2,
+	Upload,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+import {
+	Button,
+	Progress,
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-	Button,
-	Progress,
 	Slider,
 } from "@/components/shadcn";
-import { toast } from "sonner";
-import Advanced from "./components/Advanced";
-import { DropzoneWithPreview } from "./components/DropzoneWithPreview";
+import { useFFmpeg } from "@/hooks/useFFmpeg";
 import {
-	Loader2,
-	Upload,
-	FileType,
-	ShieldCheck,
-	Plus,
-	Trash2,
-	ChartArea,
-	BicepsFlexed,
-} from "lucide-react";
-
+	ImageFormat,
+	ImageFormatType,
+} from "@/lib/conversions/ConversionStrategy";
 // 导入FFMPEG类用于静态方法调用
-import { FFMPEG } from "@/lib/ffmpeg";
-import { ImageFormat, ImageFormatType } from "@/lib/conversions/ConversionStrategy";
+import ffm_ins from "@/lib/ffmpeg";
+import Advanced from "./components/Advanced";
+import CompressItem from "./components/CompressItem";
+import { DropzoneWithPreview } from "./components/DropzoneWithPreview";
 
 // 支持的图片格式配置 - 按常用程度排序
 const SUPPORTED_FORMATS = [
@@ -110,7 +111,7 @@ export default function Compress() {
 	const [progress, setProgress] = useState(0);
 	const [files, setFiles] = useState<File[]>([]);
 	const [downloadList, setDownloadList] = useState<DownloadItem[]>([]);
-	const [fileProgress, setFileProgress] = useState<FileProgressMap>({});
+	const [_, setFileProgress] = useState<FileProgressMap>({});
 	const [showDragDrop, setShowDragDrop] = useState(true);
 	const [failedCount, setFailedCount] = useState(0); // 跟踪失败的文件数量
 
@@ -294,7 +295,7 @@ export default function Compress() {
 								[file.name]: { isProcessing: false, progress: 0, failed: true },
 							}));
 							setFailedCount((prev) => prev + 1);
-							
+
 							// 返回一个标记为失败的数据结构
 							return {
 								data: new ArrayBuffer(0),
@@ -315,7 +316,7 @@ export default function Compress() {
 					height: advanced.height
 						? Number.parseInt(advanced.height)
 						: undefined,
-					onProgress: (completed: number, total: number) => {
+					onProgress: (completed: number) => {
 						// Only update individual file progress, not overall progress
 						const currentBatchIndex = completed - 1;
 						if (currentBatchIndex >= 0 && currentBatchIndex < fileData.length) {
@@ -334,7 +335,7 @@ export default function Compress() {
 					},
 					onFileComplete: (result: DownloadItem) => {
 						processedFiles++; // 增加已处理文件计数
-						
+
 						// Update overall progress based on completed files
 						setProgress(Math.round((processedFiles / totalFiles) * 100));
 
@@ -369,7 +370,10 @@ export default function Compress() {
 										}
 									}
 								} catch (error) {
-									console.warn(`[blob cache] Cache failed: ${result.name}`, error);
+									console.warn(
+										`[blob cache] Cache failed: ${result.name}`,
+										error,
+									);
 								}
 							}, 0);
 
@@ -384,19 +388,20 @@ export default function Compress() {
 							[fileName]: { isProcessing: false, progress: 0, failed: true },
 						}));
 						setFailedCount((prev) => prev + 1);
-						
+
 						// 创建一个失败的项目记录
 						const failedItem: DownloadItem = {
 							url: "",
 							name: fileName,
-							originalSize: fileData.find(f => f.name === fileName)?.originalSize || 0,
+							originalSize:
+								fileData.find((f) => f.name === fileName)?.originalSize || 0,
 							compressedSize: 0,
 							processingTime: 0,
 							format: format,
 							quality: quality,
 							failed: true,
 						};
-						
+
 						setDownloadList((prev) => [...prev, failedItem]);
 					},
 				});
@@ -408,7 +413,6 @@ export default function Compress() {
 				setShowDragDrop(false);
 			}, 300);
 		} catch (e) {
-
 			setFileProgress({});
 			setShowDragDrop(true);
 			setFiles([]);
@@ -463,7 +467,9 @@ export default function Compress() {
 													value={formatOption.value}
 													className="flex flex-col items-center justify-center p-2 h-16 text-xs hover:bg-accent/50 rounded-md transition-colors"
 												>
-													<div className="font-medium">{formatOption.label}</div>
+													<div className="font-medium">
+														{formatOption.label}
+													</div>
 												</SelectItem>
 											))}
 										</div>

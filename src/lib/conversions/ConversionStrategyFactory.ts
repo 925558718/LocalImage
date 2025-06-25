@@ -4,10 +4,10 @@ import {
 	ImageFormat,
 	ImageFormatType,
 } from "./ConversionStrategy";
-
-import { WebPConversionStrategy, DefaultConversionStrategy } from "./index";
-import { PngConversionStrategy } from "./PngConversionStrategy";
+import { DefaultConversionStrategy } from "./DefaultConversionStrategy";
 import { IcoConversionStrategy } from "./IcoConversionStrategy";
+import { PngConversionStrategy } from "./PngConversionStrategy";
+import { WebPConversionStrategy } from "./WebPConversionStrategy";
 
 /**
  * 图像转换策略工厂
