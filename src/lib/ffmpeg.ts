@@ -1,10 +1,21 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { toBlobURL } from "@ffmpeg/util";
-import { AnimationStrategyFactory } from "./animations";
-import { ImageFormatType } from "./conversions/ConversionStrategy";
-import { ConversionStrategyFactory } from "./conversions/ConversionStrategyFactory";
+import { AnimationStrategyFactory } from "./strategy/animations";
+import { ImageFormatType } from "./strategy/conversions/ConversionStrategy";
+import { ConversionStrategyFactory } from "./strategy/conversions/ConversionStrategyFactory";
 import { CompressionResult, FileInput } from "./types";
 import { getType, isBrowser } from "./utils";
+import { InputFileType, OutputType } from "./fileUtils";
+
+export type FFMPEGOptions = {
+	quality?: number;
+	width?: number;
+	height?: number;
+	frameRate?: number;
+	videoCodec?: string;
+	format?: string;
+	outputSuffixName?: string;
+};
 
 // Note: Originally there was a window.gc declaration here, but this is a non-standard API and has been removed
 
@@ -433,6 +444,121 @@ class FFMPEG {
 			} catch (_) {
 				// Ignore cleanup errors
 			}
+		}
+	}
+
+	async processImages(input: InputFileType[]): Promise<OutputType[]> {
+		await this.load();
+
+		if (!this.ffmpeg) throw new Error("ffmpeg not initialized");
+		if (input.length === 0) throw new Error("No files to process");
+
+		const results: OutputType[] = [];
+		let processedCount = 0;
+
+		try {
+			await this.reset();
+			await this.load();
+
+			for (const file of input) {
+				const startTime = performance.now();
+
+				try {
+					// 重置实例（如果需要）
+					if (this._processedBytes >= 100 * 1024 * 1024) { // 100MB
+						await this.reset();
+						await this.load();
+					}
+
+					// 检查是否有ffmpeg命令
+					if (!file.ffmpeg_command) {
+						throw new Error(`File ${file.name} does not have ffmpeg_command`);
+					}
+
+					// 写入输入文件
+					const inputFileName = `${file.inputName}.${file.format || 'tmp'}`;
+					if (!file.buffer) {
+						// 如果没有buffer，从原始文件读取
+						const arrayBuffer = await file.originalFile.arrayBuffer();
+						file.buffer = new Uint8Array(arrayBuffer);
+					}
+					await this.ffmpeg.writeFile(inputFileName, file.buffer);
+
+
+					// 处理ffmpeg命令参数数组 - 替换占位符
+
+
+					// 执行ffmpeg命令
+					await this.ffmpeg.exec(file.ffmpeg_command);
+					const outputData = (await this.ffmpeg.readFile(file.outputName)) as Uint8Array;
+					if (!outputData || outputData.length === 0) {
+						throw new Error(`Processing failed: output file ${file.outputName} is empty`);
+					}
+
+					// 创建结果对象
+					const blob = new Blob([outputData]);
+					const url = URL.createObjectURL(blob);
+
+					const result: OutputType = {
+						name: file.outputName,
+						url,
+						size: blob.size,
+						width: file.width || 0,
+						height: file.height || 0,
+						processingTime: performance.now() - startTime,
+						status: 'success',
+					};
+
+					results.push(result);
+					processedCount++;
+
+					// 更新计数器
+					this._processCount++;
+					this._processedBytes += file.buffer.byteLength;
+
+					// 清理临时文件
+					try {
+						await this.ffmpeg.deleteFile(inputFileName);
+						await this.ffmpeg.deleteFile(file.outputName);
+					} catch (error) {
+						console.warn("Failed to clean up temporary files:", error);
+					}
+
+					// 给浏览器一些时间进行垃圾回收
+					if (this._processCount % 3 === 0) {
+						await new Promise(resolve => setTimeout(resolve, 50));
+					}
+
+				} catch (error) {
+					console.error(`Processing failed for file ${file.name}:`, error);
+
+					// 继续处理其他文件，但记录错误
+					const errorResult: OutputType = {
+						name: file.name,
+						url: '',
+						size: 0,
+						width: 0,
+						height: 0,
+						processingTime: performance.now() - startTime,
+						status: 'error',
+					};
+					results.push(errorResult);
+
+					// 重置实例以避免状态污染
+					try {
+						await this.reset();
+						await this.load();
+					} catch (resetError) {
+						console.error("Failed to reset ffmpeg instance:", resetError);
+						throw error; // 如果重置失败，则抛出原始错误
+					}
+				}
+			}
+
+			return results;
+		} catch (error) {
+			console.error("Processing failed:", error);
+			throw error;
 		}
 	}
 }

@@ -139,7 +139,7 @@ export default async function RootLayout({
 									</div>
 
 									{/* 内容区域 */}
-									<main className="w-full min-h-screen flex flex-col items-center p-4">
+									<main className="w-full min-h-screen flex flex-col items-center p-4 z-10 relative">
 										{children}
 									</main>
 								</div>

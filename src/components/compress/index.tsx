@@ -26,7 +26,7 @@ import { useFFmpeg } from "@/hooks/useFFmpeg";
 import {
 	ImageFormat,
 	ImageFormatType,
-} from "@/lib/conversions/ConversionStrategy";
+} from "@/lib/strategy/conversions/ConversionStrategy";
 // 导入FFMPEG类用于静态方法调用
 import ffm_ins from "@/lib/ffmpeg";
 import Advanced from "./components/Advanced";
