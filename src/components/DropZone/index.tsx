@@ -225,5 +225,4 @@ const Dropzone = React.memo(function DropzoneWithPreview({
 	);
 });
 
-
 export default Dropzone;
