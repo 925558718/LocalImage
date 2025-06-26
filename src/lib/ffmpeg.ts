@@ -465,7 +465,8 @@ class FFMPEG {
 
 				try {
 					// 重置实例（如果需要）
-					if (this._processedBytes >= 100 * 1024 * 1024) { // 100MB
+					if (this._processedBytes >= 100 * 1024 * 1024) {
+						// 100MB
 						await this.reset();
 						await this.load();
 					}
@@ -476,7 +477,7 @@ class FFMPEG {
 					}
 
 					// 写入输入文件
-					const inputFileName = `${file.inputName}.${file.format || 'tmp'}`;
+					const inputFileName = `${file.inputName}.${file.format || "tmp"}`;
 					if (!file.buffer) {
 						// 如果没有buffer，从原始文件读取
 						const arrayBuffer = await file.originalFile.arrayBuffer();
@@ -484,15 +485,17 @@ class FFMPEG {
 					}
 					await this.ffmpeg.writeFile(inputFileName, file.buffer);
 
-
 					// 处理ffmpeg命令参数数组 - 替换占位符
-
 
 					// 执行ffmpeg命令
 					await this.ffmpeg.exec(file.ffmpeg_command);
-					const outputData = (await this.ffmpeg.readFile(file.outputName)) as Uint8Array;
+					const outputData = (await this.ffmpeg.readFile(
+						file.outputName,
+					)) as Uint8Array;
 					if (!outputData || outputData.length === 0) {
-						throw new Error(`Processing failed: output file ${file.outputName} is empty`);
+						throw new Error(
+							`Processing failed: output file ${file.outputName} is empty`,
+						);
 					}
 
 					// 创建结果对象
@@ -506,7 +509,7 @@ class FFMPEG {
 						width: file.width || 0,
 						height: file.height || 0,
 						processingTime: performance.now() - startTime,
-						status: 'success',
+						status: "success",
 					};
 
 					results.push(result);
@@ -526,21 +529,20 @@ class FFMPEG {
 
 					// 给浏览器一些时间进行垃圾回收
 					if (this._processCount % 3 === 0) {
-						await new Promise(resolve => setTimeout(resolve, 50));
+						await new Promise((resolve) => setTimeout(resolve, 50));
 					}
-
 				} catch (error) {
 					console.error(`Processing failed for file ${file.name}:`, error);
 
 					// 继续处理其他文件，但记录错误
 					const errorResult: OutputType = {
 						name: file.name,
-						url: '',
+						url: "",
 						size: 0,
 						width: 0,
 						height: 0,
 						processingTime: performance.now() - startTime,
-						status: 'error',
+						status: "error",
 					};
 					results.push(errorResult);
 

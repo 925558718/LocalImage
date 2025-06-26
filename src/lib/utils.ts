@@ -1,6 +1,9 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { ImageFormat, ImageFormatType } from "./strategy/conversions/ConversionStrategy";
+import {
+	ImageFormat,
+	ImageFormatType,
+} from "./strategy/conversions/ConversionStrategy";
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));

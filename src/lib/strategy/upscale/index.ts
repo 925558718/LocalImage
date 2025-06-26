@@ -11,4 +11,4 @@ export { DefaultUpscaleStrategy } from "./DefaultUpscaleStrategy";
 // 导出类型和函数
 export type { UpscaleStrategy, UpscaleOptions } from "../index";
 export { generateFFMPEGCommand } from "../index";
-export { convertFilesToInputFileType } from "../../fileUtils"; 
+export { convertFilesToInputFileType } from "../../fileUtils";

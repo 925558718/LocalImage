@@ -10,4 +10,4 @@ function UpscalePage() {
 	);
 }
 
-export default UpscalePage; 
+export default UpscalePage;
