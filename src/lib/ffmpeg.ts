@@ -489,6 +489,7 @@ class FFMPEG {
 
 					// 执行ffmpeg命令
 					await this.ffmpeg.exec(file.ffmpeg_command);
+					console.log("file.outputName", file.outputName);
 					const outputData = (await this.ffmpeg.readFile(
 						file.outputName,
 					)) as Uint8Array;

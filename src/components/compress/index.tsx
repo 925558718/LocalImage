@@ -31,7 +31,7 @@ import {
 import ffm_ins from "@/lib/ffmpeg";
 import Advanced from "./components/Advanced";
 import CompressItem from "./components/CompressItem";
-import { DropzoneWithPreview } from "./components/DropzoneWithPreview";
+import DropzoneWithPreview from "../DropZone";
 
 // 支持的图片格式配置 - 按常用程度排序
 const SUPPORTED_FORMATS = [

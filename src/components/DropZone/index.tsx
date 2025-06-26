@@ -2,7 +2,6 @@ import { ImageIcon, Plus, Trash2, UploadIcon } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@/components/shadcn/button";
 import { Label } from "@/components/shadcn/label";
 
 interface DropzoneWithPreviewProps {
@@ -12,7 +11,7 @@ interface DropzoneWithPreviewProps {
 	onClearAllFiles: () => void;
 }
 
-export const DropzoneWithPreview = React.memo(function DropzoneWithPreview({
+const Dropzone = React.memo(function DropzoneWithPreview({
 	onFilesSelected,
 	files,
 	onRemoveFile,
@@ -225,3 +224,6 @@ export const DropzoneWithPreview = React.memo(function DropzoneWithPreview({
 		</div>
 	);
 });
+
+
+export default Dropzone;

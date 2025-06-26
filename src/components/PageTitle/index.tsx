@@ -37,7 +37,7 @@ const PageTitle: React.FC<PageTitleProps> = ({
 	};
 
 	return (
-		<div className={`text-center space-y-6 pt-20 ${className}`}>
+		<div className={`text-center space-y-6 pt-20 mb-10 ${className}`}>
 			<h1 className={getTitleClassName()}>{title}</h1>
 
 			{description && (
