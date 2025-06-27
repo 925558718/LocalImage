@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
+import { toast } from "sonner";
 
 const downloadFile = (blob: Blob, filename: string) => {
 	const url = URL.createObjectURL(blob);
@@ -91,7 +92,7 @@ function UpscaleComposer() {
 	// 核心处理函数
 	const handleUpscale = useCallback(async () => {
 		if (imageFiles.length === 0 || !ffmpegReady) {
-			alert(t("min_upscale_files"));
+			toast.error(t("min_upscale_files"));
 			return;
 		}
 
@@ -137,7 +138,7 @@ function UpscaleComposer() {
 
 			if (successResults.length === 0) {
 				setCurrentFileName(t("all_files_failed"));
-				alert(t("all_upscale_failed"));
+				toast.error(t("all_upscale_failed"));
 			} else {
 				setCurrentFileName(t("upscale_complete"));
 				setShowDragDrop(false);
@@ -148,7 +149,7 @@ function UpscaleComposer() {
 			}, 2000);
 		} catch (error) {
 			console.error("Upscale error:", error);
-			alert(
+			toast.error(
 				`${t("upscale_failed")}: ${error instanceof Error ? error.message : t("unknown_error")}`,
 			);
 			// 出错时确保拖拽区域显示
@@ -168,7 +169,7 @@ function UpscaleComposer() {
 				downloadFile(blob, fileName);
 			} catch (error) {
 				console.error("Download failed:", error);
-				alert(t("download_failed"));
+				toast.error(t("download_failed"));
 			}
 		}
 	};

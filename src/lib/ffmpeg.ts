@@ -5,6 +5,7 @@ import { isBrowser } from "./utils";
 import { InputFileType, OutputType } from "./fileUtils";
 import "./strategy/conversions";
 import "./strategy/upscale";
+import { toast } from "sonner";
 
 export type FFMPEGOptions = {
 	quality?: number;
@@ -290,7 +291,7 @@ class FFMPEG {
 				try {
 					// 检查是否标记为不能处理，如果是则跳过
 					if (file.cannotDo) {
-						console.log(`跳过不支持的转换: ${file.name}`);
+						toast.error(`unsupported conversion: ${file.name}`);
 						processedCount++;
 						callback?.(processedCount, input.length);
 						continue;

@@ -14,6 +14,7 @@ import {
 	PreviewArea,
 	ResultArea,
 } from "./components";
+import { toast } from "sonner";
 
 function AnimationComposer() {
 	const [loading, setLoading] = useState(false);
@@ -196,7 +197,7 @@ function AnimationComposer() {
 				setCurrentFileName("");
 			}, 1000);
 		} catch (error) {
-			alert(
+			toast.error(
 				`${t("animation_failed")}: ${error instanceof Error ? error.message : t("unknown_error")}`,
 			);
 		} finally {

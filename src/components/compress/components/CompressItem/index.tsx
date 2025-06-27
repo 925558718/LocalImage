@@ -1,6 +1,7 @@
 import JSZip from "jszip";
 import { Download } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { Button } from "@/components/shadcn/button";
 import { OutputType } from "@/lib/fileUtils";
 
@@ -121,7 +122,7 @@ function CompressResult({
 			// 检查是否有文件被成功添加到zip
 			if (successCount === 0) {
 				console.error(t("no_valid_files_download"));
-				alert(t("no_valid_files_download_alert"));
+				toast.error(t("no_valid_files_download_alert"));
 				return;
 			}
 
@@ -159,7 +160,7 @@ function CompressResult({
 			const errorMessage =
 				error instanceof Error ? error.message : String(error);
 			console.error(`${t("batch_download_failed")}:`, error);
-			alert(`${t("batch_download_failed")}: ${errorMessage}`);
+			toast.error(`${t("batch_download_failed")}: ${errorMessage}`);
 		}
 	};
 

@@ -38,6 +38,7 @@ import { generateFFMPEGCommand } from "@/lib/strategy";
 import DropzoneWithPreview from "../DropZone";
 import Advanced from "./components/Advanced";
 import CompressItem from "./components/CompressItem";
+import { toast } from "sonner";
 
 // 支持的图片格式配置 - 按常用程度排序
 const SUPPORTED_FORMATS = [
@@ -163,7 +164,7 @@ export default function Compress() {
 	// 核心处理函数 - 模仿upscale的实现
 	const handleCompress = useCallback(async () => {
 		if (files.length === 0 || !ffmpegReady) {
-			alert(t("min_compress_files"));
+			toast.error(t("min_compress_files"));
 			return;
 		}
 
@@ -201,13 +202,13 @@ export default function Compress() {
 			setDownloadList(successResults);
 
 			if (successResults.length === 0) {
-				alert(t("all_compress_failed"));
+				toast.error(t("all_compress_failed"));
 			} else {
 				setShowDragDrop(false);
 			}
 		} catch (error) {
 			console.error("Compress error:", error);
-			alert(
+			toast.error(
 				`${t("compress_failed")}: ${error instanceof Error ? error.message : t("unknown_error")}`,
 			);
 			// 出错时确保拖拽区域显示

@@ -64,7 +64,6 @@ export function checkFormatConversion(
 	// 检查是否在不支持转换的映射表中
 	const unsupportedTargets = FORMAT_CONVERSION_MAP[sourceFormat];
 	const isUnsupported = unsupportedTargets?.includes(targetFormat);
-
 	if (isUnsupported) {
 		// 设置cannotDo标记，表示这个文件应该在处理时被跳过
 		input.cannotDo = true;
