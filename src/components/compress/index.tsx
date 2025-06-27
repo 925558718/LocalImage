@@ -28,7 +28,11 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 // 导入FFMPEG类和策略系统
 import ffm_ins from "@/lib/ffmpeg";
-import { convertFilesToInputFileType, InputFileType, OutputType } from "@/lib/fileUtils";
+import {
+	convertFilesToInputFileType,
+	InputFileType,
+	OutputType,
+} from "@/lib/fileUtils";
 import { generateFFMPEGCommand } from "@/lib/strategy";
 // 确保策略被初始化
 import DropzoneWithPreview from "../DropZone";
@@ -169,26 +173,26 @@ export default function Compress() {
 		setFailedCount(0);
 
 		try {
-
 			const inputFiles = await convertFilesToInputFileType(files);
-
 
 			inputFiles.forEach((file: InputFileType) => {
 				generateFFMPEGCommand("convert", file, {
 					format: format,
 					compressionLevel: quality,
 					width: advanced.width ? Number.parseInt(advanced.width) : undefined,
-					height: advanced.height ? Number.parseInt(advanced.height) : undefined,
+					height: advanced.height
+						? Number.parseInt(advanced.height)
+						: undefined,
 					outputSuffixName: advanced.outputSuffixName,
 				});
 			});
 
-
-			const results = await ffm_ins.processMultiDataToMultiData(inputFiles, (current, total) => {
-				setProgress(Math.floor((current / total) * 100));
-			});
-
-
+			const results = await ffm_ins.processMultiDataToMultiData(
+				inputFiles,
+				(current, total) => {
+					setProgress(Math.floor((current / total) * 100));
+				},
+			);
 
 			const successResults = results.filter(
 				(result) => result.status === "success",
@@ -410,10 +414,7 @@ export default function Compress() {
 								</h4>
 								<CompressItem
 									name={t("all_files")}
-									originalSize={files.reduce(
-										(sum, item) => sum + item.size,
-										0,
-									)}
+									originalSize={files.reduce((sum, item) => sum + item.size, 0)}
 									compressedSize={downloadList.reduce(
 										(sum, item) => sum + item.size,
 										0,
@@ -422,8 +423,7 @@ export default function Compress() {
 										(sum, item) => sum + (item.processingTime || 0),
 										0,
 									)}
-									format={format
-									}
+									format={format}
 									quality={quality}
 									downloadItems={downloadList}
 									failedCount={failedCount}

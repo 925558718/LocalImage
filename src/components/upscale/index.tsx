@@ -120,11 +120,13 @@ function UpscaleComposer() {
 
 			setCurrentFileName(t("processing_images"));
 
-
-			const results = await ffm_ins.processMultiDataToMultiData(inputFiles, (current, total) => {
-				setProgress(Math.round((current / total) * 100));
-				setCurrentFileName(t("processing_images"));
-			});
+			const results = await ffm_ins.processMultiDataToMultiData(
+				inputFiles,
+				(current, total) => {
+					setProgress(Math.round((current / total) * 100));
+					setCurrentFileName(t("processing_images"));
+				},
+			);
 
 			setCurrentFileName(t("finalizing"));
 

@@ -55,22 +55,27 @@ export const FORMAT_CONVERSION_MAP: Partial<
  * @param targetFormat 目标格式
  * @returns 是否可以进行转换（总是返回true，但会设置cannotDo标记）
  */
-export function checkFormatConversion(input: any, targetFormat: ImageFormatType): boolean {
+export function checkFormatConversion(
+	input: any,
+	targetFormat: ImageFormatType,
+): boolean {
 	const sourceFormat = input.format?.toLowerCase() as ImageFormatType;
-	
+
 	// 检查是否在不支持转换的映射表中
 	const unsupportedTargets = FORMAT_CONVERSION_MAP[sourceFormat];
 	const isUnsupported = unsupportedTargets?.includes(targetFormat);
-	
+
 	if (isUnsupported) {
 		// 设置cannotDo标记，表示这个文件应该在处理时被跳过
 		input.cannotDo = true;
-		console.warn(`格式转换不支持: ${sourceFormat} -> ${targetFormat}，文件将被跳过`);
+		console.warn(
+			`格式转换不支持: ${sourceFormat} -> ${targetFormat}，文件将被跳过`,
+		);
 	} else {
 		// 确保cannotDo为false
 		input.cannotDo = false;
 	}
-	
+
 	// 总是返回true，允许文件被添加到处理队列
 	return true;
 }

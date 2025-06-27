@@ -268,7 +268,10 @@ class FFMPEG {
 		}
 	}
 
-	async processMultiDataToMultiData(input: InputFileType[], callback?: (current: number, total: number) => void): Promise<OutputType[]> {
+	async processMultiDataToMultiData(
+		input: InputFileType[],
+		callback?: (current: number, total: number) => void,
+	): Promise<OutputType[]> {
 		await this.load();
 
 		if (!this.ffmpeg) throw new Error("ffmpeg not initialized");
@@ -304,7 +307,6 @@ class FFMPEG {
 					if (!file.ffmpeg_command) {
 						throw new Error(`File ${file.name} does not have ffmpeg_command`);
 					}
-
 
 					if (!file.buffer) {
 						// 如果没有buffer，从原始文件读取
@@ -395,12 +397,14 @@ class FFMPEG {
 		}
 	}
 
-	async processSingleDataToMultiData(input: InputFileType): Promise<OutputType[]> {
+	async processSingleDataToMultiData(
+		input: InputFileType,
+	): Promise<OutputType[]> {
 		await this.load();
 
 		if (!this.ffmpeg) throw new Error("ffmpeg not initialized");
 		if (!input) throw new Error("No input file");
-		return []
+		return [];
 	}
 }
 const ffm_ins = new FFMPEG();

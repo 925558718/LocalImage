@@ -47,7 +47,10 @@ export async function convertFilesToInputFileType(
 	const promises = fileArray.map(async (file) => {
 		const id = generateUniqueId();
 		const format = getFileFormat(file.name);
-		const filename = file.name.substring(0, file.name.length - format.length - 1);
+		const filename = file.name.substring(
+			0,
+			file.name.length - format.length - 1,
+		);
 		const outputName = `${filename}_output.${format}`;
 		const inputFile: InputFileType = {
 			id,

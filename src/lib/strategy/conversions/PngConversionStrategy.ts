@@ -18,7 +18,7 @@ export class PngConversionStrategy implements ConvertStrategy {
 		if (options.format?.toLowerCase() !== "png") {
 			return false;
 		}
-		
+
 		// 使用checkFormatConversion检查格式转换并设置cannotDo标记
 		return checkFormatConversion(input, options.format as ImageFormatType);
 	}
@@ -34,12 +34,12 @@ export class PngConversionStrategy implements ConvertStrategy {
 		options: ConvertOptions,
 	): string[] {
 		const args: string[] = [];
-		
+
 		// 生成输入文件名和输出文件名
 		const inputFileName = `${input.name}.${input.format || "tmp"}`;
 		const outputFileName = `${input.name}_${options.outputSuffixName || "output"}.png`;
 		input.outputName = outputFileName;
-		
+
 		// 输入文件
 		args.push("-i", inputFileName);
 
@@ -53,13 +53,15 @@ export class PngConversionStrategy implements ConvertStrategy {
 
 		// PNG压缩级别设置
 		if (options.compressionLevel !== undefined) {
-			const compressionLevel = Math.round(4 + ((100 - options.compressionLevel) / 100) * 5);
+			const compressionLevel = Math.round(
+				4 + ((100 - options.compressionLevel) / 100) * 5,
+			);
 			args.push("-compression_level", compressionLevel.toString());
 		}
-		
+
 		// 输出文件
 		args.push(outputFileName);
-		
+
 		return args;
 	}
 }

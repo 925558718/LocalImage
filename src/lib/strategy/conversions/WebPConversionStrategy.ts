@@ -18,7 +18,7 @@ export class WebPConversionStrategy implements ConvertStrategy {
 		if (options.format?.toLowerCase() !== "webp") {
 			return false;
 		}
-		
+
 		// 使用checkFormatConversion检查格式转换并设置cannotDo标记
 		return checkFormatConversion(input, options.format as ImageFormatType);
 	}
@@ -34,15 +34,15 @@ export class WebPConversionStrategy implements ConvertStrategy {
 		options: ConvertOptions,
 	): string[] {
 		const args: string[] = [];
-		console.log("calc")
+		console.log("calc");
 		// 生成输入文件名和输出文件名
 		const inputFileName = `${input.name}.${input.format || "tmp"}`;
 		const outputFileName = `${input.name}_${options.outputSuffixName || "output"}.webp`;
 		input.outputName = outputFileName;
-		
+
 		// 输入文件
 		args.push("-i", inputFileName);
-		
+
 		const isGif = input.format?.toLowerCase() === "gif";
 
 		// 分辨率缩放
@@ -69,7 +69,7 @@ export class WebPConversionStrategy implements ConvertStrategy {
 
 		// 输出文件
 		args.push(outputFileName);
-		
+
 		return args;
 	}
 }

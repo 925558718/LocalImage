@@ -24,7 +24,7 @@ export class IcoConversionStrategy implements ConvertStrategy {
 		if (options.format?.toLowerCase() !== "ico") {
 			return false;
 		}
-		
+
 		// 使用checkFormatConversion检查格式转换并设置cannotDo标记
 		return checkFormatConversion(input, options.format as ImageFormatType);
 	}
@@ -40,12 +40,12 @@ export class IcoConversionStrategy implements ConvertStrategy {
 		options: ConvertOptions,
 	): string[] {
 		const args: string[] = [];
-		
+
 		// 生成输入文件名和输出文件名
 		const inputFileName = `${input.name}.${input.format || "tmp"}`;
 		const outputFileName = `${input.name}_${options.outputSuffixName || "output"}.ico`;
 		input.outputName = outputFileName;
-		
+
 		// 输入文件
 		args.push("-i", inputFileName);
 
@@ -72,7 +72,10 @@ export class IcoConversionStrategy implements ConvertStrategy {
 		// ICO文件通常不需要很高的压缩，保持较好的质量
 		// 压缩级别范围：1-9，1为最高压缩率，9为最低压缩率
 		if (options.compressionLevel !== undefined) {
-			const compressionLevel = Math.max(1, Math.round(6 - (options.compressionLevel / 100) * 5));
+			const compressionLevel = Math.max(
+				1,
+				Math.round(6 - (options.compressionLevel / 100) * 5),
+			);
 			args.push("-compression_level", compressionLevel.toString());
 		}
 
@@ -81,7 +84,7 @@ export class IcoConversionStrategy implements ConvertStrategy {
 
 		// 输出文件
 		args.push(outputFileName);
-		
+
 		return args;
 	}
 }
