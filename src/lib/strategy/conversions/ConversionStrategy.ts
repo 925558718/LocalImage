@@ -1,26 +1,3 @@
-/**
- * 图像转换策略接口
- * 定义了所有图像转换策略必须实现的方法
- */
-export interface ConversionStrategy {
-	/**
-	 * 获取FFmpeg转换参数
-	 * @param inputFileName 输入文件名
-	 * @param outputName 输出文件名
-	 * @param quality 质量（0-100）
-	 * @param width 可选的输出宽度
-	 * @param height 可选的输出高度
-	 * @returns FFmpeg命令行参数数组
-	 */
-	getArgs(
-		inputFileName: string,
-		outputName: string,
-		quality: number,
-		width?: number,
-		height?: number,
-	): string[];
-}
-
 // 支持的图片格式枚举
 export enum ImageFormat {
 	// 常见格式
@@ -71,3 +48,33 @@ export const FORMAT_CONVERSION_MAP: Partial<
 	// [ImageFormat.GIF]: [ImageFormat.AVIF], // GIF不支持转换为AVIF
 	// [ImageFormat.BMP]: [ImageFormat.WEBP], // BMP不支持转换为WebP
 };
+
+/**
+ * 检查格式转换是否被支持，如果不支持则设置cannotDo标记
+ * @param input 输入文件信息
+ * @param targetFormat 目标格式
+ * @returns 是否可以进行转换（总是返回true，但会设置cannotDo标记）
+ */
+export function checkFormatConversion(
+	input: any,
+	targetFormat: ImageFormatType,
+): boolean {
+	const sourceFormat = input.format?.toLowerCase() as ImageFormatType;
+
+	// 检查是否在不支持转换的映射表中
+	const unsupportedTargets = FORMAT_CONVERSION_MAP[sourceFormat];
+	const isUnsupported = unsupportedTargets?.includes(targetFormat);
+	if (isUnsupported) {
+		// 设置cannotDo标记，表示这个文件应该在处理时被跳过
+		input.cannotDo = true;
+		console.warn(
+			`格式转换不支持: ${sourceFormat} -> ${targetFormat}，文件将被跳过`,
+		);
+	} else {
+		// 确保cannotDo为false
+		input.cannotDo = false;
+	}
+
+	// 总是返回true，允许文件被添加到处理队列
+	return true;
+}

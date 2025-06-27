@@ -1,10 +1,21 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { toBlobURL } from "@ffmpeg/util";
-import { AnimationStrategyFactory } from "./animations";
-import { ImageFormatType } from "./conversions/ConversionStrategy";
-import { ConversionStrategyFactory } from "./conversions/ConversionStrategyFactory";
-import { CompressionResult, FileInput } from "./types";
-import { getType, isBrowser } from "./utils";
+import { AnimationStrategyFactory } from "./strategy/animations";
+import { isBrowser } from "./utils";
+import { InputFileType, OutputType } from "./fileUtils";
+import "./strategy/conversions";
+import "./strategy/upscale";
+import { toast } from "sonner";
+
+export type FFMPEGOptions = {
+	quality?: number;
+	width?: number;
+	height?: number;
+	frameRate?: number;
+	videoCodec?: string;
+	format?: string;
+	outputSuffixName?: string;
+};
 
 // Note: Originally there was a window.gc declaration here, but this is a non-standard API and has been removed
 
@@ -87,184 +98,6 @@ class FFMPEG {
 	}
 
 	/**
-	 * Convert and compress images - supports single and batch processing
-	 * @param input Array of files to process
-	 * @param format Output format (e.g., 'jpg', 'png', 'webp')
-	 * @param outputName Custom output filename (optional, defaults to source filename)
-	 * @param quality Compression quality (0-100, default 75)
-	 * @param width Optional output width
-	 * @param height Optional output height
-	 * @param onProgress Progress callback for batch processing
-	 * @param onFileComplete File completion callback for batch processing
-	 * @param onFileError File error callback for batch processing
-	 */
-	async convertImages({
-		input,
-		format,
-		outputSuffixName,
-		quality = 75,
-		width,
-		height,
-		onProgress,
-		onFileComplete,
-		onFileError,
-	}: {
-		input: FileInput[];
-		format: string;
-		outputSuffixName?: string;
-		quality?: number;
-		width?: number;
-		height?: number;
-		onProgress?: (completed: number, total: number) => void;
-		onFileComplete?: (result: CompressionResult) => void;
-		onFileError?: (fileName: string, error: Error) => void;
-	}): Promise<CompressionResult[]> {
-		await this.load();
-
-		if (!this.ffmpeg) throw new Error("ffmpeg not initialized");
-		if (input.length === 0) throw new Error("No files to process");
-
-		const results: CompressionResult[] = [];
-		let totalCompleted = 0; // Track total completed files across resets
-
-		try {
-			await this.reset();
-			await this.load();
-
-			for (let i = 0; i < input.length; i++) {
-				const file = input[i];
-				const startTime = performance.now();
-
-				try {
-					// Reset instance if needed based on processed bytes
-					if (this._processedBytes >= 100 * 1024 * 1024) {
-						// 100MB
-						await this.reset();
-						await this.load();
-					}
-
-					// Generate output filename
-					const baseName = file.name.replace(/\.[^.]+$/, "");
-					const cleanBaseName = baseName.replace(/[<>:"/\\|?*]/g, "_");
-					// Use custom output name or default to source filename
-					const finalOutputName = `${cleanBaseName}${outputSuffixName ? `_${outputSuffixName}` : ""}`;
-					const sourceExt = getType(file.name);
-					const targetExt = format.toLowerCase() as ImageFormatType;
-					const singleOutputName = `${finalOutputName}.${targetExt}`;
-
-					// Process single file
-					if (!ConversionStrategyFactory.canConvert(sourceExt, targetExt)) {
-						throw new Error(`unsupported format: ${sourceExt} -> ${targetExt}`);
-					}
-
-					const inputFileName = `input_image.${sourceExt}`;
-					const fileData = new Uint8Array(file.data);
-
-					await this.ffmpeg.writeFile(inputFileName, fileData);
-
-					try {
-						const strategy = ConversionStrategyFactory.getStrategy(targetExt);
-						const args = strategy.getArgs(
-							inputFileName,
-							singleOutputName,
-							quality,
-							width,
-							height,
-						);
-						console.log("[ffmpeg] args", args);
-
-						await this.ffmpeg.exec(args);
-						const compressed = (await this.ffmpeg.readFile(
-							singleOutputName,
-						)) as Uint8Array;
-
-						if (!compressed || compressed.length === 0) {
-							throw new Error(
-								"Compression failed: compression result is empty",
-							);
-						}
-
-						// Create result
-						const blob = new Blob([compressed], { type: `image/${targetExt}` });
-						if (blob.size === 0) {
-							throw new Error("Compression failed: generated file size is 0");
-						}
-
-						const blobUrl = URL.createObjectURL(blob);
-						const result: CompressionResult = {
-							url: blobUrl,
-							name: singleOutputName,
-							originalSize: file.originalSize,
-							compressedSize: blob.size,
-							processingTime: performance.now() - startTime,
-							format: targetExt,
-							quality,
-						};
-
-						results.push(result);
-						onFileComplete?.(result);
-
-						// Update progress with correct total completed count
-						totalCompleted++;
-						onProgress?.(totalCompleted, input.length);
-
-						// Update instance counters
-						this._processCount++;
-						this._processedBytes += file.data.byteLength;
-
-						// Reduce ArrayBuffer reference to help garbage collection
-						// @ts-ignore
-						file.data = null;
-
-						// Give browser time for automatic garbage collection every 3 files
-						if (this._processCount % 3 === 0) {
-							await new Promise((resolve) => setTimeout(resolve, 50));
-						}
-					} finally {
-						// Clean up temporary files
-						try {
-							if (inputFileName && inputFileName !== singleOutputName) {
-								await this.ffmpeg.deleteFile(inputFileName);
-							}
-							if (singleOutputName) {
-								await this.ffmpeg.deleteFile(singleOutputName);
-							}
-						} catch (_) {
-							// Ignore cleanup errors
-						}
-					}
-
-					// Brief delay for browser
-					if (i < input.length - 1) {
-						await new Promise((resolve) => setTimeout(resolve, 50));
-					}
-				} catch (error) {
-					// 调用失败回调
-					const errorMessage =
-						error instanceof Error ? error.message : String(error);
-					onFileError?.(file.name, new Error(errorMessage));
-
-					// Reset instance and continue or throw
-					try {
-						await this.reset();
-						await this.load();
-
-						if (i === input.length - 1) {
-							throw error;
-						}
-					} catch (_) {
-						throw error;
-					}
-				}
-			}
-
-			return results;
-		} finally {
-			// Cleanup handled by individual file processing
-		}
-	}
-
-	/**
 	 * Create animation from multiple images - unified entry point
 	 * @param images Array of image files
 	 * @param outputName Output filename
@@ -273,7 +106,7 @@ class FFMPEG {
 	 * @param videoCodec Video codec, default libx264 (MP4) or libvpx-vp9 (WebM)
 	 * @param format Output format (webp/gif/mp4/webm)
 	 */
-	async createAnimation({
+	async processMultiDataToSingleData({
 		images,
 		outputName,
 		frameRate = 10,
@@ -434,6 +267,145 @@ class FFMPEG {
 				// Ignore cleanup errors
 			}
 		}
+	}
+
+	async processMultiDataToMultiData(
+		input: InputFileType[],
+		callback?: (current: number, total: number) => void,
+	): Promise<OutputType[]> {
+		await this.load();
+
+		if (!this.ffmpeg) throw new Error("ffmpeg not initialized");
+		if (input.length === 0) throw new Error("No files to process");
+
+		const results: OutputType[] = [];
+		let processedCount = 0;
+
+		try {
+			await this.reset();
+			await this.load();
+
+			for (const file of input) {
+				const startTime = performance.now();
+
+				try {
+					// 检查是否标记为不能处理，如果是则跳过
+					if (file.cannotDo) {
+						toast.error(`unsupported conversion: ${file.name}`);
+						processedCount++;
+						callback?.(processedCount, input.length);
+						continue;
+					}
+
+					// 重置实例（如果需要）
+					if (this._processedBytes >= 100 * 1024 * 1024) {
+						// 100MB
+						await this.reset();
+						await this.load();
+					}
+
+					// 检查是否有ffmpeg命令
+					if (!file.ffmpeg_command) {
+						throw new Error(`File ${file.name} does not have ffmpeg_command`);
+					}
+
+					if (!file.buffer) {
+						// 如果没有buffer，从原始文件读取
+						const arrayBuffer = await file.originalFile.arrayBuffer();
+						file.buffer = new Uint8Array(arrayBuffer);
+					}
+					await this.ffmpeg.writeFile(file.inputName, file.buffer);
+
+					// 处理ffmpeg命令参数数组 - 替换占位符
+
+					// 执行ffmpeg命令
+					console.info(file.ffmpeg_command.join(" "));
+					await this.ffmpeg.exec(file.ffmpeg_command);
+					const outputData = (await this.ffmpeg.readFile(
+						file.outputName,
+					)) as Uint8Array;
+					if (!outputData || outputData.length === 0) {
+						throw new Error(
+							`Processing failed: output file ${file.outputName} is empty`,
+						);
+					}
+
+					// 创建结果对象
+					const blob = new Blob([outputData]);
+					const url = URL.createObjectURL(blob);
+
+					const result: OutputType = {
+						name: file.outputName,
+						url,
+						size: blob.size,
+						width: file.width || 0,
+						height: file.height || 0,
+						processingTime: performance.now() - startTime,
+						status: "success",
+					};
+
+					results.push(result);
+					processedCount++;
+
+					callback?.(processedCount, input.length);
+
+					// 更新计数器
+					this._processCount++;
+					this._processedBytes += file.buffer.byteLength;
+
+					// 清理临时文件
+					try {
+						await this.ffmpeg.deleteFile(file.inputName);
+						await this.ffmpeg.deleteFile(file.outputName);
+					} catch (error) {
+						console.warn("Failed to clean up temporary files:", error);
+					}
+
+					// 给浏览器一些时间进行垃圾回收
+					if (this._processCount % 3 === 0) {
+						await new Promise((resolve) => setTimeout(resolve, 50));
+					}
+				} catch (error) {
+					console.error(`Processing failed for file ${file.name}:`, error);
+
+					// 继续处理其他文件，但记录错误
+					const errorResult: OutputType = {
+						name: file.name,
+						url: "",
+						size: 0,
+						width: 0,
+						height: 0,
+						processingTime: performance.now() - startTime,
+						status: "error",
+					};
+					results.push(errorResult);
+
+					// 重置实例以避免状态污染
+					try {
+						await this.reset();
+						await this.load();
+					} catch (resetError) {
+						console.error("Failed to reset ffmpeg instance:", resetError);
+						throw error; // 如果重置失败，则抛出原始错误
+					}
+				}
+			}
+
+			return results;
+		} catch (error) {
+			console.error("Processing failed:", error);
+			throw error;
+		}
+	}
+
+	async processSingleDataToMultiData(
+		input: InputFileType,
+	): Promise<OutputType[]> {
+		await this.load();
+
+		if (!this.ffmpeg) throw new Error("ffmpeg not initialized");
+		if (!input) throw new Error("No input file");
+		return [];
 	}
 }
 const ffm_ins = new FFMPEG();

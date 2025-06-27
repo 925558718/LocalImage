@@ -14,6 +14,7 @@ import {
 	PreviewArea,
 	ResultArea,
 } from "./components";
+import { toast } from "sonner";
 
 function AnimationComposer() {
 	const [loading, setLoading] = useState(false);
@@ -161,7 +162,7 @@ function AnimationComposer() {
 				videoCodec = "libx264"; // MP4标准编解码器
 			}
 
-			const result = await ffm_ins.createAnimation({
+			const result = await ffm_ins.processMultiDataToSingleData({
 				images: files,
 				outputName,
 				frameRate: frameRate[0],
@@ -196,7 +197,7 @@ function AnimationComposer() {
 				setCurrentFileName("");
 			}, 1000);
 		} catch (error) {
-			alert(
+			toast.error(
 				`${t("animation_failed")}: ${error instanceof Error ? error.message : t("unknown_error")}`,
 			);
 		} finally {
