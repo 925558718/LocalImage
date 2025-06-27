@@ -19,10 +19,10 @@ export async function generateMetadata({
 
 	const title =
 		dictionary.upscale_meta_title ||
-		"AI Image Upscaler - Enhance Image Resolution | LocalImage";
+		"Image Upscaler - Enhance Image Resolution | LocalImage";
 	const description =
 		dictionary.upscale_meta_description ||
-		"Free online AI image upscaler tool. Use advanced algorithms to enhance image resolution and make blurry images sharp. Local processing protects privacy.";
+		"Free online image upscaler tool. Use advanced algorithms to enhance image resolution and make blurry images sharp. Local processing protects privacy.";
 
 	return {
 		title,
@@ -52,7 +52,7 @@ export default async function UpscaleLayout({
 					title={dictionary.upscale_composer || "Image Upscaler"}
 					description={
 						dictionary.upscale_desc ||
-						"Use AI technology to enhance image resolution and make low-resolution images crisp"
+						"Use advanced algorithms to enhance image resolution and make low-resolution images crisp"
 					}
 				/>
 				{children}
