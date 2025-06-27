@@ -161,7 +161,7 @@ function AnimationComposer() {
 				videoCodec = "libx264"; // MP4标准编解码器
 			}
 
-			const result = await ffm_ins.createAnimation({
+			const result = await ffm_ins.processMultiDataToSingleData({
 				images: files,
 				outputName,
 				frameRate: frameRate[0],

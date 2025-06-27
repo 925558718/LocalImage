@@ -232,5 +232,8 @@
 	"processing_images": "画像を処理中...",
 	"generating_commands": "処理コマンドを生成中...",
 	"all_files_failed": "すべてのファイルの処理に失敗しました",
-	"all_upscale_failed": "すべての画像拡大に失敗しました。ファイル形式を確認するか、再試行してください"
+	"all_upscale_failed": "すべての画像拡大に失敗しました。ファイル形式を確認するか、再試行してください",
+	"min_compress_files": "圧縮する画像を選択してください",
+	"compress_failed": "画像圧縮に失敗しました",
+	"all_compress_failed": "すべての画像圧縮に失敗しました。ファイル形式を確認するか、再試行してください"
 }

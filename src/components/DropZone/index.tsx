@@ -1,7 +1,7 @@
 import { ImageIcon, Plus, Trash2, UploadIcon } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Label } from "@/components/shadcn/label";
 
 interface DropzoneWithPreviewProps {
@@ -20,6 +20,7 @@ const Dropzone = React.memo(function DropzoneWithPreview({
 	const t = useTranslations();
 	const [isDragging, setIsDragging] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const dragCounterRef = useRef(0);
 
 	// 使用useMemo缓存文件URL，避免每次渲染时重新创建
 	const fileUrls = useMemo(() => {
@@ -41,12 +42,54 @@ const Dropzone = React.memo(function DropzoneWithPreview({
 	}, [fileUrls]);
 
 	// 处理点击上传
-	const handleClickUpload = () => {
+	const handleClickUpload = useCallback(() => {
 		fileInputRef.current?.click();
-	};
+	}, []);
+
+	// 优化的拖拽事件处理函数
+	const handleContainerDragEvents = useCallback((e: React.DragEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+
+		if (e.type === "dragenter") {
+			dragCounterRef.current++;
+			if (dragCounterRef.current === 1) {
+				setIsDragging(true);
+			}
+			if (e.dataTransfer) {
+				e.dataTransfer.dropEffect = "copy";
+			}
+		} else if (e.type === "dragover") {
+			if (e.dataTransfer) {
+				e.dataTransfer.dropEffect = "copy";
+			}
+		} else if (e.type === "dragleave") {
+			dragCounterRef.current--;
+			if (dragCounterRef.current === 0) {
+				setIsDragging(false);
+			}
+		} else if (e.type === "drop") {
+			dragCounterRef.current = 0;
+			setIsDragging(false);
+
+			// 处理拖拽文件
+			if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+				const allFiles = Array.from(e.dataTransfer.files);
+				const imageFiles = allFiles.filter(
+					(file) =>
+						file.type.startsWith("image/") ||
+						/\.(jpg|jpeg|png|gif|webp|avif|bmp|tiff)$/i.test(file.name),
+				);
+
+				if (imageFiles.length > 0) {
+					onFilesSelected(imageFiles);
+				}
+			}
+		}
+	}, [onFilesSelected]);
 
 	// 拖拽区域的渲染函数 - 移除了拖拽相关事件，因为现在在容器级别处理
-	const renderDropzone = () => {
+	const renderDropzone = useCallback(() => {
 		return (
 			<button
 				type="button"
@@ -67,40 +110,9 @@ const Dropzone = React.memo(function DropzoneWithPreview({
 				</div>
 			</button>
 		);
-	};
+	}, [isDragging, handleClickUpload, t, files.length]);
 
 	// 图片预览功能已直接写在主渲染函数中
-
-	// 创建一个事件处理函数，处理整个容器的拖拽事件
-	const handleContainerDragEvents = (e: React.DragEvent) => {
-		e.preventDefault();
-		e.stopPropagation();
-
-		if (e.type === "dragover" || e.type === "dragenter") {
-			setIsDragging(true);
-			if (e.dataTransfer) {
-				e.dataTransfer.dropEffect = "copy";
-			}
-		} else if (e.type === "dragleave") {
-			setIsDragging(false);
-		} else if (e.type === "drop") {
-			setIsDragging(false);
-
-			// 处理拖拽文件
-			if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-				const allFiles = Array.from(e.dataTransfer.files);
-				const imageFiles = allFiles.filter(
-					(file) =>
-						file.type.startsWith("image/") ||
-						/\.(jpg|jpeg|png|gif|webp|avif|bmp|tiff)$/i.test(file.name),
-				);
-
-				if (imageFiles.length > 0) {
-					onFilesSelected(imageFiles);
-				}
-			}
-		}
-	};
 
 	return (
 		<div

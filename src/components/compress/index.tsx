@@ -1,18 +1,5 @@
 "use client";
 import {
-	BicepsFlexed,
-	ChartArea,
-	FileType,
-	Loader2,
-	Plus,
-	ShieldCheck,
-	Trash2,
-	Upload,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
-import {
 	Button,
 	Progress,
 	Select,
@@ -27,11 +14,26 @@ import {
 	ImageFormat,
 	ImageFormatType,
 } from "@/lib/strategy/conversions/ConversionStrategy";
-// 导入FFMPEG类用于静态方法调用
+import {
+	BicepsFlexed,
+	ChartArea,
+	FileType,
+	Loader2,
+	Plus,
+	ShieldCheck,
+	Trash2,
+	Upload,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useState } from "react";
+// 导入FFMPEG类和策略系统
 import ffm_ins from "@/lib/ffmpeg";
+import { convertFilesToInputFileType, InputFileType, OutputType } from "@/lib/fileUtils";
+import { generateFFMPEGCommand } from "@/lib/strategy";
+// 确保策略被初始化
+import DropzoneWithPreview from "../DropZone";
 import Advanced from "./components/Advanced";
 import CompressItem from "./components/CompressItem";
-import DropzoneWithPreview from "../DropZone";
 
 // 支持的图片格式配置 - 按常用程度排序
 const SUPPORTED_FORMATS = [
@@ -62,27 +64,6 @@ const SUPPORTED_FORMATS = [
 	{ value: ImageFormat.XBM, label: ".xbm" },
 ];
 
-// 类型定义
-type DownloadItem = {
-	url: string;
-	name: string;
-	originalSize: number;
-	compressedSize: number;
-	processingTime?: number;
-	format?: string;
-	quality?: number;
-	blob?: Blob;
-	failed?: boolean; // 标记是否为失败的文件
-};
-
-type FileProgressMap = {
-	[key: string]: {
-		isProcessing: boolean;
-		progress: number;
-		failed?: boolean; // 标记文件是否处理失败
-	};
-};
-
 const NO_SUPPORT_QUALITY_SETTING_FORMATS: ImageFormatType[] = [
 	ImageFormat.BMP,
 	ImageFormat.GIF,
@@ -110,10 +91,9 @@ export default function Compress() {
 	const [loading, setLoading] = useState(false);
 	const [progress, setProgress] = useState(0);
 	const [files, setFiles] = useState<File[]>([]);
-	const [downloadList, setDownloadList] = useState<DownloadItem[]>([]);
-	const [_, setFileProgress] = useState<FileProgressMap>({});
+	const [downloadList, setDownloadList] = useState<OutputType[]>([]);
 	const [showDragDrop, setShowDragDrop] = useState(true);
-	const [failedCount, setFailedCount] = useState(0); // 跟踪失败的文件数量
+	const [failedCount, setFailedCount] = useState(0);
 
 	// 格式和高级配置
 	const [format, setFormat] = useState("webp");
@@ -130,36 +110,36 @@ export default function Compress() {
 	};
 
 	// 释放blob URL
-	const revokeBlobUrls = useCallback((items: DownloadItem[]) => {
+	const revokeBlobUrls = (items: OutputType[]) => {
 		for (const item of items) {
 			if (item.url) {
 				URL.revokeObjectURL(item.url);
 			}
 		}
-	}, []);
+	};
 
 	// 单独处理downloadList变化时的清理 - 确保URL被及时释放
 	useEffect(() => {
 		return () => {
 			revokeBlobUrls(downloadList);
 		};
-	}, [downloadList, revokeBlobUrls]);
+	}, [downloadList]);
 
 	// 处理新文件添加
-	const handleFilesSelected = useCallback((newFiles: File[]) => {
+	const handleFilesSelected = (newFiles: File[]) => {
 		setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-	}, []);
+	};
 
 	// 处理删除单个文件
-	const handleRemoveFile = useCallback((index: number) => {
+	const handleRemoveFile = (index: number) => {
 		setFiles((prevFiles) => prevFiles.filter((_, idx) => idx !== index));
-	}, []);
+	};
 
 	// 清空已选择的文件
-	const handleClearFiles = useCallback(() => {
+	const handleClearFiles = () => {
 		setFiles([]);
 		setShowDragDrop(true);
-	}, []);
+	};
 
 	// 清空已压缩的文件列表
 	const handleClearDownloadList = useCallback(async () => {
@@ -176,266 +156,62 @@ export default function Compress() {
 		setFiles([]);
 	}, []);
 
-	// 处理压缩
-	async function handleCompress() {
-		if (files.length === 0) return;
-
-		// 验证FFmpeg状态
-		if (ffmpegLoading) return;
-		if (!ffmpegReady) {
-			alert("FFmpeg正在加载中，请稍等...");
-			return;
-		}
-		if (ffmpegError) {
+	// 核心处理函数 - 模仿upscale的实现
+	const handleCompress = useCallback(async () => {
+		if (files.length === 0 || !ffmpegReady) {
+			alert(t("min_compress_files"));
 			return;
 		}
 
-		// 初始化状态
 		setLoading(true);
 		setProgress(0);
 		setDownloadList([]);
-		setFileProgress({});
-		setFailedCount(0); // 重置失败计数
-
-		// 大图片警告
-		const totalSize = files.reduce((sum, file) => sum + file.size, 0);
-		const largeImageWarningSize = 20 * 1024 * 1024; // 20MB
-		const maxBatchSize = 100 * 1024 * 1024; // 100MB
-
-		if (totalSize > maxBatchSize) {
-			const confirmProcess = confirm(
-				`警告：您选择的图片总大小超过 ${Math.round(maxBatchSize / 1024 / 1024)}MB，可能导致内存不足。建议您分批处理或选择较小的图片。是否继续？`,
-			);
-			if (!confirmProcess) {
-				setLoading(false);
-				return;
-			}
-		} else if (files.some((file) => file.size > largeImageWarningSize)) {
-			console.warn(
-				`检测到超过 ${Math.round(largeImageWarningSize / 1024 / 1024)}MB 的大图片，可能影响处理性能`,
-			);
-		}
+		setFailedCount(0);
 
 		try {
-			// 智能批处理：将大文件拆分处理，防止内存溢出
-			const fileGroups: File[][] = [];
-			let currentGroup: File[] = [];
-			let currentGroupSize = 0;
-			const maxGroupSize = 50 * 1024 * 1024; // 50MB
 
-			// 首先处理大文件
-			const sortedFiles = [...files].sort((a, b) => b.size - a.size);
+			const inputFiles = await convertFilesToInputFileType(files);
 
-			for (const file of sortedFiles) {
-				// 特别大的文件单独处理
-				if (file.size > maxGroupSize / 2) {
-					fileGroups.push([file]);
-					continue;
-				}
 
-				// 如果当前组加上这个文件会超过限制，创建新组
-				if (
-					currentGroupSize + file.size > maxGroupSize &&
-					currentGroup.length > 0
-				) {
-					fileGroups.push(currentGroup);
-					currentGroup = [file];
-					currentGroupSize = file.size;
-				} else {
-					currentGroup.push(file);
-					currentGroupSize += file.size;
-				}
-			}
+			inputFiles.forEach((file: InputFileType) => {
+				generateFFMPEGCommand("convert", file, {
+					format: format,
+					compressionLevel: quality,
+					width: advanced.width ? Number.parseInt(advanced.width) : undefined,
+					height: advanced.height ? Number.parseInt(advanced.height) : undefined,
+					outputSuffixName: advanced.outputSuffixName,
+				});
+			});
 
-			// 添加最后一组（如果有）
-			if (currentGroup.length > 0) {
-				fileGroups.push(currentGroup);
-			}
 
-			console.log(
-				`智能批处理：将 ${files.length} 个文件分为 ${fileGroups.length} 批处理`,
+			const results = await ffm_ins.processMultiDataToMultiData(inputFiles, (current, total) => {
+				setProgress(Math.floor((current / total) * 100));
+			});
+
+
+
+			const successResults = results.filter(
+				(result) => result.status === "success",
 			);
 
-			// 为批处理跟踪总进度
-			let processedFiles = 0;
-			const totalFiles = files.length;
+			setDownloadList(successResults);
 
-			// 确保FFmpeg已加载
-			if (ffm_ins) {
-				await ffm_ins.load();
-			}
-
-			// 按批次顺序处理文件
-			for (let groupIndex = 0; groupIndex < fileGroups.length; groupIndex++) {
-				const fileGroup = fileGroups[groupIndex];
-				console.log(
-					`处理第 ${groupIndex + 1}/${fileGroups.length} 批，包含 ${fileGroup.length} 个文件`,
-				);
-
-				// 并行读取当前批次的所有文件
-				const fileData = await Promise.all(
-					fileGroup.map(async (file) => {
-						setFileProgress((prev) => ({
-							...prev,
-							[file.name]: { isProcessing: true, progress: 0 },
-						}));
-
-						try {
-							const arrayBuffer = await file.arrayBuffer();
-							return {
-								data: arrayBuffer,
-								name: file.name,
-								originalSize: file.size,
-							};
-						} catch (error) {
-							// 记录文件读取失败
-							console.error(`文件读取失败: ${file.name}`, error);
-							setFileProgress((prev) => ({
-								...prev,
-								[file.name]: { isProcessing: false, progress: 0, failed: true },
-							}));
-							setFailedCount((prev) => prev + 1);
-
-							// 返回一个标记为失败的数据结构
-							return {
-								data: new ArrayBuffer(0),
-								name: file.name,
-								originalSize: file.size,
-								failed: true,
-							};
-						}
-					}),
-				);
-				// 使用串行压缩模式处理当前批次
-				await ffm_ins?.convertImages({
-					input: fileData,
-					format: format,
-					outputSuffixName: advanced.outputSuffixName,
-					quality: quality,
-					width: advanced.width ? Number.parseInt(advanced.width) : undefined,
-					height: advanced.height
-						? Number.parseInt(advanced.height)
-						: undefined,
-					onProgress: (completed: number) => {
-						// Only update individual file progress, not overall progress
-						const currentBatchIndex = completed - 1;
-						if (currentBatchIndex >= 0 && currentBatchIndex < fileData.length) {
-							const currentFileName = fileData[currentBatchIndex]?.name;
-							if (currentFileName) {
-								const batchProgress = (completed / fileData.length) * 100;
-								setFileProgress((prev) => ({
-									...prev,
-									[currentFileName]: {
-										isProcessing: true,
-										progress: Math.round(batchProgress),
-									},
-								}));
-							}
-						}
-					},
-					onFileComplete: (result: DownloadItem) => {
-						processedFiles++; // 增加已处理文件计数
-
-						// Update overall progress based on completed files
-						setProgress(Math.round((processedFiles / totalFiles) * 100));
-
-						const originalFileName =
-							fileData.find((file) =>
-								result.name.includes(file.name.replace(/\.[^.]+$/, "")),
-							)?.name || result.name;
-
-						setFileProgress((prev) => ({
-							...prev,
-							[originalFileName]: { isProcessing: false, progress: 100 },
-						}));
-
-						setDownloadList((prev) => {
-							const newList = [...prev, result];
-							// 异步获取并缓存blob数据
-							setTimeout(async () => {
-								try {
-									if (result.url?.startsWith("blob:")) {
-										const response = await fetch(result.url);
-										if (response.ok) {
-											const blob = await response.blob();
-											if (blob && blob.size > 0) {
-												setDownloadList((currentList) =>
-													currentList.map((item) =>
-														item.url === result.url && item.name === result.name
-															? { ...item, blob }
-															: item,
-													),
-												);
-											}
-										}
-									}
-								} catch (error) {
-									console.warn(
-										`[blob cache] Cache failed: ${result.name}`,
-										error,
-									);
-								}
-							}, 0);
-
-							return newList;
-						});
-					},
-					onFileError: (fileName: string, error: Error) => {
-						// 处理文件处理失败
-						console.error(`文件处理失败: ${fileName}`, error);
-						setFileProgress((prev) => ({
-							...prev,
-							[fileName]: { isProcessing: false, progress: 0, failed: true },
-						}));
-						setFailedCount((prev) => prev + 1);
-
-						// 创建一个失败的项目记录
-						const failedItem: DownloadItem = {
-							url: "",
-							name: fileName,
-							originalSize:
-								fileData.find((f) => f.name === fileName)?.originalSize || 0,
-							compressedSize: 0,
-							processingTime: 0,
-							format: format,
-							quality: quality,
-							failed: true,
-						};
-
-						setDownloadList((prev) => [...prev, failedItem]);
-					},
-				});
-			}
-
-			// 完成所有文件处理
-			setTimeout(() => {
-				setProgress(100);
-				setShowDragDrop(false);
-			}, 300);
-		} catch (e) {
-			setFileProgress({});
-			setShowDragDrop(true);
-			setFiles([]);
-			setDownloadList([]);
-			setProgress(0);
-			setFailedCount(0); // 重置失败计数
-
-			const errorMessage = e instanceof Error ? e.message : String(e);
-			// Handle memory out of bounds error
-			if (errorMessage.includes("RuntimeError: memory access out of bounds")) {
-				toast.error("Memory Limit Exceeded", {
-					description:
-						"Insufficient memory when processing images. Please try compressing smaller images or reducing batch size.",
-					duration: 5000,
-				});
+			if (successResults.length === 0) {
+				alert(t("all_compress_failed"));
 			} else {
-				toast.error(errorMessage);
+				setShowDragDrop(false);
 			}
+		} catch (error) {
+			console.error("Compress error:", error);
+			alert(
+				`${t("compress_failed")}: ${error instanceof Error ? error.message : t("unknown_error")}`,
+			);
+			// 出错时确保拖拽区域显示
+			setShowDragDrop(true);
 		} finally {
 			setLoading(false);
-			setProgress(0);
 		}
-	}
+	}, [files, ffmpegReady, format, quality, advanced, t]);
 
 	// UI渲染
 	return (
@@ -634,34 +410,22 @@ export default function Compress() {
 								</h4>
 								<CompressItem
 									name={t("all_files")}
-									url=""
-									originalSize={downloadList.reduce(
-										(sum, item) => sum + item.originalSize,
+									originalSize={files.reduce(
+										(sum, item) => sum + item.size,
 										0,
 									)}
 									compressedSize={downloadList.reduce(
-										(sum, item) => sum + item.compressedSize,
+										(sum, item) => sum + item.size,
 										0,
 									)}
 									processingTime={downloadList.reduce(
 										(sum, item) => sum + (item.processingTime || 0),
 										0,
 									)}
-									format={
-										downloadList.length > 0
-											? downloadList[downloadList.length - 1].format
-											: format
+									format={format
 									}
-									quality={
-										downloadList.length > 0
-											? downloadList[0].quality
-											: undefined
-									}
-									downloadItems={downloadList.map((item) => ({
-										url: item.url,
-										name: item.name,
-										blob: item.blob,
-									}))}
+									quality={quality}
+									downloadItems={downloadList}
 									failedCount={failedCount}
 									key="overall-stats"
 								/>

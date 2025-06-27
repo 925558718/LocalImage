@@ -235,5 +235,8 @@
 	"processing_images": "Processing images...",
 	"generating_commands": "Generating processing commands...",
 	"all_files_failed": "All files failed to process",
-	"all_upscale_failed": "All image upscaling failed, please check file formats or try again"
+	"all_upscale_failed": "All image upscaling failed, please check file formats or try again",
+	"min_compress_files": "Please select images to compress",
+	"compress_failed": "Image compression failed",
+	"all_compress_failed": "All image compression failed, please check file formats or try again"
 }

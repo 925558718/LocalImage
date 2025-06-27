@@ -235,5 +235,8 @@
 	"processing_images": "正在处理图片...",
 	"generating_commands": "正在生成处理命令...",
 	"all_files_failed": "所有文件处理失败",
-	"all_upscale_failed": "所有图片放大失败，请检查文件格式或重试"
+	"all_upscale_failed": "所有图片放大失败，请检查文件格式或重试",
+	"min_compress_files": "请选择要压缩的图片",
+	"compress_failed": "图片压缩失败",
+	"all_compress_failed": "所有图片压缩失败，请检查文件格式或重试"
 }

@@ -45,7 +45,7 @@ export type ACTION_TYPE = keyof ActionOptionsMap;
 
 // 泛型策略接口
 export interface Strategy<T extends ACTION_TYPE = ACTION_TYPE> {
-	canDo: (input: InputFileType, options: ActionOptionsMap[T]) => boolean;
+	match: (input: InputFileType, options: ActionOptionsMap[T]) => boolean;
 	generateFFMPEGCommand: (
 		input: InputFileType,
 		options: ActionOptionsMap[T],
@@ -95,26 +95,29 @@ export function generateFFMPEGCommand(
 		const strategyPool = strategyPoolMap.upscale;
 		const upscaleOptions = options as UpscaleOptions;
 		for (const strategy of strategyPool) {
-			if (strategy.canDo(input, upscaleOptions)) {
+			if (strategy.match(input, upscaleOptions)) {
 				command.push(...strategy.generateFFMPEGCommand(input, upscaleOptions));
+				break;
 			}
 		}
 	} else if (action === "convert") {
 		const strategyPool = strategyPoolMap.convert;
 		const convertOptions = options as ConvertOptions;
 		for (const strategy of strategyPool) {
-			if (strategy.canDo(input, convertOptions)) {
+			if (strategy.match(input, convertOptions)) {
 				command.push(...strategy.generateFFMPEGCommand(input, convertOptions));
+				break;
 			}
 		}
 	} else if (action === "animation") {
 		const strategyPool = strategyPoolMap.animation;
 		const animationOptions = options as AnimationOptions;
 		for (const strategy of strategyPool) {
-			if (strategy.canDo(input, animationOptions)) {
+			if (strategy.match(input, animationOptions)) {
 				command.push(
 					...strategy.generateFFMPEGCommand(input, animationOptions),
 				);
+				break;
 			}
 		}
 	} else {
@@ -123,6 +126,7 @@ export function generateFFMPEGCommand(
 	input.ffmpeg_command = command;
 	return command;
 }
+
 // 导出策略池以供注册新策略使用
 export const strategyPools = {
 	upscale: upscale_strategy_pool,

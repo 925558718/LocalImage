@@ -1,5 +1,5 @@
-import { UpscaleStrategy, UpscaleOptions } from "../index";
 import { InputFileType } from "../../fileUtils";
+import { UpscaleOptions, UpscaleStrategy } from "../index";
 
 /**
  * 默认图片放大策略
@@ -12,7 +12,7 @@ export class DefaultUpscaleStrategy implements UpscaleStrategy {
 	 * @param options 放大选项
 	 * @returns 是否能够处理
 	 */
-	canDo(input: InputFileType, options: UpscaleOptions): boolean {
+	match(input: InputFileType, options: UpscaleOptions): boolean {
 		return true;
 	}
 
@@ -29,8 +29,8 @@ export class DefaultUpscaleStrategy implements UpscaleStrategy {
 		const args: string[] = [];
 		console.log("input", input);
 		// 生成输入文件名和输出文件名
-		const inputFileName = `${input.inputName}.${input.format || "tmp"}`;
-		const outputFileName = `${input.inputName}_${options.outputSuffixName || "upscaled"}.${input.format || "tmp"}`;
+		const inputFileName = `${input.name}.${input.format || "tmp"}`;
+		const outputFileName = `${input.name}_${options.outputSuffixName || "upscaled"}.${input.format || "tmp"}`;
 		input.outputName = outputFileName;
 		// 输入文件
 		args.push("-i", inputFileName);

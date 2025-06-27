@@ -2,25 +2,20 @@ import JSZip from "jszip";
 import { Download } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/shadcn/button";
+import { OutputType } from "@/lib/fileUtils";
 
 interface CompressItemProps {
-	url: string;
-	name: string;
-	originalSize: number;
-	compressedSize: number;
-	isOverallStats?: boolean; // 是否为总体统计数据
-	processingTime?: number; // 压缩处理时间(毫秒)
-	format?: string; // 压缩格式
+	name: string; // 总体统计名称
+	originalSize: number; // 总原始大小
+	compressedSize: number; // 总压缩后大小
+	processingTime?: number; // 总处理时间(毫秒)
+	format?: string; // 输出格式
 	quality?: number; // 压缩质量
-	downloadItems?: { url: string; name: string; blob?: Blob }[]; // 总体统计时的下载列表
-	isProcessing?: boolean; // 是否正在处理
-	progress?: number; // 处理进度(0-100)
-	blob?: Blob; // 添加blob数据支持
-	failed?: boolean; // 是否为失败的文件
-	failedCount?: number; // 失败文件数量（仅在总体统计时使用）
+	downloadItems?: OutputType[]; // 可下载文件列表
+	failedCount?: number; // 失败文件数量
 }
 
-function CompressItem({
+function CompressResult({
 	name,
 	originalSize,
 	compressedSize,
@@ -80,14 +75,7 @@ function CompressItem({
 					}
 
 					let blob: Blob;
-
-					// 优先使用存储的blob数据
-					if (item.blob) {
-						blob = item.blob;
-						console.log(
-							`${t("using_cached_blob")}: ${item.name} (${blob.size} bytes)`,
-						);
-					} else if (item.url?.startsWith("blob:")) {
+					if (item.url?.startsWith("blob:")) {
 						// 如果没有缓存的blob，尝试从URL获取
 						console.log(`${t("fetching_blob_from_url")}: ${item.name}`);
 
@@ -198,11 +186,9 @@ function CompressItem({
 		return `${minutes}:${remainingSeconds.toString().padStart(2, "0")} ${t("minutes")}`;
 	};
 
-	// 格式化处理时间
-	const formattedProcessingTime = formatProcessingTime(processingTime);
-
 	return (
 		<div className="flex flex-col space-y-2">
+			{/* 主信息行 */}
 			<div className="flex items-center justify-between bg-background p-3 rounded-md border">
 				<div className="flex items-center gap-3">
 					<span className="font-medium">{name}</span>
@@ -231,7 +217,7 @@ function CompressItem({
 				</Button>
 			</div>
 
-			{/* 总体文件大小和压缩率 */}
+			{/* 文件大小信息 */}
 			<div className="flex justify-between text-xs px-2">
 				<span className="text-muted-foreground">
 					{t("total_size")}: {formatFileSize(originalSize)} {t("arrow_symbol")}{" "}
@@ -242,11 +228,11 @@ function CompressItem({
 				</span>
 			</div>
 
-			{/* 压缩时间和设置 */}
+			{/* 处理信息 */}
 			<div className="grid grid-cols-3 gap-2 text-xs px-2 text-muted-foreground">
 				<div>
 					<span className="font-medium">{t("processing_time")}:</span>{" "}
-					{formattedProcessingTime}
+					{formatProcessingTime(processingTime)}
 				</div>
 				{format && (
 					<div>
@@ -264,4 +250,4 @@ function CompressItem({
 	);
 }
 
-export default CompressItem;
+export default CompressResult;

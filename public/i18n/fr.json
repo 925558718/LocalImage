@@ -232,5 +232,8 @@
 	"processing_images": "Traitement des images...",
 	"generating_commands": "Génération des commandes de traitement...",
 	"all_files_failed": "Tous les fichiers ont échoué à traiter",
-	"all_upscale_failed": "Tout l'agrandissement d'image a échoué, veuillez vérifier les formats de fichier ou réessayer"
+	"all_upscale_failed": "Tout l'agrandissement d'image a échoué, veuillez vérifier les formats de fichier ou réessayer",
+	"min_compress_files": "Veuillez sélectionner des images à compresser",
+	"compress_failed": "Échec de la compression d'image",
+	"all_compress_failed": "Toute la compression d'image a échoué, veuillez vérifier les formats de fichier ou réessayer"
 }

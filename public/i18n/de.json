@@ -232,5 +232,8 @@
 	"processing_images": "Bilder werden verarbeitet...",
 	"generating_commands": "Verarbeitungsbefehle werden generiert...",
 	"all_files_failed": "Alle Dateien konnten nicht verarbeitet werden",
-	"all_upscale_failed": "Alle Bildvergrößerungen fehlgeschlagen, bitte überprüfen Sie die Dateiformate oder versuchen Sie es erneut"
+	"all_upscale_failed": "Alle Bildvergrößerungen fehlgeschlagen, bitte überprüfen Sie die Dateiformate oder versuchen Sie es erneut",
+	"min_compress_files": "Bitte wählen Sie Bilder zum Komprimieren aus",
+	"compress_failed": "Bildkomprimierung fehlgeschlagen",
+	"all_compress_failed": "Alle Bildkomprimierungen fehlgeschlagen, bitte überprüfen Sie die Dateiformate oder versuchen Sie es erneut"
 }

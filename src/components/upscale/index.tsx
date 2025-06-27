@@ -13,16 +13,16 @@ import {
 import { useFFmpeg } from "@/hooks/useFFmpeg";
 import ffm_ins from "@/lib/ffmpeg";
 import { OutputType, convertFilesToInputFileType } from "@/lib/fileUtils";
-import { generateFFMPEGCommand } from "@/lib/strategy/upscale";
+import { generateFFMPEGCommand } from "@/lib/strategy";
 import {
-	Loader2,
-	ZoomIn,
-	TrendingUp,
-	Download,
-	Trash2,
-	ShieldCheck,
 	ChartArea,
+	Download,
+	Loader2,
 	Plus,
+	ShieldCheck,
+	Trash2,
+	TrendingUp,
+	ZoomIn,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
@@ -96,18 +96,15 @@ function UpscaleComposer() {
 		}
 
 		setLoading(true);
-		setProgress(0);
 		setCurrentFileName(t("initializing_status"));
 		setUpscaleResults([]);
 
 		try {
 			setCurrentFileName(t("converting_files"));
-			setProgress(20);
 
 			const inputFiles = await convertFilesToInputFileType(imageFiles);
 
 			setCurrentFileName(t("generating_commands"));
-			setProgress(40);
 
 			inputFiles.forEach((file) => {
 				generateFFMPEGCommand("upscale", file, {
@@ -122,18 +119,19 @@ function UpscaleComposer() {
 			});
 
 			setCurrentFileName(t("processing_images"));
-			setProgress(60);
 
-			const results = await ffm_ins.processImages(inputFiles);
 
-			setProgress(90);
+			const results = await ffm_ins.processMultiDataToMultiData(inputFiles, (current, total) => {
+				setProgress(Math.round((current / total) * 100));
+				setCurrentFileName(t("processing_images"));
+			});
+
 			setCurrentFileName(t("finalizing"));
 
 			const successResults = results.filter(
 				(result) => result.status === "success",
 			);
 			setUpscaleResults(successResults);
-			setProgress(100);
 
 			if (successResults.length === 0) {
 				setCurrentFileName(t("all_files_failed"));
@@ -214,7 +212,7 @@ function UpscaleComposer() {
 										onValueChange={setUpscaleFactor}
 										min={1}
 										max={4}
-										step={0.5}
+										step={1}
 										className="w-full"
 									/>
 								</div>
@@ -223,7 +221,6 @@ function UpscaleComposer() {
 								</span>
 							</div>
 						</div>
-
 						{/* 分隔线 */}
 						<div className="w-px h-8 bg-border/50" />
 

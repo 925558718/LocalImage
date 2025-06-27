@@ -3,6 +3,7 @@
  * 包含文件的所有相关信息和处理状态
  */
 export interface InputFileType {
+	id: string;
 	inputName: string;
 	// 基本文件信息
 	name: string;
@@ -45,13 +46,17 @@ export async function convertFilesToInputFileType(
 
 	const promises = fileArray.map(async (file) => {
 		const id = generateUniqueId();
+		const format = getFileFormat(file.name);
+		const filename = file.name.substring(0, file.name.length - format.length - 1);
+		const outputName = `${filename}_output.${format}`;
 		const inputFile: InputFileType = {
-			inputName: id,
-			outputName: "",
-			name: file.name,
+			id,
+			inputName: file.name,
+			outputName: outputName,
+			name: filename,
 			originalFile: file,
 			size: file.size,
-			format: getFileFormat(file.name),
+			format,
 		};
 
 		// 读取文件的Uint8Array
