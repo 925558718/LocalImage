@@ -213,14 +213,14 @@ function UpscaleComposer() {
 									<Slider
 										value={upscaleFactor}
 										onValueChange={setUpscaleFactor}
-										min={1}
+										min={0}
 										max={4}
-										step={1}
+										step={0.1}
 										className="w-full"
 									/>
 								</div>
 								<span className="text-sm font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg min-w-[3rem] text-center">
-									{upscaleFactor[0]}x
+									{upscaleFactor[0].toFixed(1)}x
 								</span>
 							</div>
 						</div>
@@ -422,7 +422,7 @@ function UpscaleComposer() {
 								<div className="grid grid-cols-2 gap-2 text-xs px-2 text-muted-foreground">
 									<div>
 										<span className="font-medium">{t("upscale_factor")}:</span>{" "}
-										{upscaleFactor[0]}x
+										{upscaleFactor[0].toFixed(1)}x
 									</div>
 									<div>
 										<span className="font-medium">{t("algorithm")}:</span>{" "}

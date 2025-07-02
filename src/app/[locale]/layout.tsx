@@ -68,6 +68,9 @@ export async function generateMetadata({
 		}
 	}
 
+	// 添加x-default指向默认语言
+	languageAlternates["x-default"] = baseUrl;
+
 	return {
 		title,
 		description,

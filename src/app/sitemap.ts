@@ -18,6 +18,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			changeFreq: "weekly" as const,
 			description: "Image Compression Tool Page",
 		},
+		{
+			path: "/upscale", // Image Upscale Page
+			priority: 0.9,
+			changeFreq: "weekly" as const,
+			description: "Image Upscale Tool Page",
+		},
 	];
 
 	const currentDate = new Date().toISOString();

@@ -1,7 +1,7 @@
 {
 	"name": "localpress",
 	"description": "a image compress web tool",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"cloudflare": {
 		"label": "localpress",
 		"products": ["Workers"],
