@@ -22,18 +22,15 @@ export class DefaultCropStrategy implements CropStrategy {
 	 * @param options 裁剪选项
 	 * @returns FFmpeg命令参数数组
 	 */
-	generateFFMPEGCommand(
-		input: InputFileType,
-		options: CropOptions,
-	): string[] {
+	generateFFMPEGCommand(input: InputFileType, options: CropOptions): string[] {
 		const args: string[] = [];
 		console.log("input", input);
-		
+
 		// 生成输入文件名和输出文件名
 		const inputFileName = `${input.name}.${input.format || "tmp"}`;
 		const outputFileName = `${input.name}_${options.outputSuffixName || "cropped"}.${input.format || "tmp"}`;
 		input.outputName = outputFileName;
-		
+
 		// 输入文件
 		args.push("-i", inputFileName);
 
@@ -47,4 +44,4 @@ export class DefaultCropStrategy implements CropStrategy {
 
 		return args;
 	}
-} 
+}

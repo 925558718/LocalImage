@@ -143,9 +143,7 @@ export function generateFFMPEGCommand(
 		const cropOptions = options as CropOptions;
 		for (const strategy of strategyPool) {
 			if (strategy.match(input, cropOptions)) {
-				command.push(
-					...strategy.generateFFMPEGCommand(input, cropOptions),
-				);
+				command.push(...strategy.generateFFMPEGCommand(input, cropOptions));
 				break;
 			}
 		}
@@ -185,4 +183,3 @@ import "./upscale";
 import "./conversions";
 import "./animations";
 import "./crop";
-

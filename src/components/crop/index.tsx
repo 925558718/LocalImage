@@ -2,7 +2,13 @@
 
 import { useTranslations } from "next-intl";
 import { useState, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/shadcn/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/shadcn/card";
 import { Button } from "@/components/shadcn/button";
 import { toast } from "sonner";
 import { Download, Upload, X } from "lucide-react";
@@ -19,21 +25,22 @@ export default function CropComposer() {
 	const [isProcessing, setIsProcessing] = useState(false);
 
 	const handleFilesAdded = useCallback((newFiles: File[]) => {
-		setFiles(prev => [...prev, ...newFiles]);
+		setFiles((prev) => [...prev, ...newFiles]);
 		setCroppedFiles([]);
 	}, []);
 
 	const handleFilesRemoved = useCallback((indexes: number[]) => {
-		setFiles(prev => prev.filter((_, index) => !indexes.includes(index)));
+		setFiles((prev) => prev.filter((_, index) => !indexes.includes(index)));
 		setCroppedFiles([]);
 	}, []);
 
-	const handleCropComplete = useCallback((outputFile: OutputType) => {
-		setCroppedFiles(prev => [...prev, outputFile]);
-		toast.success(t("crop_complete"));
-	}, [t]);
-
-
+	const handleCropComplete = useCallback(
+		(outputFile: OutputType) => {
+			setCroppedFiles((prev) => [...prev, outputFile]);
+			toast.success(t("crop_complete"));
+		},
+		[t],
+	);
 
 	const handleDownloadAll = useCallback(() => {
 		if (croppedFiles.length === 0) {
@@ -84,7 +91,9 @@ export default function CropComposer() {
 							files={files}
 							onFilesSelected={handleFilesAdded}
 							onRemoveFile={(index) => handleFilesRemoved([index])}
-							onClearAllFiles={() => handleFilesRemoved(files.map((_, index) => index))}
+							onClearAllFiles={() =>
+								handleFilesRemoved(files.map((_, index) => index))
+							}
 						/>
 					</CardContent>
 				</Card>
@@ -143,8 +152,6 @@ export default function CropComposer() {
 					</CardContent>
 				</Card>
 			)}
-
-
 		</div>
 	);
-} 
+}

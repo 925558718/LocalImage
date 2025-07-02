@@ -24,7 +24,8 @@ export default function ResultArea({ files }: ResultAreaProps) {
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
 				<span className="text-sm font-medium">
-					{files.length} {files.length === 1 ? t("file_selected") : t("files_selected")}
+					{files.length}{" "}
+					{files.length === 1 ? t("file_selected") : t("files_selected")}
 				</span>
 			</div>
 
@@ -47,7 +48,9 @@ export default function ResultArea({ files }: ResultAreaProps) {
 						<div className="space-y-1">
 							<div className="flex items-center space-x-2">
 								<FileImage className="w-4 h-4 text-muted-foreground" />
-								<span className="text-sm font-medium truncate">{outputFile.name}</span>
+								<span className="text-sm font-medium truncate">
+									{outputFile.name}
+								</span>
 							</div>
 							<span className="text-xs text-muted-foreground">
 								{(outputFile.size / 1024 / 1024).toFixed(2)} MB
@@ -69,4 +72,4 @@ export default function ResultArea({ files }: ResultAreaProps) {
 			</div>
 		</div>
 	);
-} 
+}

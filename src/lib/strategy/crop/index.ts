@@ -11,4 +11,4 @@ export { DefaultCropStrategy } from "./DefaultCropStrategy";
 // 导出类型和函数
 export type { CropStrategy, CropOptions } from "../index";
 export { generateFFMPEGCommand } from "../index";
-export { convertFilesToInputFileType } from "../../fileUtils"; 
+export { convertFilesToInputFileType } from "../../fileUtils";
