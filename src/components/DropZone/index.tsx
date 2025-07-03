@@ -9,12 +9,15 @@ import React, {
 	useState,
 } from "react";
 import { Label } from "@/components/shadcn/label";
+import { toast } from "sonner";
 
 interface DropzoneWithPreviewProps {
 	onFilesSelected: (files: File[]) => void;
 	files: File[];
 	onRemoveFile: (index: number) => void;
 	onClearAllFiles: () => void;
+	// 新增：要禁用的文件格式数组
+	disableFormats?: string[];
 }
 
 const Dropzone = React.memo(function DropzoneWithPreview({
@@ -22,11 +25,51 @@ const Dropzone = React.memo(function DropzoneWithPreview({
 	files,
 	onRemoveFile,
 	onClearAllFiles,
+	disableFormats = [],
 }: DropzoneWithPreviewProps) {
 	const t = useTranslations();
 	const [isDragging, setIsDragging] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const dragCounterRef = useRef(0);
+
+	// 检查文件是否为禁用格式
+	const isDisabledFormat = useCallback(
+		(file: File): boolean => {
+			const format = file.name.split(".").pop()?.toLowerCase() || "";
+			return disableFormats.includes(format);
+		},
+		[disableFormats],
+	);
+
+	// 过滤文件，移除禁用格式
+	const filterFiles = useCallback(
+		(files: File[]): File[] => {
+			if (disableFormats.length === 0) {
+				return files;
+			}
+
+			const validFiles: File[] = [];
+			const rejectedFiles: File[] = [];
+
+			for (const file of files) {
+				const isDisabled = isDisabledFormat(file);
+				if (isDisabled) {
+					rejectedFiles.push(file);
+				} else {
+					validFiles.push(file);
+				}
+			}
+
+			// 显示被拒绝的文件提示
+			if (rejectedFiles.length > 0) {
+				const fileNames = rejectedFiles.map((f) => f.name).join(", ");
+				toast.error(t("unsupported_animation_format_toast", { fileNames }));
+			}
+
+			return validFiles;
+		},
+		[disableFormats, isDisabledFormat],
+	);
 
 	// 使用useMemo缓存文件URL，避免每次渲染时重新创建
 	const fileUrls = useMemo(() => {
@@ -89,12 +132,15 @@ const Dropzone = React.memo(function DropzoneWithPreview({
 					);
 
 					if (imageFiles.length > 0) {
-						onFilesSelected(imageFiles);
+						const filteredFiles = filterFiles(imageFiles);
+						if (filteredFiles.length > 0) {
+							onFilesSelected(filteredFiles);
+						}
 					}
 				}
 			}
 		},
-		[onFilesSelected],
+		[onFilesSelected, filterFiles],
 	);
 
 	// 拖拽区域的渲染函数 - 移除了拖拽相关事件，因为现在在容器级别处理
@@ -110,6 +156,11 @@ const Dropzone = React.memo(function DropzoneWithPreview({
 					<p className="mt-2 text-sm text-muted-foreground">
 						{t("drag_drop_or_click")}
 					</p>
+					{disableFormats.length > 0 && (
+						<p className="mt-1 text-xs text-muted-foreground">
+							{t("unsupported_animation_format")}
+						</p>
+					)}
 					{files.length > 0 && (
 						<p className="mt-2 text-sm text-primary">
 							{files.length}{" "}
@@ -119,7 +170,7 @@ const Dropzone = React.memo(function DropzoneWithPreview({
 				</div>
 			</button>
 		);
-	}, [isDragging, handleClickUpload, t, files.length]);
+	}, [isDragging, handleClickUpload, t, files.length, disableFormats]);
 
 	// 图片预览功能已直接写在主渲染函数中
 
@@ -229,13 +280,16 @@ const Dropzone = React.memo(function DropzoneWithPreview({
 				ref={fileInputRef}
 				type="file"
 				multiple
-				accept="image/*"
+				accept={"image/*"}
 				className="hidden"
 				onChange={(e) => {
 					// 只有当有文件被选择时才更新状态
 					if (e.target.files && e.target.files.length > 0) {
 						const newFiles = Array.from(e.target.files);
-						onFilesSelected(newFiles);
+						const filteredFiles = filterFiles(newFiles);
+						if (filteredFiles.length > 0) {
+							onFilesSelected(filteredFiles);
+						}
 
 						// 清空input的value，确保可以再次上传相同的文件
 						e.target.value = "";

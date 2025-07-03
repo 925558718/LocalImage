@@ -3,8 +3,6 @@ import { toBlobURL } from "@ffmpeg/util";
 import { AnimationStrategyFactory } from "./strategy/animations";
 import { isBrowser } from "./utils";
 import { InputFileType, OutputType } from "./fileUtils";
-import "./strategy/conversions";
-import "./strategy/upscale";
 import { toast } from "sonner";
 
 export type FFMPEGOptions = {

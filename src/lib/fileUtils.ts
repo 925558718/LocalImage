@@ -73,6 +73,7 @@ export async function convertFilesToInputFileType(
 		if (isImageFile(file)) {
 			try {
 				const imageMetadata = await getImageMetadata(file);
+				inputFile.isAnimated = await checkIfAnimated(file);
 				Object.assign(inputFile, imageMetadata);
 			} catch (error) {
 				console.warn(`获取图片元数据失败: ${file.name}`, error);
@@ -152,14 +153,14 @@ async function getImageMetadata(file: File): Promise<Partial<InputFileType>> {
 		const img = new Image();
 		const url = URL.createObjectURL(file);
 
-		img.onload = () => {
+		img.onload = async () => {
 			const width = img.naturalWidth;
 			const height = img.naturalHeight;
 			const aspectRatio = width / height;
 			const megapixels = Math.round(((width * height) / 1000000) * 100) / 100;
 
 			// 检查是否是动画文件
-			const isAnimated = checkIfAnimated(file);
+			const isAnimated = await checkIfAnimated(file);
 
 			URL.revokeObjectURL(url);
 
@@ -184,10 +185,89 @@ async function getImageMetadata(file: File): Promise<Partial<InputFileType>> {
 /**
  * 检查图片是否为动画格式
  * @param file - 图片文件
- * @returns boolean - 是否为动画
+ * @returns Promise<boolean> - 是否为动画
  */
-function checkIfAnimated(file: File): boolean {
-	const animatedFormats = ["gif", "webp", "apng"];
+async function checkIfAnimated(file: File): Promise<boolean> {
 	const format = getFileFormat(file.name);
-	return animatedFormats.includes(format);
+
+	// GIF格式总是动画格式
+	if (format === "gif") {
+		return true;
+	}
+
+	// APNG格式总是动画格式
+	if (format === "apng") {
+		return true;
+	}
+
+	// WebP格式需要检查文件头部来判断是否为动图
+	if (format === "webp") {
+		return await checkWebPAnimation(file);
+	}
+
+	return false;
+}
+
+/**
+ * 检查WebP文件是否为动图
+ * @param file - WebP文件
+ * @returns Promise<boolean> - 是否为动图
+ */
+async function checkWebPAnimation(file: File): Promise<boolean> {
+	try {
+		// 读取文件的前32字节来检查WebP头部
+		const buffer = await readFileAsUint8Array(file);
+
+		// WebP文件必须以 "RIFF" 开头
+		if (buffer.length < 12) return false;
+
+		const riffHeader = new TextDecoder().decode(buffer.slice(0, 4));
+		if (riffHeader !== "RIFF") return false;
+
+		// 检查文件类型是否为 "WEBP"
+		const webpType = new TextDecoder().decode(buffer.slice(8, 12));
+		if (webpType !== "WEBP") return false;
+
+		// 检查是否包含VP8X块（扩展块，可能包含动画信息）
+		// 或者检查是否包含ANIM块（动画块）
+		for (let i = 12; i < buffer.length - 8; i += 4) {
+			const chunkType = new TextDecoder().decode(buffer.slice(i, i + 4));
+
+			// VP8X块表示扩展WebP，可能包含动画
+			if (chunkType === "VP8X") {
+				// 读取VP8X块的数据
+				if (i + 8 < buffer.length) {
+					const chunkSize = new DataView(
+						buffer.buffer,
+						buffer.byteOffset + i + 4,
+						4,
+					).getUint32(0, true);
+
+					// 检查动画标志位（第3个字节的第1位）
+					if (i + 12 < buffer.length) {
+						const flags = buffer[i + 12];
+						const hasAnimation = (flags & 0x02) !== 0;
+						return hasAnimation;
+					}
+				}
+			}
+
+			// ANIM块明确表示这是动画WebP
+			if (chunkType === "ANIM") {
+				return true;
+			}
+
+			// 如果遇到VP8或VP8L块，说明是静态WebP
+			if (chunkType === "VP8 " || chunkType === "VP8L") {
+				return false;
+			}
+		}
+
+		// 如果没有找到明确的动画标志，默认为静态
+		return false;
+	} catch (error) {
+		console.warn("检查WebP动画失败:", error);
+		// 如果检查失败，为了安全起见，假设是动图
+		return true;
+	}
 }
