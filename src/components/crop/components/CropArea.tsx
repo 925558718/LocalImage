@@ -88,7 +88,10 @@ export default function CropArea({
 		const containerWidth = 600;
 		const containerHeight = 400;
 
-		const scale = Math.min(containerWidth / naturalWidth, containerHeight / naturalHeight);
+		const scale = Math.min(
+			containerWidth / naturalWidth,
+			containerHeight / naturalHeight,
+		);
 		const displayWidth = naturalWidth * scale;
 		const displayHeight = naturalHeight * scale;
 
@@ -113,7 +116,8 @@ export default function CropArea({
 	useEffect(() => {
 		if (imageInfo.displayWidth > 0 && imageInfo.displayHeight > 0) {
 			// 初始化裁剪区域为图片中心的一个矩形
-			const cropSize = Math.min(imageInfo.displayWidth, imageInfo.displayHeight) * 0.6;
+			const cropSize =
+				Math.min(imageInfo.displayWidth, imageInfo.displayHeight) * 0.6;
 			setCropArea({
 				x: (imageInfo.displayWidth - cropSize) / 2,
 				y: (imageInfo.displayHeight - cropSize) / 2,
@@ -197,7 +201,13 @@ export default function CropArea({
 
 			setCropArea({ x, y, width, height });
 		},
-		[isResizing, resizeHandle, resizeStart, imageInfo.displayWidth, imageInfo.displayHeight],
+		[
+			isResizing,
+			resizeHandle,
+			resizeStart,
+			imageInfo.displayWidth,
+			imageInfo.displayHeight,
+		],
 	);
 
 	// 鼠标松开
@@ -239,8 +249,14 @@ export default function CropArea({
 			let newY = boxDragStart.crop.y + dy;
 
 			// 限制在图片区域内
-			newX = Math.max(0, Math.min(newX, imageInfo.displayWidth - cropArea.width));
-			newY = Math.max(0, Math.min(newY, imageInfo.displayHeight - cropArea.height));
+			newX = Math.max(
+				0,
+				Math.min(newX, imageInfo.displayWidth - cropArea.width),
+			);
+			newY = Math.max(
+				0,
+				Math.min(newY, imageInfo.displayHeight - cropArea.height),
+			);
 
 			setCropArea((prev) => ({ ...prev, x: newX, y: newY }));
 		},
@@ -322,75 +338,77 @@ export default function CropArea({
 		<div className="space-y-4">
 			{/* 裁剪预览区域 */}
 			<div className="relative border rounded-lg overflow-hidden bg-muted/20">
-				{imageUrl && imageInfo.displayWidth > 0 && imageInfo.displayHeight > 0 && (
-					<div
-						className="relative border-2 border-background"
-						style={{
-							width: imageInfo.displayWidth,
-							height: imageInfo.displayHeight,
-							margin: "0 auto",
-						}}
-						onMouseMove={
-							isResizing
-								? handleResizeMouseMove
-								: isBoxDragging
-									? handleBoxMouseMove
-									: undefined
-						}
-						onMouseUp={
-							isResizing
-								? handleResizeMouseUp
-								: isBoxDragging
-									? handleBoxMouseUp
-									: undefined
-						}
-						onMouseLeave={
-							isResizing
-								? handleResizeMouseUp
-								: isBoxDragging
-									? handleBoxMouseUp
-									: undefined
-						}
-					>
-						<img
-							src={imageUrl}
-							alt="Preview"
-							className="w-full h-full object-contain pointer-events-none select-none"
-							onLoad={handleImageLoad}
-							draggable={false}
-						/>
-						{/* 裁剪框 */}
+				{imageUrl &&
+					imageInfo.displayWidth > 0 &&
+					imageInfo.displayHeight > 0 && (
 						<div
-							className="absolute border-2 border-primary bg-primary/10 cursor-move"
+							className="relative border-2 border-background"
 							style={{
-								left: cropArea.x,
-								top: cropArea.y,
-								width: cropArea.width,
-								height: cropArea.height,
-								pointerEvents: isResizing ? "none" : "auto",
+								width: imageInfo.displayWidth,
+								height: imageInfo.displayHeight,
+								margin: "0 auto",
 							}}
-							onMouseDown={handleBoxMouseDown}
+							onMouseMove={
+								isResizing
+									? handleResizeMouseMove
+									: isBoxDragging
+										? handleBoxMouseMove
+										: undefined
+							}
+							onMouseUp={
+								isResizing
+									? handleResizeMouseUp
+									: isBoxDragging
+										? handleBoxMouseUp
+										: undefined
+							}
+							onMouseLeave={
+								isResizing
+									? handleResizeMouseUp
+									: isBoxDragging
+										? handleBoxMouseUp
+										: undefined
+							}
 						>
-							{/* 四角手柄 */}
-							<div
-								className="absolute -top-1 -left-1 w-3 h-3 bg-primary border border-white rounded-full cursor-nwse-resize z-10 resize-handle"
-								onMouseDown={(e) => handleResizeMouseDown("tl", e)}
+							<img
+								src={imageUrl}
+								alt="Preview"
+								className="w-full h-full object-contain pointer-events-none select-none"
+								onLoad={handleImageLoad}
+								draggable={false}
 							/>
+							{/* 裁剪框 */}
 							<div
-								className="absolute -top-1 -right-1 w-3 h-3 bg-primary border border-white rounded-full cursor-nesw-resize z-10 resize-handle"
-								onMouseDown={(e) => handleResizeMouseDown("tr", e)}
-							/>
-							<div
-								className="absolute -bottom-1 -left-1 w-3 h-3 bg-primary border border-white rounded-full cursor-nesw-resize z-10 resize-handle"
-								onMouseDown={(e) => handleResizeMouseDown("bl", e)}
-							/>
-							<div
-								className="absolute -bottom-1 -right-1 w-3 h-3 bg-primary border border-white rounded-full cursor-nwse-resize z-10 resize-handle"
-								onMouseDown={(e) => handleResizeMouseDown("br", e)}
-							/>
+								className="absolute border-2 border-primary bg-primary/10 cursor-move"
+								style={{
+									left: cropArea.x,
+									top: cropArea.y,
+									width: cropArea.width,
+									height: cropArea.height,
+									pointerEvents: isResizing ? "none" : "auto",
+								}}
+								onMouseDown={handleBoxMouseDown}
+							>
+								{/* 四角手柄 */}
+								<div
+									className="absolute -top-1 -left-1 w-3 h-3 bg-primary border border-white rounded-full cursor-nwse-resize z-10 resize-handle"
+									onMouseDown={(e) => handleResizeMouseDown("tl", e)}
+								/>
+								<div
+									className="absolute -top-1 -right-1 w-3 h-3 bg-primary border border-white rounded-full cursor-nesw-resize z-10 resize-handle"
+									onMouseDown={(e) => handleResizeMouseDown("tr", e)}
+								/>
+								<div
+									className="absolute -bottom-1 -left-1 w-3 h-3 bg-primary border border-white rounded-full cursor-nesw-resize z-10 resize-handle"
+									onMouseDown={(e) => handleResizeMouseDown("bl", e)}
+								/>
+								<div
+									className="absolute -bottom-1 -right-1 w-3 h-3 bg-primary border border-white rounded-full cursor-nwse-resize z-10 resize-handle"
+									onMouseDown={(e) => handleResizeMouseDown("br", e)}
+								/>
+							</div>
 						</div>
-					</div>
-				)}
+					)}
 				{/* 隐藏的图片元素用于获取原始尺寸 */}
 				{imageUrl && (
 					<img

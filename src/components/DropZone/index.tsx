@@ -33,38 +33,43 @@ const Dropzone = React.memo(function DropzoneWithPreview({
 	const dragCounterRef = useRef(0);
 
 	// 检查文件是否为禁用格式
-	const isDisabledFormat = useCallback((file: File): boolean => {
-		const format = file.name.split(".").pop()?.toLowerCase() || "";
-		return disableFormats.includes(format);
-	}, [disableFormats]);
+	const isDisabledFormat = useCallback(
+		(file: File): boolean => {
+			const format = file.name.split(".").pop()?.toLowerCase() || "";
+			return disableFormats.includes(format);
+		},
+		[disableFormats],
+	);
 
 	// 过滤文件，移除禁用格式
-	const filterFiles = useCallback((files: File[]): File[] => {
-		if (disableFormats.length === 0) {
-			return files;
-		}
-
-		const validFiles: File[] = [];
-		const rejectedFiles: File[] = [];
-
-		for (const file of files) {
-			const isDisabled = isDisabledFormat(file);
-			if (isDisabled) {
-				rejectedFiles.push(file);
-			} else {
-				validFiles.push(file);
+	const filterFiles = useCallback(
+		(files: File[]): File[] => {
+			if (disableFormats.length === 0) {
+				return files;
 			}
-		}
 
-		// 显示被拒绝的文件提示
-		if (rejectedFiles.length > 0) {
-			const fileNames = rejectedFiles.map(f => f.name).join(", ");
-			toast.error(t("unsupported_animation_format_toast", { fileNames }));
-		}
+			const validFiles: File[] = [];
+			const rejectedFiles: File[] = [];
 
-		return validFiles;
-	}, [disableFormats, isDisabledFormat]);
+			for (const file of files) {
+				const isDisabled = isDisabledFormat(file);
+				if (isDisabled) {
+					rejectedFiles.push(file);
+				} else {
+					validFiles.push(file);
+				}
+			}
 
+			// 显示被拒绝的文件提示
+			if (rejectedFiles.length > 0) {
+				const fileNames = rejectedFiles.map((f) => f.name).join(", ");
+				toast.error(t("unsupported_animation_format_toast", { fileNames }));
+			}
+
+			return validFiles;
+		},
+		[disableFormats, isDisabledFormat],
+	);
 
 	// 使用useMemo缓存文件URL，避免每次渲染时重新创建
 	const fileUrls = useMemo(() => {

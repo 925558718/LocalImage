@@ -100,7 +100,7 @@ export function generateFFMPEGCommand(
 	const command: string[] = [];
 
 	if (action === "upscale") {
-		const strategyPool =  upscaleStrategyPool;
+		const strategyPool = upscaleStrategyPool;
 		console.log("strategyPool", strategyPool);
 		const upscaleOptions = options as UpscaleOptions;
 		for (const strategy of strategyPool) {
@@ -119,7 +119,7 @@ export function generateFFMPEGCommand(
 			}
 		}
 	} else if (action === "animation") {
-		throw new Error("Unsupported action: animation");	
+		throw new Error("Unsupported action: animation");
 	} else if (action === "crop") {
 		const strategyPool = cropStrategyPool;
 		const cropOptions = options as CropOptions;
@@ -135,6 +135,5 @@ export function generateFFMPEGCommand(
 	input.ffmpeg_command = command;
 	return command;
 }
-
 
 // 直接导出策略注册函数
