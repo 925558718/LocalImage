@@ -24,6 +24,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			changeFreq: "weekly" as const,
 			description: "Image Upscale Tool Page",
 		},
+		{
+			path: "/crop", // Image Crop Page
+			priority: 0.9,
+			changeFreq: "weekly" as const,
+			description: "Image Crop Tool Page",
+		},
 	];
 
 	const currentDate = new Date().toISOString();
