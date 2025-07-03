@@ -24,6 +24,15 @@ interface CropAreaType {
 	height: number;
 }
 
+interface ImageInfo {
+	naturalWidth: number;
+	naturalHeight: number;
+	displayWidth: number;
+	displayHeight: number;
+	scaleX: number;
+	scaleY: number;
+}
+
 export default function CropArea({
 	file,
 	onCropComplete,
@@ -32,14 +41,20 @@ export default function CropArea({
 	const t = useTranslations();
 	const imageRef = useRef<HTMLImageElement>(null);
 	const [imageUrl, setImageUrl] = useState<string>("");
+	const [imageInfo, setImageInfo] = useState<ImageInfo>({
+		naturalWidth: 0,
+		naturalHeight: 0,
+		displayWidth: 0,
+		displayHeight: 0,
+		scaleX: 1,
+		scaleY: 1,
+	});
 	const [cropArea, setCropArea] = useState<CropAreaType>({
 		x: 0,
 		y: 0,
 		width: 0,
 		height: 0,
 	});
-	const [isDragging, setIsDragging] = useState(false);
-	const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 	const [isResizing, setIsResizing] = useState(false);
 	const [resizeHandle, setResizeHandle] = useState<
 		null | "tl" | "tr" | "bl" | "br"
@@ -65,64 +80,48 @@ export default function CropArea({
 		}
 	}, [file]);
 
-	// 获取图片显示尺寸
-	const getImageDisplaySize = useCallback(() => {
-		if (!imageRef.current) return { width: 600, height: 400 };
+	// 计算图片显示尺寸和缩放比例
+	const calculateImageInfo = useCallback(() => {
+		if (!imageRef.current) return;
 
-		const { width, height } = imageRef.current;
+		const { naturalWidth, naturalHeight } = imageRef.current;
 		const containerWidth = 600;
 		const containerHeight = 400;
 
-		const scale = Math.min(containerWidth / width, containerHeight / height);
-		const displayWidth = width * scale;
-		const displayHeight = height * scale;
+		const scale = Math.min(containerWidth / naturalWidth, containerHeight / naturalHeight);
+		const displayWidth = naturalWidth * scale;
+		const displayHeight = naturalHeight * scale;
 
-		return { width: displayWidth, height: displayHeight };
-	}, []);
-
-	// 获取图片显示区域
-	const getImageBounds = useCallback(() => {
-		if (!imageRef.current) return { x: 0, y: 0, width: 0, height: 0 };
-
-		const { width, height } = imageRef.current;
-		const containerWidth = 600;
-		const containerHeight = 400;
-
-		const scale = Math.min(containerWidth / width, containerHeight / height);
-		const displayWidth = width * scale;
-		const displayHeight = height * scale;
-
-		// 图片在预览区域中居中显示，所以x和y都是0
-		return {
-			x: 0,
-			y: 0,
-			width: displayWidth,
-			height: displayHeight,
-		};
+		setImageInfo({
+			naturalWidth,
+			naturalHeight,
+			displayWidth,
+			displayHeight,
+			scaleX: naturalWidth / displayWidth,
+			scaleY: naturalHeight / displayHeight,
+		});
 	}, []);
 
 	// 图片加载完成后初始化裁剪区域
 	const handleImageLoad = useCallback(() => {
 		if (imageRef.current) {
-			const { width, height } = imageRef.current;
-			const containerWidth = 600; // 容器宽度
-			const containerHeight = 400; // 容器高度
+			calculateImageInfo();
+		}
+	}, [calculateImageInfo]);
 
-			// 计算图片在容器中的显示尺寸
-			const scale = Math.min(containerWidth / width, containerHeight / height);
-			const displayWidth = width * scale;
-			const displayHeight = height * scale;
-
+	// 初始化裁剪区域
+	useEffect(() => {
+		if (imageInfo.displayWidth > 0 && imageInfo.displayHeight > 0) {
 			// 初始化裁剪区域为图片中心的一个矩形
-			const cropSize = Math.min(displayWidth, displayHeight) * 0.6;
+			const cropSize = Math.min(imageInfo.displayWidth, imageInfo.displayHeight) * 0.6;
 			setCropArea({
-				x: (displayWidth - cropSize) / 2,
-				y: (displayHeight - cropSize) / 2,
+				x: (imageInfo.displayWidth - cropSize) / 2,
+				y: (imageInfo.displayHeight - cropSize) / 2,
 				width: cropSize,
 				height: cropSize,
 			});
 		}
-	}, []);
+	}, [imageInfo.displayWidth, imageInfo.displayHeight]);
 
 	// 鼠标按下裁剪框手柄
 	const handleResizeMouseDown = useCallback(
@@ -177,7 +176,6 @@ export default function CropArea({
 			height = Math.max(32, height);
 
 			// 限制在图片区域内
-			const imageBounds = getImageBounds();
 			if (x < 0) {
 				width += x;
 				x = 0;
@@ -186,11 +184,11 @@ export default function CropArea({
 				height += y;
 				y = 0;
 			}
-			if (x + width > imageBounds.width) {
-				width = imageBounds.width - x;
+			if (x + width > imageInfo.displayWidth) {
+				width = imageInfo.displayWidth - x;
 			}
-			if (y + height > imageBounds.height) {
-				height = imageBounds.height - y;
+			if (y + height > imageInfo.displayHeight) {
+				height = imageInfo.displayHeight - y;
 			}
 
 			// 确保最小尺寸
@@ -199,7 +197,7 @@ export default function CropArea({
 
 			setCropArea({ x, y, width, height });
 		},
-		[isResizing, resizeHandle, resizeStart, getImageBounds],
+		[isResizing, resizeHandle, resizeStart, imageInfo.displayWidth, imageInfo.displayHeight],
 	);
 
 	// 鼠标松开
@@ -241,9 +239,8 @@ export default function CropArea({
 			let newY = boxDragStart.crop.y + dy;
 
 			// 限制在图片区域内
-			const imageBounds = getImageBounds();
-			newX = Math.max(0, Math.min(newX, imageBounds.width - cropArea.width));
-			newY = Math.max(0, Math.min(newY, imageBounds.height - cropArea.height));
+			newX = Math.max(0, Math.min(newX, imageInfo.displayWidth - cropArea.width));
+			newY = Math.max(0, Math.min(newY, imageInfo.displayHeight - cropArea.height));
 
 			setCropArea((prev) => ({ ...prev, x: newX, y: newY }));
 		},
@@ -252,7 +249,8 @@ export default function CropArea({
 			boxDragStart,
 			cropArea.width,
 			cropArea.height,
-			getImageBounds,
+			imageInfo.displayWidth,
+			imageInfo.displayHeight,
 		],
 	);
 
@@ -264,16 +262,13 @@ export default function CropArea({
 
 	// 执行裁剪
 	const handleCrop = useCallback(async () => {
-		if (!imageRef.current) return;
+		if (!imageRef.current || imageInfo.naturalWidth === 0) return;
 
-		// 计算裁剪参数
-		const scaleX = imageRef.current.naturalWidth / imageRef.current.width;
-		const scaleY = imageRef.current.naturalHeight / imageRef.current.height;
-
-		const sourceX = cropArea.x * scaleX;
-		const sourceY = cropArea.y * scaleY;
-		const sourceWidth = cropArea.width * scaleX;
-		const sourceHeight = cropArea.height * scaleY;
+		// 使用图片信息中的缩放比例计算实际裁剪参数
+		const sourceX = cropArea.x * imageInfo.scaleX;
+		const sourceY = cropArea.y * imageInfo.scaleY;
+		const sourceWidth = cropArea.width * imageInfo.scaleX;
+		const sourceHeight = cropArea.height * imageInfo.scaleY;
 
 		try {
 			// 转换文件为InputFileType
@@ -314,25 +309,25 @@ export default function CropArea({
 			console.error("Failed to process crop:", error);
 			toast.error("裁剪失败，请重试");
 		}
-	}, [cropArea, file, onCropComplete]);
+	}, [cropArea, file, onCropComplete, imageInfo]);
 
 	// 重置裁剪区域
 	const handleReset = useCallback(() => {
 		if (imageRef.current) {
-			handleImageLoad();
+			calculateImageInfo();
 		}
-	}, [handleImageLoad]);
+	}, [calculateImageInfo]);
 
 	return (
 		<div className="space-y-4">
 			{/* 裁剪预览区域 */}
 			<div className="relative border rounded-lg overflow-hidden bg-muted/20">
-				{imageUrl && (
+				{imageUrl && imageInfo.displayWidth > 0 && imageInfo.displayHeight > 0 && (
 					<div
-						className="relative"
+						className="relative border-2 border-background"
 						style={{
-							width: getImageDisplaySize().width,
-							height: getImageDisplaySize().height,
+							width: imageInfo.displayWidth,
+							height: imageInfo.displayHeight,
 							margin: "0 auto",
 						}}
 						onMouseMove={
@@ -397,13 +392,15 @@ export default function CropArea({
 					</div>
 				)}
 				{/* 隐藏的图片元素用于获取原始尺寸 */}
-				<img
-					ref={imageRef}
-					src={imageUrl}
-					alt="Preview"
-					className="hidden"
-					onLoad={handleImageLoad}
-				/>
+				{imageUrl && (
+					<img
+						ref={imageRef}
+						src={imageUrl}
+						alt="Preview"
+						className="hidden"
+						onLoad={handleImageLoad}
+					/>
+				)}
 			</div>
 
 			{/* 操作按钮 */}
@@ -422,11 +419,11 @@ export default function CropArea({
 			</div>
 
 			{/* 裁剪信息 */}
-			{imageUrl && (
+			{imageUrl && imageInfo.naturalWidth > 0 && (
 				<div className="text-sm text-muted-foreground">
 					{t("crop_info", {
-						width: Math.round(cropArea.width),
-						height: Math.round(cropArea.height),
+						width: Math.round(cropArea.width * imageInfo.scaleX),
+						height: Math.round(cropArea.height * imageInfo.scaleY),
 					})}
 				</div>
 			)}

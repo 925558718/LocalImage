@@ -79,24 +79,17 @@ export default function CropComposer() {
 			{/* 主要内容区域 */}
 			{files.length === 0 ? (
 				/* 文件上传区域 - 只在没有文件时显示 */
-				<Card className="h-full">
-					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
-							<Upload className="w-5 h-5" />
-							{t("uploaded_files")}
-						</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<DropZone
-							files={files}
-							onFilesSelected={handleFilesAdded}
-							onRemoveFile={(index) => handleFilesRemoved([index])}
-							onClearAllFiles={() =>
-								handleFilesRemoved(files.map((_, index) => index))
-							}
-						/>
-					</CardContent>
-				</Card>
+				<div className="bg-background/70 backdrop-blur-xl rounded-3xl p-8 border border-border/20 shadow-xl relative">
+					<DropZone
+						files={files}
+						onFilesSelected={handleFilesAdded}
+						onRemoveFile={(index) => handleFilesRemoved([index])}
+						onClearAllFiles={() =>
+							handleFilesRemoved(files.map((_, index) => index))
+						}
+						disableFormats={["gif", "webp"]}
+					/>
+				</div>
 			) : (
 				/* 裁剪预览和操作区域 - 有文件时显示 */
 				<div className="space-y-6">

@@ -1,4 +1,7 @@
 import { InputFileType } from "../fileUtils";
+import conversionStrategyPool from "./conversions";
+import cropStrategyPool from "./crop";
+import upscaleStrategyPool from "./upscale";
 
 // 基础通用选项 - 所有策略都需要的公共属性
 export interface BaseOptions {
@@ -68,19 +71,6 @@ export type ConvertStrategy = Strategy<"convert">;
 export type AnimationStrategy = Strategy<"animation">;
 export type CropStrategy = Strategy<"crop">;
 
-const upscale_strategy_pool: UpscaleStrategy[] = [];
-const convert_strategy_pool: ConvertStrategy[] = [];
-const animation_strategy_pool: AnimationStrategy[] = [];
-const crop_strategy_pool: CropStrategy[] = [];
-
-// 创建 action 到 strategy pool 的映射
-const strategyPoolMap = {
-	upscale: upscale_strategy_pool,
-	convert: convert_strategy_pool,
-	animation: animation_strategy_pool,
-	crop: crop_strategy_pool,
-} as const;
-
 // 重载函数以支持类型安全
 export function generateFFMPEGCommand(
 	action: "upscale",
@@ -110,7 +100,8 @@ export function generateFFMPEGCommand(
 	const command: string[] = [];
 
 	if (action === "upscale") {
-		const strategyPool = strategyPoolMap.upscale;
+		const strategyPool =  upscaleStrategyPool;
+		console.log("strategyPool", strategyPool);
 		const upscaleOptions = options as UpscaleOptions;
 		for (const strategy of strategyPool) {
 			if (strategy.match(input, upscaleOptions)) {
@@ -119,7 +110,7 @@ export function generateFFMPEGCommand(
 			}
 		}
 	} else if (action === "convert") {
-		const strategyPool = strategyPoolMap.convert;
+		const strategyPool = conversionStrategyPool;
 		const convertOptions = options as ConvertOptions;
 		for (const strategy of strategyPool) {
 			if (strategy.match(input, convertOptions)) {
@@ -128,18 +119,9 @@ export function generateFFMPEGCommand(
 			}
 		}
 	} else if (action === "animation") {
-		const strategyPool = strategyPoolMap.animation;
-		const animationOptions = options as AnimationOptions;
-		for (const strategy of strategyPool) {
-			if (strategy.match(input, animationOptions)) {
-				command.push(
-					...strategy.generateFFMPEGCommand(input, animationOptions),
-				);
-				break;
-			}
-		}
+		throw new Error("Unsupported action: animation");	
 	} else if (action === "crop") {
-		const strategyPool = strategyPoolMap.crop;
+		const strategyPool = cropStrategyPool;
 		const cropOptions = options as CropOptions;
 		for (const strategy of strategyPool) {
 			if (strategy.match(input, cropOptions)) {
@@ -154,32 +136,5 @@ export function generateFFMPEGCommand(
 	return command;
 }
 
-// 导出策略池以供注册新策略使用
-export const strategyPools = {
-	upscale: upscale_strategy_pool,
-	convert: convert_strategy_pool,
-	animation: animation_strategy_pool,
-	crop: crop_strategy_pool,
-} as const;
 
-// 注册策略的辅助函数
-export function registerUpscaleStrategy(strategy: UpscaleStrategy): void {
-	upscale_strategy_pool.push(strategy);
-}
-
-export function registerConvertStrategy(strategy: ConvertStrategy): void {
-	convert_strategy_pool.push(strategy);
-}
-
-export function registerAnimationStrategy(strategy: AnimationStrategy): void {
-	animation_strategy_pool.push(strategy);
-}
-
-export function registerCropStrategy(strategy: CropStrategy): void {
-	crop_strategy_pool.push(strategy);
-}
-// 导入并注册所有策略
-import "./upscale";
-import "./conversions";
-import "./animations";
-import "./crop";
+// 直接导出策略注册函数

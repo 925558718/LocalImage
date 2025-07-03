@@ -13,7 +13,8 @@ export class DefaultCropStrategy implements CropStrategy {
 	 * @returns 是否能够处理
 	 */
 	match(input: InputFileType, options: CropOptions): boolean {
-		return true;
+		// 只处理静态图片，动图由AnimatedCropStrategy处理
+		return input.isAnimated !== true;
 	}
 
 	/**
@@ -24,7 +25,7 @@ export class DefaultCropStrategy implements CropStrategy {
 	 */
 	generateFFMPEGCommand(input: InputFileType, options: CropOptions): string[] {
 		const args: string[] = [];
-		console.log("input", input);
+		console.log("处理静态图片裁剪:", input);
 
 		// 生成输入文件名和输出文件名
 		const inputFileName = `${input.name}.${input.format || "tmp"}`;

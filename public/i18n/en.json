@@ -224,6 +224,8 @@
 	"min_crop_files": "Please select images to crop",
 	"crop_instruction": "Please upload images on the left to preview and crop here",
 	"crop_info": "Crop size: {width} × {height} pixels",
+	"crop_results": "Crop Results",
+	"crop_results_desc": "Download all cropped images or view cropped results",
 	"upscale": "Image Upscale",
 	"upscale_desc": "Use advanced algorithms to enhance image resolution, resize images, and make low-resolution images crisp",
 	"upscale_meta_title": "Image Upscaler & Resizer - Enhance & Resize Images | LocalImage",
@@ -264,5 +266,8 @@
 	"all_upscale_failed": "All image upscaling failed, please check file formats or try again",
 	"min_compress_files": "Please select images to compress",
 	"compress_failed": "Image compression failed",
-	"all_compress_failed": "All image compression failed, please check file formats or try again"
+	"all_compress_failed": "All image compression failed, please check file formats or try again",
+	"unsupported_animation_format": "Unsupported GIF and WebP animation formats",
+	"unsupported_animation_format_toast": "Unsupported animation format: {fileNames}. Please upload static image files.",
+	"finalizing": "Finalizing..."
 }
