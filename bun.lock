@@ -435,8 +435,6 @@
 
     "@opennextjs/cloudflare": ["@opennextjs/cloudflare@1.0.0-beta.3", "", { "dependencies": { "@dotenvx/dotenvx": "1.31.0", "@opennextjs/aws": "3.5.7", "enquirer": "^2.4.1", "glob": "^11.0.0", "ts-tqdm": "^0.8.6" }, "peerDependencies": { "wrangler": "^3.114.3 || ^4.7.0" }, "bin": { "opennextjs-cloudflare": "dist/cli/index.js" } }, "sha512-qKBXQZhUeQ+iGvfJeF7PO30g59LHnPOlRVZd77zxwn6Uc9C+c0LSwo8N28XRIWyQPkY007rKk9pSIxOrP4MHtQ=="],
 
-    "@opentelemetry/api": ["@opentelemetry/api@1.9.0", "", {}, "sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg=="],
-
     "@parcel/watcher": ["@parcel/watcher@2.5.1", "", { "dependencies": { "detect-libc": "^1.0.3", "is-glob": "^4.0.3", "micromatch": "^4.0.5", "node-addon-api": "^7.0.0" }, "optionalDependencies": { "@parcel/watcher-android-arm64": "2.5.1", "@parcel/watcher-darwin-arm64": "2.5.1", "@parcel/watcher-darwin-x64": "2.5.1", "@parcel/watcher-freebsd-x64": "2.5.1", "@parcel/watcher-linux-arm-glibc": "2.5.1", "@parcel/watcher-linux-arm-musl": "2.5.1", "@parcel/watcher-linux-arm64-glibc": "2.5.1", "@parcel/watcher-linux-arm64-musl": "2.5.1", "@parcel/watcher-linux-x64-glibc": "2.5.1", "@parcel/watcher-linux-x64-musl": "2.5.1", "@parcel/watcher-win32-arm64": "2.5.1", "@parcel/watcher-win32-ia32": "2.5.1", "@parcel/watcher-win32-x64": "2.5.1" } }, "sha512-dfUnCxiN9H4ap84DvD2ubjw+3vUNpstxa0TneY/Paat8a3R4uQZDLSvWjmznAY/DoahqTHl9V46HF/Zs3F29pg=="],
 
     "@parcel/watcher-android-arm64": ["@parcel/watcher-android-arm64@2.5.1", "", { "os": "android", "cpu": "arm64" }, "sha512-KF8+j9nNbUN8vzOFDpRMsaKBHZ/mcjEjMToVMJOhTozkDonQFFrRcfdLWn6yWKCmJKmdVxSgHiYvTCef4/qcBA=="],
