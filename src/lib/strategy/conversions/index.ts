@@ -5,10 +5,10 @@ import { PngConversionStrategy } from "./PngConversionStrategy";
 import { WebPConversionStrategy } from "./WebPConversionStrategy";
 
 const conversionStrategyPool: ConvertStrategy[] = [
-	new DefaultConversionStrategy(),
 	new IcoConversionStrategy(),
 	new PngConversionStrategy(),
 	new WebPConversionStrategy(),
+	new DefaultConversionStrategy(),
 ];
 
 export default conversionStrategyPool;

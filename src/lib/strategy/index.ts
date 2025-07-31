@@ -101,7 +101,6 @@ export function generateFFMPEGCommand(
 
 	if (action === "upscale") {
 		const strategyPool = upscaleStrategyPool;
-		console.log("strategyPool", strategyPool);
 		const upscaleOptions = options as UpscaleOptions;
 		for (const strategy of strategyPool) {
 			if (strategy.match(input, upscaleOptions)) {
