@@ -27,7 +27,6 @@ export class DefaultUpscaleStrategy implements UpscaleStrategy {
 		options: UpscaleOptions,
 	): string[] {
 		const args: string[] = [];
-		console.log("input", input);
 		// 生成输入文件名和输出文件名
 		const inputFileName = `${input.name}.${input.format || "tmp"}`;
 		const outputFileName = `${input.name}_${options.outputSuffixName || "upscaled"}.${input.format || "tmp"}`;

@@ -34,7 +34,6 @@ export class WebPConversionStrategy implements ConvertStrategy {
 		options: ConvertOptions,
 	): string[] {
 		const args: string[] = [];
-		console.log("calc", 123);
 		// 生成输入文件名和输出文件名
 		const inputFileName = `${input.name}.${input.format || "tmp"}`;
 		const outputFileName = `${input.name}_${options.outputSuffixName || "output"}.webp`;
