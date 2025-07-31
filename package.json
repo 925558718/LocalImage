@@ -61,7 +61,7 @@
 		"wrangler": "^4.16.1"
 	},
 	"scripts": {
-		"build": "NEXT_PRIVATE_STANDALONE=true next build --turbopack",
+		"build": "NEXT_PRIVATE_STANDALONE=true next build",
 		"postbuild": "opennextjs-cloudflare build -s",
 		"cf-typegen": "wrangler types --env-interface CloudflareEnv env.d.ts",
 		"deploy": "wrangler deploy",
