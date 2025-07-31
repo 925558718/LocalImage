@@ -114,6 +114,7 @@ export function generateFFMPEGCommand(
 		const convertOptions = options as ConvertOptions;
 		for (const strategy of strategyPool) {
 			if (strategy.match(input, convertOptions)) {
+				console.log(strategy.generateFFMPEGCommand(input, convertOptions));
 				command.push(...strategy.generateFFMPEGCommand(input, convertOptions));
 				break;
 			}
