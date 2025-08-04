@@ -1,57 +1,66 @@
-import { MetadataRoute } from 'next';
+import { MetadataRoute } from "next";
+import { defaultLocale, supportedLocales } from "@/i18n/langMap";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://www.limgx.com';
-  
-  // Basic route list, animation creator as main feature
-  const routes = [
-    {
-      path: '',            // Homepage - WebP Animation Creator
-      priority: 1.0,
-      changeFreq: 'daily' as const,
-      description: 'WebP Animation Creator Homepage'
-    },
-    {
-      path: '/compress',   // Image Compression Page
-      priority: 0.8,
-      changeFreq: 'weekly' as const,
-      description: 'Image Compression Tool Page'
-    },
-    {
-      path: '/dev/gradient', // CSS Gradient Generator Page
-      priority: 0.7,
-      changeFreq: 'weekly' as const,
-      description: 'CSS Gradient Generator Tool Page'
-    },
-  ];
+	const baseUrl = "https://limgx.com";
 
-  const currentDate = new Date().toISOString();
-  
-  // Supported languages
-  const languages = {
-    'zh-CN': 'https://www.limgx.com',
-    'en': 'https://www.limgx.com',
-    'ja': 'https://www.limgx.com',
-    'es': 'https://www.limgx.com',
-    'fr': 'https://www.limgx.com',
-    'de': 'https://www.limgx.com',
-  };
+	// Basic route list, animation creator as main feature
+	const routes = [
+		{
+			path: "/animation", // Homepage - WebP Animation Creator
+			priority: 1.0,
+			changeFreq: "daily" as const,
+			description: "WebP Animation Creator Homepage",
+		},
+		{
+			path: "/", // Image Compression Page
+			priority: 0.8,
+			changeFreq: "weekly" as const,
+			description: "Image Compression Tool Page",
+		},
+		{
+			path: "/upscale", // Image Upscale Page
+			priority: 0.9,
+			changeFreq: "weekly" as const,
+			description: "Image Upscale Tool Page",
+		},
+		{
+			path: "/crop", // Image Crop Page
+			priority: 0.9,
+			changeFreq: "weekly" as const,
+			description: "Image Crop Tool Page",
+		},
+	];
 
-  // Convert each route to sitemap entry
-  return routes.map(route => {
-    return {
-      url: `${baseUrl}${route.path}`,
-      lastModified: currentDate,
-      changeFrequency: route.changeFreq,
-      priority: route.priority,
-      alternates: {
-        languages: Object.fromEntries(
-          Object.entries(languages).map(([lang, url]) => [
-            lang, 
-            `${url}${route.path}`
-          ])
-        )
-      }
-    };
-  });
+	const currentDate = new Date().toISOString();
+
+	// 生成所有语言和路由的组合
+	const sitemapEntries: MetadataRoute.Sitemap = [];
+
+	// 为每个路由和每种语言生成条目
+	for (const route of routes) {
+		// 为默认语言生成无语言前缀的URL（默认路径）
+		sitemapEntries.push({
+			url: `${baseUrl}${route.path}`,
+			lastModified: currentDate,
+			changeFrequency: route.changeFreq,
+			priority: route.priority,
+		});
+
+		// 为每种支持的语言生成带语言前缀的URL
+		for (const locale of supportedLocales) {
+			// 默认语言已经添加过了（没有前缀）
+			if (locale === defaultLocale) continue;
+
+			// 添加带语言前缀的URL
+			sitemapEntries.push({
+				url: `${baseUrl}/${locale}${route.path}`,
+				lastModified: currentDate,
+				changeFrequency: route.changeFreq,
+				priority: route.priority,
+			});
+		}
+	}
+
+	return sitemapEntries;
 }

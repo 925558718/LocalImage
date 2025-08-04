@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 执行 pre-commit 检查..."
+
+# 运行 Biome format 和 lint
+echo "🎨 运行 Biome format..."
+bunx @biomejs/biome format --write .
+
+echo "🔍 运行 Biome lint..."
+bunx @biomejs/biome lint --write .
+
+echo "✅ pre-commit 检查完成" 
