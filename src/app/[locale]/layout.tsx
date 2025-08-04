@@ -13,6 +13,7 @@ import {
 	defaultLocale,
 	dictionaries,
 	getNormalizedLocale,
+	getOpenGraphLocale,
 	supportedLocales,
 } from "@/i18n/langMap";
 
@@ -43,10 +44,10 @@ export async function generateMetadata({
 	// 标题和描述支持多语言 - 更新为压缩功能的SEO
 	const title =
 		dictionary.compress_meta_title ||
-		"Compress & Convert Images - LocalImage | Free Online Image Compression";
+		"Image Compression & Conversion Tool - Local Processing Privacy Protected";
 	const description =
 		dictionary.compress_meta_description ||
-		"Free online image compression & conversion tool. Reduce size or convert formats, all processed locally for privacy.";
+		"Free online image compression & conversion tool. Local processing protects privacy, supports JPG, PNG, WebP formats.";
 
 	// 构建基础URL
 	const baseUrl = "https://limgx.com";
@@ -75,6 +76,7 @@ export async function generateMetadata({
 		title,
 		description,
 		authors: [{ name: "limgx.com" }],
+		keywords: "image compression, image converter, local processing, privacy, JPG, PNG, WebP, free online tool",
 		robots: {
 			index: true,
 			follow: true,
@@ -90,6 +92,56 @@ export async function generateMetadata({
 			canonical: currentUrl,
 			languages: languageAlternates,
 		},
+		openGraph: {
+			title,
+			description,
+			url: currentUrl,
+			siteName: "LocalImage",
+			locale: getOpenGraphLocale(locale),
+			type: "website",
+			images: [
+				{
+					url: "https://static.limgx.com/screenshot.png",
+					width: 1200,
+					height: 630,
+					alt: "LocalImage - Image Compression Tool",
+				},
+			],
+		},
+		twitter: {
+			card: "summary_large_image",
+			title,
+			description,
+			images: ["https://static.limgx.com/screenshot.png"],
+		},
+		other: {
+			"application/ld+json": JSON.stringify({
+				"@context": "https://schema.org",
+				"@type": "WebApplication",
+				"name": "LocalImage Image Compression Tool",
+				"description": description,
+				"url": currentUrl,
+				"applicationCategory": "MultimediaApplication",
+				"operatingSystem": "Web Browser",
+				"offers": {
+					"@type": "Offer",
+					"price": "0",
+					"priceCurrency": "USD"
+				},
+				"featureList": [
+					"Image compression",
+					"Format conversion", 
+					"Local processing",
+					"Privacy protection",
+					"Batch processing",
+					"Multiple format support"
+				],
+				"author": {
+					"@type": "Organization",
+					"name": "LocalImage"
+				}
+			})
+		}
 	};
 }
 

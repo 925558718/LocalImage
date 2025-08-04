@@ -22,7 +22,7 @@
 		"Real-time preview functionality"
 	],
 	"compress_meta_title": "Image Compression & Conversion Tool - Local Processing Privacy Protected",
-	"compress_meta_description": "Free online image compression & conversion tool. Local processing protects privacy, supports JPG, PNG, WebP format conversion, no server upload required.",
+	"compress_meta_description": "Free online image compression & conversion tool. Local processing protects privacy, supports JPG, PNG, WebP formats.",
 	"advanceoption": {
 		"outputName": "Output filename suffix",
 		"outputName_placeholder": "e.g. compressed, leave empty for no suffix",
