@@ -6,6 +6,7 @@ import PageTitle from "@/components/PageTitle";
 
 function Page() {
 	const t = useTranslations();
+
 	return (
 		<>
 			<PageTitle
