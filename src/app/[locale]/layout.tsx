@@ -76,7 +76,8 @@ export async function generateMetadata({
 		title,
 		description,
 		authors: [{ name: "limgx.com" }],
-		keywords: "image compression, image converter, local processing, privacy, JPG, PNG, WebP, free online tool",
+		keywords:
+			"image compression, image converter, local processing, privacy, JPG, PNG, WebP, free online tool",
 		robots: {
 			index: true,
 			follow: true,
@@ -118,30 +119,30 @@ export async function generateMetadata({
 			"application/ld+json": JSON.stringify({
 				"@context": "https://schema.org",
 				"@type": "WebApplication",
-				"name": "LocalImage Image Compression Tool",
-				"description": description,
-				"url": currentUrl,
-				"applicationCategory": "MultimediaApplication",
-				"operatingSystem": "Web Browser",
-				"offers": {
+				name: "LocalImage Image Compression Tool",
+				description: description,
+				url: currentUrl,
+				applicationCategory: "MultimediaApplication",
+				operatingSystem: "Web Browser",
+				offers: {
 					"@type": "Offer",
-					"price": "0",
-					"priceCurrency": "USD"
+					price: "0",
+					priceCurrency: "USD",
 				},
-				"featureList": [
+				featureList: [
 					"Image compression",
-					"Format conversion", 
+					"Format conversion",
 					"Local processing",
 					"Privacy protection",
 					"Batch processing",
-					"Multiple format support"
+					"Multiple format support",
 				],
-				"author": {
+				author: {
 					"@type": "Organization",
-					"name": "LocalImage"
-				}
-			})
-		}
+					name: "LocalImage",
+				},
+			}),
+		},
 	};
 }
 
