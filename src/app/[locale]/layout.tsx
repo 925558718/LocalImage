@@ -4,7 +4,6 @@ import clsx from "clsx";
 import { Provider as JotaiProvider } from "jotai";
 import { Inter, Open_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import BugsnagErrorBoundary from "@/components/Bugsnap";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import { Toaster } from "@/components/shadcn/sonner";
@@ -45,9 +44,13 @@ export async function generateMetadata({
 	const title =
 		dictionary.compress_meta_title ||
 		"Image Compression & Conversion Tool - Local Processing Privacy Protected";
-	const description =
+	const rawDescription =
 		dictionary.compress_meta_description ||
 		"Free online image compression & conversion tool. Local processing protects privacy, supports JPG, PNG, WebP formats.";
+	const description =
+		rawDescription.length > 160
+			? `${rawDescription.slice(0, 157)}...`
+			: rawDescription;
 
 	// 构建基础URL
 	const baseUrl = "https://limgx.com";
@@ -76,8 +79,6 @@ export async function generateMetadata({
 		title,
 		description,
 		authors: [{ name: "limgx.com" }],
-		keywords:
-			"image compression, image converter, local processing, privacy, JPG, PNG, WebP, free online tool",
 		robots: {
 			index: true,
 			follow: true,
@@ -115,34 +116,6 @@ export async function generateMetadata({
 			description,
 			images: ["https://static.limgx.com/screenshot.png"],
 		},
-		other: {
-			"application/ld+json": JSON.stringify({
-				"@context": "https://schema.org",
-				"@type": "WebApplication",
-				name: "LocalImage Image Compression Tool",
-				description: description,
-				url: currentUrl,
-				applicationCategory: "MultimediaApplication",
-				operatingSystem: "Web Browser",
-				offers: {
-					"@type": "Offer",
-					price: "0",
-					priceCurrency: "USD",
-				},
-				featureList: [
-					"Image compression",
-					"Format conversion",
-					"Local processing",
-					"Privacy protection",
-					"Batch processing",
-					"Multiple format support",
-				],
-				author: {
-					"@type": "Organization",
-					name: "LocalImage",
-				},
-			}),
-		},
 	};
 }
 
@@ -160,11 +133,52 @@ export default async function RootLayout({
 	// 加载当前语言的字典
 	const dictionary = await dictionaries[locale]();
 
+	// 生成结构化数据所需字段
+	const baseUrl = "https://limgx.com";
+	const currentUrl =
+		locale === defaultLocale ? baseUrl : `${baseUrl}/${locale}`;
+	const structuredRawDescription =
+		dictionary.compress_meta_description ||
+		"Free online image compression & conversion tool. Local processing protects privacy, supports JPG, PNG, WebP formats.";
+	const structuredDescription =
+		structuredRawDescription.length > 160
+			? `${structuredRawDescription.slice(0, 157)}...`
+			: structuredRawDescription;
+	const jsonLd = {
+		"@context": "https://schema.org",
+		"@type": "WebApplication",
+		name: "LocalImage Image Compression Tool",
+		description: structuredDescription,
+		url: currentUrl,
+		applicationCategory: "MultimediaApplication",
+		operatingSystem: "Web Browser",
+		offers: {
+			"@type": "Offer",
+			price: "0",
+			priceCurrency: "USD",
+		},
+		featureList: [
+			"Image compression",
+			"Format conversion",
+			"Local processing",
+			"Privacy protection",
+			"Batch processing",
+			"Multiple format support",
+		],
+		author: {
+			"@type": "Organization",
+			name: "LocalImage",
+		},
+	};
+
 	return (
 		<html lang={locale} suppressHydrationWarning>
 			<head>
 				{/* 多语言SEO优化 */}
 				<meta httpEquiv="content-language" content={locale} />
+				<script type="application/ld+json" suppressHydrationWarning>
+					{JSON.stringify(jsonLd)}
+				</script>
 			</head>
 			<body
 				className={clsx(
@@ -173,38 +187,36 @@ export default async function RootLayout({
 					inter.variable,
 				)}
 			>
-				<BugsnagErrorBoundary>
-					<ThemeProvider
-						attribute="class"
-						defaultTheme="light"
-						disableTransitionOnChange
-						enableSystem={false}
-					>
-						<NextIntlClientProvider locale={locale} messages={dictionary}>
-							<JotaiProvider>
-								<Header />
-								<div className="relative min-h-screen w-full overflow-hidden">
-									{/* 共享的装饰性背景 */}
-									<div className="absolute inset-0 bg-gradient-to-br from-background via-primary/5 to-primary/10" />
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="light"
+					disableTransitionOnChange
+					enableSystem={false}
+				>
+					<NextIntlClientProvider locale={locale} messages={dictionary}>
+						<JotaiProvider>
+							<Header />
+							<div className="relative min-h-screen w-full overflow-hidden">
+								{/* 共享的装饰性背景 */}
+								<div className="absolute inset-0 bg-gradient-to-br from-background via-primary/5 to-primary/10" />
 
-									{/* 装饰性背景元素 */}
-									<div className="absolute inset-0 overflow-hidden">
-										<div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full blur-3xl" />
-										<div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-primary/15 to-primary/5 rounded-full blur-3xl" />
-										<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full blur-3xl" />
-									</div>
-
-									{/* 内容区域 */}
-									<main className="w-full min-h-screen flex flex-col items-center p-4 z-10 relative">
-										{children}
-									</main>
+								{/* 装饰性背景元素 */}
+								<div className="absolute inset-0 overflow-hidden">
+									<div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full blur-3xl" />
+									<div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-primary/15 to-primary/5 rounded-full blur-3xl" />
+									<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full blur-3xl" />
 								</div>
-								<Footer />
-								<Toaster />
-							</JotaiProvider>
-						</NextIntlClientProvider>
-					</ThemeProvider>
-				</BugsnagErrorBoundary>
+
+								{/* 内容区域 */}
+								<main className="w-full min-h-screen flex flex-col items-center p-4 z-10 relative">
+									{children}
+								</main>
+							</div>
+							<Footer />
+							<Toaster />
+						</JotaiProvider>
+					</NextIntlClientProvider>
+				</ThemeProvider>
 			</body>
 		</html>
 	);

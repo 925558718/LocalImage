@@ -1,15 +1,13 @@
 "use client";
 
+import { Crop, RotateCw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "@/components/shadcn/button";
-import { Crop, RotateCw } from "lucide-react";
 import { toast } from "sonner";
-
-import { OutputType } from "@/lib/fileUtils";
-import { generateFFMPEGCommand } from "@/lib/strategy";
-import { convertFilesToInputFileType } from "@/lib/fileUtils";
+import { Button } from "@/components/shadcn/button";
 import ffm_ins from "@/lib/ffmpeg";
+import { convertFilesToInputFileType, OutputType } from "@/lib/fileUtils";
+import { generateFFMPEGCommand } from "@/lib/strategy";
 
 interface CropAreaProps {
 	file: File;

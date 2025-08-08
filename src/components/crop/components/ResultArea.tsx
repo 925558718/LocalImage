@@ -1,9 +1,9 @@
 "use client";
 
+import { Download, FileImage } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { Button } from "@/components/shadcn/button";
-import { Download, FileImage } from "lucide-react";
 import { OutputType } from "@/lib/fileUtils";
 
 interface ResultAreaProps {
