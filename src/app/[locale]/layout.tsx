@@ -4,7 +4,6 @@ import clsx from "clsx";
 import { Provider as JotaiProvider } from "jotai";
 import { Inter, Open_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import BugsnagErrorBoundary from "@/components/Bugsnap";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import { Toaster } from "@/components/shadcn/sonner";
@@ -188,38 +187,36 @@ export default async function RootLayout({
 					inter.variable,
 				)}
 			>
-				<BugsnagErrorBoundary>
-					<ThemeProvider
-						attribute="class"
-						defaultTheme="light"
-						disableTransitionOnChange
-						enableSystem={false}
-					>
-						<NextIntlClientProvider locale={locale} messages={dictionary}>
-							<JotaiProvider>
-								<Header />
-								<div className="relative min-h-screen w-full overflow-hidden">
-									{/* 共享的装饰性背景 */}
-									<div className="absolute inset-0 bg-gradient-to-br from-background via-primary/5 to-primary/10" />
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="light"
+					disableTransitionOnChange
+					enableSystem={false}
+				>
+					<NextIntlClientProvider locale={locale} messages={dictionary}>
+						<JotaiProvider>
+							<Header />
+							<div className="relative min-h-screen w-full overflow-hidden">
+								{/* 共享的装饰性背景 */}
+								<div className="absolute inset-0 bg-gradient-to-br from-background via-primary/5 to-primary/10" />
 
-									{/* 装饰性背景元素 */}
-									<div className="absolute inset-0 overflow-hidden">
-										<div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full blur-3xl" />
-										<div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-primary/15 to-primary/5 rounded-full blur-3xl" />
-										<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full blur-3xl" />
-									</div>
-
-									{/* 内容区域 */}
-									<main className="w-full min-h-screen flex flex-col items-center p-4 z-10 relative">
-										{children}
-									</main>
+								{/* 装饰性背景元素 */}
+								<div className="absolute inset-0 overflow-hidden">
+									<div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full blur-3xl" />
+									<div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-primary/15 to-primary/5 rounded-full blur-3xl" />
+									<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full blur-3xl" />
 								</div>
-								<Footer />
-								<Toaster />
-							</JotaiProvider>
-						</NextIntlClientProvider>
-					</ThemeProvider>
-				</BugsnagErrorBoundary>
+
+								{/* 内容区域 */}
+								<main className="w-full min-h-screen flex flex-col items-center p-4 z-10 relative">
+									{children}
+								</main>
+							</div>
+							<Footer />
+							<Toaster />
+						</JotaiProvider>
+					</NextIntlClientProvider>
+				</ThemeProvider>
 			</body>
 		</html>
 	);
