@@ -2,6 +2,7 @@
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import PageTitle from "@/components/PageTitle";
 import { Progress } from "@/components/shadcn";
 import { useFFmpeg } from "@/hooks/useFFmpeg";
@@ -14,7 +15,6 @@ import {
 	PreviewArea,
 	ResultArea,
 } from "./components";
-import { toast } from "sonner";
 
 function AnimationComposer() {
 	const [loading, setLoading] = useState(false);

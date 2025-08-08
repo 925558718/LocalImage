@@ -45,9 +45,13 @@ export async function generateMetadata({
 	const title =
 		dictionary.compress_meta_title ||
 		"Image Compression & Conversion Tool - Local Processing Privacy Protected";
-	const description =
+	const rawDescription =
 		dictionary.compress_meta_description ||
 		"Free online image compression & conversion tool. Local processing protects privacy, supports JPG, PNG, WebP formats.";
+	const description =
+		rawDescription.length > 160
+			? `${rawDescription.slice(0, 157)}...`
+			: rawDescription;
 
 	// 构建基础URL
 	const baseUrl = "https://limgx.com";
@@ -76,8 +80,6 @@ export async function generateMetadata({
 		title,
 		description,
 		authors: [{ name: "limgx.com" }],
-		keywords:
-			"image compression, image converter, local processing, privacy, JPG, PNG, WebP, free online tool",
 		robots: {
 			index: true,
 			follow: true,
@@ -115,34 +117,6 @@ export async function generateMetadata({
 			description,
 			images: ["https://static.limgx.com/screenshot.png"],
 		},
-		other: {
-			"application/ld+json": JSON.stringify({
-				"@context": "https://schema.org",
-				"@type": "WebApplication",
-				name: "LocalImage Image Compression Tool",
-				description: description,
-				url: currentUrl,
-				applicationCategory: "MultimediaApplication",
-				operatingSystem: "Web Browser",
-				offers: {
-					"@type": "Offer",
-					price: "0",
-					priceCurrency: "USD",
-				},
-				featureList: [
-					"Image compression",
-					"Format conversion",
-					"Local processing",
-					"Privacy protection",
-					"Batch processing",
-					"Multiple format support",
-				],
-				author: {
-					"@type": "Organization",
-					name: "LocalImage",
-				},
-			}),
-		},
 	};
 }
 
@@ -160,11 +134,52 @@ export default async function RootLayout({
 	// 加载当前语言的字典
 	const dictionary = await dictionaries[locale]();
 
+	// 生成结构化数据所需字段
+	const baseUrl = "https://limgx.com";
+	const currentUrl =
+		locale === defaultLocale ? baseUrl : `${baseUrl}/${locale}`;
+	const structuredRawDescription =
+		dictionary.compress_meta_description ||
+		"Free online image compression & conversion tool. Local processing protects privacy, supports JPG, PNG, WebP formats.";
+	const structuredDescription =
+		structuredRawDescription.length > 160
+			? `${structuredRawDescription.slice(0, 157)}...`
+			: structuredRawDescription;
+	const jsonLd = {
+		"@context": "https://schema.org",
+		"@type": "WebApplication",
+		name: "LocalImage Image Compression Tool",
+		description: structuredDescription,
+		url: currentUrl,
+		applicationCategory: "MultimediaApplication",
+		operatingSystem: "Web Browser",
+		offers: {
+			"@type": "Offer",
+			price: "0",
+			priceCurrency: "USD",
+		},
+		featureList: [
+			"Image compression",
+			"Format conversion",
+			"Local processing",
+			"Privacy protection",
+			"Batch processing",
+			"Multiple format support",
+		],
+		author: {
+			"@type": "Organization",
+			name: "LocalImage",
+		},
+	};
+
 	return (
 		<html lang={locale} suppressHydrationWarning>
 			<head>
 				{/* 多语言SEO优化 */}
 				<meta httpEquiv="content-language" content={locale} />
+				<script type="application/ld+json" suppressHydrationWarning>
+					{JSON.stringify(jsonLd)}
+				</script>
 			</head>
 			<body
 				className={clsx(

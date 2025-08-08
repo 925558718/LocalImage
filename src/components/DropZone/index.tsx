@@ -8,8 +8,8 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import { Label } from "@/components/shadcn/label";
 import { toast } from "sonner";
+import { Label } from "@/components/shadcn/label";
 
 interface DropzoneWithPreviewProps {
 	onFilesSelected: (files: File[]) => void;

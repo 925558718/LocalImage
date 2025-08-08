@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getNormalizedLocale, dictionaries } from "@/i18n/langMap";
+import { dictionaries, getNormalizedLocale } from "@/i18n/langMap";
 
 export async function generateMetadata({
 	params,
