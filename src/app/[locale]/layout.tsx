@@ -15,6 +15,7 @@ import {
 	getOpenGraphLocale,
 	supportedLocales,
 } from "@/i18n/langMap";
+import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 const Opensans = Open_Sans({
 	subsets: ["latin"],
@@ -214,6 +215,7 @@ export default async function RootLayout({
 							</div>
 							<Footer />
 							<Toaster />
+							<Analytics />
 							<SpeedInsights />
 						</JotaiProvider>
 					</NextIntlClientProvider>
