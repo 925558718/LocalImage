@@ -54,7 +54,7 @@
 		"typescript": "5.8.3"
 	},
 	"scripts": {
-		"build": "next build && bun run scripts/uploader.ts",
+		"build": "next build",
 		"dev": "next dev",
 		"lint": "next lint",
 		"start": "next start",
