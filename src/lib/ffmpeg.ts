@@ -1,9 +1,9 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { toBlobURL } from "@ffmpeg/util";
+import { toast } from "sonner";
+import { InputFileType, OutputType } from "./fileUtils";
 import { AnimationStrategyFactory } from "./strategy/animations";
 import { isBrowser } from "./utils";
-import { InputFileType, OutputType } from "./fileUtils";
-import { toast } from "sonner";
 
 export type FFMPEGOptions = {
 	quality?: number;

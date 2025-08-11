@@ -1,20 +1,5 @@
 "use client";
 import {
-	Button,
-	Progress,
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-	Slider,
-} from "@/components/shadcn";
-import { useFFmpeg } from "@/hooks/useFFmpeg";
-import {
-	ImageFormat,
-	ImageFormatType,
-} from "@/lib/strategy/conversions/ConversionStrategy";
-import {
 	BicepsFlexed,
 	ChartArea,
 	FileType,
@@ -26,6 +11,18 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+import {
+	Button,
+	Progress,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+	Slider,
+} from "@/components/shadcn";
+import { useFFmpeg } from "@/hooks/useFFmpeg";
 // 导入FFMPEG类和策略系统
 import ffm_ins from "@/lib/ffmpeg";
 import {
@@ -34,11 +31,14 @@ import {
 	OutputType,
 } from "@/lib/fileUtils";
 import { generateFFMPEGCommand } from "@/lib/strategy";
+import {
+	ImageFormat,
+	ImageFormatType,
+} from "@/lib/strategy/conversions/ConversionStrategy";
 // 确保策略被初始化
 import DropzoneWithPreview from "../DropZone";
 import Advanced from "./components/Advanced";
 import CompressItem from "./components/CompressItem";
-import { toast } from "sonner";
 
 // 支持的图片格式配置 - 按常用程度排序
 const SUPPORTED_FORMATS = [
