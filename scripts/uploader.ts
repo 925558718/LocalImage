@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import fs from 'fs';
 import path from 'path';
 // Cloudflare R2 配置
@@ -10,9 +10,14 @@ interface R2Config {
     region?: string;
 }
 
+
+
 class CloudflareR2Uploader {
     private s3Client: S3Client;
     private bucketName: string;
+    private uploadedCount: number = 0;
+    private skippedCount: number = 0;
+    private startTime: number = 0;
 
     constructor(config: R2Config) {
         this.bucketName = config.bucketName;
@@ -29,7 +34,7 @@ class CloudflareR2Uploader {
     }
 
     /**
-     * 上传单个文件到 R2
+     * 上传单个文件到 R2（使用条件上传避免重复）
      */
     async uploadFile(localFilePath: string, r2Key: string): Promise<void> {
         try {
@@ -39,23 +44,59 @@ class CloudflareR2Uploader {
                 Bucket: this.bucketName,
                 Key: r2Key,
                 Body: fileContent,
+                // 使用 If-None-Match: "*" 确保只有当对象不存在时才上传
+                IfNoneMatch: "*"
             });
 
             await this.s3Client.send(command);
+            this.uploadedCount++;
             console.log(`✅ 上传成功: ${r2Key}`);
-        } catch (error) {
+        } catch (error: any) {
+            // 如果返回 412 状态码，说明文件已存在
+            if (error.name === 'PreconditionFailed' || error.$metadata?.httpStatusCode === 412) {
+                this.skippedCount++;
+                console.log(`⏭️  文件已存在，跳过: ${r2Key}`);
+                return;
+            }
             console.error(`❌ 上传失败: ${r2Key}`, error);
             throw error;
         }
     }
 
     /**
-     * 批量上传目录中的所有文件（并发优化）
+     * 重置统计计数器和计时器
+     */
+    private resetCounters(): void {
+        this.uploadedCount = 0;
+        this.skippedCount = 0;
+        this.startTime = Date.now();
+    }
+
+    /**
+     * 格式化时间显示
+     */
+    public static formatDuration(milliseconds: number): string {
+        const seconds = Math.floor(milliseconds / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+
+        if (hours > 0) {
+            return `${hours}小时${minutes % 60}分钟${seconds % 60}秒`;
+        } else if (minutes > 0) {
+            return `${minutes}分钟${seconds % 60}秒`;
+        } else {
+            return `${seconds}秒`;
+        }
+    }
+
+    /**
+     * 批量上传目录中的所有文件（并发优化 + 条件上传）
      */
     async uploadDirectory(localDir: string, r2Prefix: string = '', concurrency: number = 100): Promise<void> {
+        this.resetCounters();
         const files = this.getAllFiles(localDir);
 
-        console.log(`🚀 开始上传 ${files.length} 个文件到 R2... (并发数: ${concurrency})`);
+        console.log(`🚀 开始检查并上传 ${files.length} 个文件到 R2... (并发数: ${concurrency})`);
 
         // 创建上传任务
         const uploadTasks = files.map(file => {
@@ -67,9 +108,20 @@ class CloudflareR2Uploader {
         });
 
         // 并发执行上传任务
-        await this.executeConcurrent(uploadTasks, concurrency);
+        const results = await this.executeConcurrent(uploadTasks, concurrency);
 
-        console.log(`🎉 所有文件上传完成！`);
+        const endTime = Date.now();
+        const duration = endTime - this.startTime;
+        const formattedDuration = CloudflareR2Uploader.formatDuration(duration);
+        
+        // 计算平均速度
+        const totalFiles = this.uploadedCount + this.skippedCount;
+        const averageSpeed = totalFiles > 0 ? (totalFiles / (duration / 1000)).toFixed(2) : '0';
+        
+        console.log(`🎉 文件处理完成！共处理 ${files.length} 个文件`);
+        console.log(`📊 统计信息: 上传 ${this.uploadedCount} 个，跳过 ${this.skippedCount} 个`);
+        console.log(`⏱️  总耗时: ${formattedDuration}`);
+        console.log(`🚀 平均速度: ${averageSpeed} 文件/秒`);
     }
 
     /**
@@ -157,6 +209,8 @@ async function main() {
     const uploader = new CloudflareR2Uploader(config);
 
     try {
+        const totalStartTime = Date.now();
+        
         // Next.js 静态文件目录
         const nextDir = path.join(process.cwd(), '.next');
         const publicDir = path.join(process.cwd(), 'public');
@@ -184,7 +238,12 @@ async function main() {
             await uploader.uploadDirectory(publicDir);
         }
 
+        const totalEndTime = Date.now();
+        const totalDuration = totalEndTime - totalStartTime;
+        const formattedTotalDuration = CloudflareR2Uploader.formatDuration(totalDuration);
+        
         console.log('🎉 Next.js 静态文件上传到 Cloudflare R2 完成！');
+        console.log(`🕐 整个部署总耗时: ${formattedTotalDuration}`);
 
     } catch (error) {
         console.error('❌ 上传过程中出现错误:', error);
