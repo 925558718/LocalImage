@@ -7,26 +7,26 @@ export default function sitemap(): MetadataRoute.Sitemap {
 	// Basic route list, animation creator as main feature
 	const routes = [
 		{
-			path: "/animation", // Homepage - WebP Animation Creator
+			path: "/", // Homepage - Image Compression Page
 			priority: 1.0,
 			changeFreq: "daily" as const,
-			description: "WebP Animation Creator Homepage",
-		},
-		{
-			path: "/", // Image Compression Page
-			priority: 0.8,
-			changeFreq: "weekly" as const,
 			description: "Image Compression Tool Page",
 		},
 		{
-			path: "/upscale", // Image Upscale Page
+			path: "/animation", // WebP Animation Creator
 			priority: 0.9,
+			changeFreq: "weekly" as const,
+			description: "WebP Animation Creator Homepage",
+		},
+		{
+			path: "/upscale", // Image Upscale Page
+			priority: 0.8,
 			changeFreq: "weekly" as const,
 			description: "Image Upscale Tool Page",
 		},
 		{
 			path: "/crop", // Image Crop Page
-			priority: 0.9,
+			priority: 0.8,
 			changeFreq: "weekly" as const,
 			description: "Image Crop Tool Page",
 		},

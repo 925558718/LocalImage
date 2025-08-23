@@ -1,5 +1,5 @@
-import { ConvertStrategy, ConvertOptions } from "../index";
 import { InputFileType } from "../../fileUtils";
+import { ConvertOptions, ConvertStrategy } from "../index";
 import { checkFormatConversion, ImageFormatType } from "./ConversionStrategy";
 
 /**

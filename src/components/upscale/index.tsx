@@ -1,19 +1,4 @@
 "use client";
-import Dropzone from "@/components/DropZone";
-import {
-	Button,
-	Progress,
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-	Slider,
-} from "@/components/shadcn";
-import { useFFmpeg } from "@/hooks/useFFmpeg";
-import ffm_ins from "@/lib/ffmpeg";
-import { OutputType, convertFilesToInputFileType } from "@/lib/fileUtils";
-import { generateFFMPEGCommand } from "@/lib/strategy";
 import {
 	ChartArea,
 	Download,
@@ -27,6 +12,21 @@ import {
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import Dropzone from "@/components/DropZone";
+import {
+	Button,
+	Progress,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+	Slider,
+} from "@/components/shadcn";
+import { useFFmpeg } from "@/hooks/useFFmpeg";
+import ffm_ins from "@/lib/ffmpeg";
+import { convertFilesToInputFileType, OutputType } from "@/lib/fileUtils";
+import { generateFFMPEGCommand } from "@/lib/strategy";
 
 const downloadFile = (blob: Blob, filename: string) => {
 	const url = URL.createObjectURL(blob);

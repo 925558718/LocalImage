@@ -31,6 +31,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+
+.env
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
@@ -41,3 +44,6 @@ next-env.d.ts
 # wrangler files
 .wrangler
 .dev.vars
+
+# Sentry Config File
+.env.sentry-build-plugin

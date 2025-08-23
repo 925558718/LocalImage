@@ -1,7 +1,12 @@
 "use client";
 
+import { Download, Upload, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
+import { toast } from "sonner";
+import DropZone from "@/components/DropZone";
+import PageTitle from "@/components/PageTitle";
+import { Button } from "@/components/shadcn/button";
 import {
 	Card,
 	CardContent,
@@ -9,14 +14,9 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/shadcn/card";
-import { Button } from "@/components/shadcn/button";
-import { toast } from "sonner";
-import { Download, Upload, X } from "lucide-react";
-import CropArea from "./components/CropArea";
-import DropZone from "@/components/DropZone";
-import PageTitle from "@/components/PageTitle";
-import ResultArea from "./components/ResultArea";
 import { OutputType } from "@/lib/fileUtils";
+import CropArea from "./components/CropArea";
+import ResultArea from "./components/ResultArea";
 
 export default function CropComposer() {
 	const t = useTranslations();

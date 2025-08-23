@@ -32,3 +32,7 @@ export function getType(file_name: string): ImageFormatType {
 
 	return format as ImageFormatType;
 }
+
+export function isLocal() {
+	return process.env.NODE_ENV === "development";
+}
