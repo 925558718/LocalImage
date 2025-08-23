@@ -24,7 +24,7 @@
 		"jotai": "^2.12.5",
 		"jszip": "^3.10.1",
 		"lucide-react": "^0.511.0",
-		"next": "15.4.5",
+		"next": "^15.5.0",
 		"next-intl": "^4.1.0",
 		"next-themes": "^0.4.6",
 		"radash": "^12.1.0",
@@ -45,7 +45,7 @@
 		"@vitest/ui": "^3.1.4",
 		"@types/bun": "^1.2.20",
 		"eslint": "8.56.0",
-		"eslint-config-next": "^15.4.5",
+		"eslint-config-next": "^15.5.0",
 		"husky": "^9.1.7",
 		"jsdom": "^26.1.0",
 		"postcss": "^8.5.3",
@@ -54,8 +54,8 @@
 		"typescript": "5.8.3"
 	},
 	"scripts": {
-		"build": "next build",
-		"dev": "next dev",
+		"build": "next build --turbopack",
+		"dev": "next dev --turbopack",
 		"lint": "next lint",
 		"start": "next start",
 		"prepare": "husky",
