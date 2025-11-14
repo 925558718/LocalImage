@@ -6,7 +6,7 @@ import { routing } from "./i18n/routing";
 const intlMiddleware = createMiddleware(routing);
 
 // 自定义中间件，确保sitemap.xml和robots.txt在根路径可用
-export default function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
 	const pathname = request.nextUrl.pathname;
 
 	// 对于sitemap.xml和robots.txt特殊处理，让它们不通过语言路由
